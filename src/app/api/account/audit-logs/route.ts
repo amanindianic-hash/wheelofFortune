@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
 
   try {
     const logs = await sql`
-      SELECT id, user_id, action, entity_type, entity_id, 
-             old_values, new_values, ip_address, user_agent, created_at
+      SELECT id, user_id, action, resource_type, resource_id,
+             changes, ip_address, user_agent, created_at
       FROM audit_logs
       WHERE client_id = ${auth.user.client_id}
       ORDER BY created_at DESC

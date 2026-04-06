@@ -9,10 +9,9 @@ interface AuditLog {
   id: string;
   user_id: string;
   action: string;
-  entity_type: string;
-  entity_id: string;
-  old_values: any;
-  new_values: any;
+  resource_type: string;
+  resource_id: string;
+  changes: any;
   ip_address: string;
   user_agent: string;
   created_at: string;
@@ -95,15 +94,15 @@ export default function AuditLogsPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-medium capitalize">{log.entity_type}</span>
+                          <span className="font-medium capitalize">{log.resource_type}</span>
                           <span className="text-[10px] text-muted-foreground truncate max-w-[120px]">
-                            ID: {log.entity_id}
+                            ID: {log.resource_id}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
                          <span className="text-xs text-muted-foreground italic">
-                           Modified {Object.keys(log.new_values || {}).length} field(s)
+                           Modified {Object.keys(log.changes?.after ?? log.changes ?? {}).length} field(s)
                          </span>
                       </TableCell>
                       <TableCell className="text-xs font-mono">{log.ip_address}</TableCell>
