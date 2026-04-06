@@ -38,8 +38,8 @@ export async function POST(req: NextRequest) {
       VALUES (${user.id}, ${tokenHash}, ${expiresAt.toISOString()})
     `;
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
-    const resetUrl = `${appUrl}/reset-password?token=${rawToken}`;
+    const origin = req.nextUrl.origin;
+    const resetUrl = `${origin}/reset-password?token=${rawToken}`;
 
     await sendPasswordResetEmail(email, resetUrl);
 

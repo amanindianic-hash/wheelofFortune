@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   const state = searchParams.get('state');
   const error = searchParams.get('error');
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = req.nextUrl.origin;
   const redirectBase = `${appUrl}/login`;
 
   // User denied access
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const redirectUri = `${appUrl}/api/auth/google/callback`;
+    const redirectUri = `${req.nextUrl.origin}/api/auth/google/callback`;
 
     // Exchange code for access token
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {

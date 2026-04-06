@@ -1,14 +1,14 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 
 // GET /api/auth/google — initiate Google OAuth flow
-export async function GET() {
+export async function GET(req: NextRequest) {
   const state = randomBytes(16).toString('hex');
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const origin = req.nextUrl.origin;
 
   const params = new URLSearchParams({
     client_id: process.env.GOOGLE_CLIENT_ID!,
-    redirect_uri: `${appUrl}/api/auth/google/callback`,
+    redirect_uri: `${origin}/api/auth/google/callback`,
     response_type: 'code',
     scope: 'openid email profile',
     state,
