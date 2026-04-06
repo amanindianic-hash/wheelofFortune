@@ -13,7 +13,8 @@ function getDb(): SqlClient {
   return globalForSql.sql;
 }
 
-export const sql: SqlClient = new Proxy({} as SqlClient, {
+// Target must be a function for the `apply` trap to fire (tagged template calls)
+export const sql: SqlClient = new Proxy(function () {} as unknown as SqlClient, {
   apply(_target, _thisArg, args) {
     return (getDb() as unknown as (...a: unknown[]) => unknown)(...args);
   },
