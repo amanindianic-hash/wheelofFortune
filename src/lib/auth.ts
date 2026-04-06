@@ -2,9 +2,11 @@ import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 import type { AuthUser } from './types';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback-secret-change-in-production'
-);
+function getJwtSecret() {
+  return new TextEncoder().encode(
+    process.env.JWT_SECRET || 'fallback-secret-change-in-production'
+  );
+}
 
 const ACCESS_TOKEN_EXPIRY = '15m';
 const REFRESH_TOKEN_EXPIRY = '7d';
@@ -14,7 +16,7 @@ export async function signAccessToken(user: AuthUser): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(ACCESS_TOKEN_EXPIRY)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function signRefreshToken(userId: string): Promise<string> {
@@ -22,12 +24,12 @@ export async function signRefreshToken(userId: string): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(REFRESH_TOKEN_EXPIRY)
-    .sign(JWT_SECRET);
+    .sign(getJwtSecret());
 }
 
 export async function verifyAccessToken(token: string): Promise<AuthUser | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     return payload as unknown as AuthUser;
   } catch {
     return null;
@@ -36,7 +38,7 @@ export async function verifyAccessToken(token: string): Promise<AuthUser | null>
 
 export async function verifyRefreshToken(token: string): Promise<{ sub: string } | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, getJwtSecret());
     if (payload.type !== 'refresh') return null;
     return payload as { sub: string };
   } catch {
