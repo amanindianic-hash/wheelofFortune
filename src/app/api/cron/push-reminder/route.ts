@@ -3,15 +3,18 @@ import webpush from 'web-push';
 import { sql } from '@/lib/db';
 import { okResponse, errorResponse } from '@/lib/middleware-utils';
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT ?? 'mailto:admin@spinplatform.com',
-  process.env.VAPID_PUBLIC_KEY ?? '',
-  process.env.VAPID_PRIVATE_KEY ?? '',
-);
+
 
 // GET /api/cron/push-reminder — called by Vercel Cron
 export async function GET(req: NextRequest) {
   try {
+    // Configure VAPID inside handler so env vars are available at runtime (not build time)
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT ?? 'mailto:admin@spinplatform.com',
+      process.env.VAPID_PUBLIC_KEY ?? '',
+      process.env.VAPID_PRIVATE_KEY ?? '',
+    );
+
     // Verify cron secret
     const authHeader = req.headers.get('authorization');
     if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

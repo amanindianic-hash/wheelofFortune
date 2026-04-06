@@ -4,15 +4,18 @@ import { sql } from '@/lib/db';
 import { getAuthUser } from '@/lib/auth';
 import { okResponse, errorResponse } from '@/lib/middleware-utils';
 
-webpush.setVapidDetails(
-  process.env.VAPID_SUBJECT ?? 'mailto:admin@spinplatform.com',
-  process.env.VAPID_PUBLIC_KEY ?? '',
-  process.env.VAPID_PRIVATE_KEY ?? '',
-);
+
 
 // POST /api/push/send — authenticated
 export async function POST(req: NextRequest) {
   try {
+    // Configure VAPID inside handler so env vars are available at runtime (not build time)
+    webpush.setVapidDetails(
+      process.env.VAPID_SUBJECT ?? 'mailto:admin@spinplatform.com',
+      process.env.VAPID_PUBLIC_KEY ?? '',
+      process.env.VAPID_PRIVATE_KEY ?? '',
+    );
+
     const auth = await getAuthUser();
     if (!auth) return errorResponse('UNAUTHORIZED', 'Authentication required.', 401);
 

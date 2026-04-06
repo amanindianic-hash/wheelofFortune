@@ -4,9 +4,11 @@ import { sql } from '@/lib/db';
 import { signAccessToken, signRefreshToken } from '@/lib/auth';
 import { errorResponse } from '@/lib/middleware-utils';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback-secret-change-in-production'
-);
+function getJwtSecret() {
+  return new TextEncoder().encode(
+    process.env.JWT_SECRET || 'fallback-secret-change-in-production'
+  );
+}
 
 function slugify(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -24,7 +26,7 @@ export async function POST(req: NextRequest) {
     // Verify the onboarding token issued by the OAuth callback
     let payload: { google_id: string; email: string; full_name: string; type: string };
     try {
-      const result = await jwtVerify(token, JWT_SECRET);
+      const result = await jwtVerify(token, getJwtSecret());
       payload = result.payload as typeof payload;
     } catch {
       return errorResponse('INVALID_TOKEN', 'Onboarding token is invalid or expired. Please sign in with Google again.', 401);

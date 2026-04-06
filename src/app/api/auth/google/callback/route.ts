@@ -3,9 +3,11 @@ import { SignJWT } from 'jose';
 import { sql } from '@/lib/db';
 import { signAccessToken, signRefreshToken } from '@/lib/auth';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback-secret-change-in-production'
-);
+function getJwtSecret() {
+  return new TextEncoder().encode(
+    process.env.JWT_SECRET || 'fallback-secret-change-in-production'
+  );
+}
 
 // GET /api/auth/google/callback — handle Google OAuth redirect
 export async function GET(req: NextRequest) {
@@ -121,7 +123,7 @@ export async function GET(req: NextRequest) {
       .setProtectedHeader({ alg: 'HS256' })
       .setIssuedAt()
       .setExpirationTime('30m')
-      .sign(JWT_SECRET);
+      .sign(getJwtSecret());
 
     const params = new URLSearchParams({
       token: onboardingToken,
