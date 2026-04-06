@@ -3,16 +3,27 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { Plus, Disc3, MoreHorizontal, Pencil, Pause, Play, Trash2 } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import type { Wheel } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+
+const STATUS_MAP: Record<string, { dot: string; label: string }> = {
+  active:   { dot: 'bg-emerald-500', label: 'Active' },
+  draft:    { dot: 'bg-slate-400',   label: 'Draft' },
+  paused:   { dot: 'bg-amber-400',   label: 'Paused' },
+  archived: { dot: 'bg-rose-400',    label: 'Archived' },
+};
 
 export default function WheelsPage() {
   const [wheels, setWheels] = useState<Wheel[]>([]);
@@ -62,117 +73,158 @@ export default function WheelsPage() {
   }
 
   return (
-    <div className="p-8 space-y-6">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
+
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Wheels</h1>
-          <p className="text-muted-foreground">Manage your spin-to-win campaigns</p>
+          <h1 className="text-xl font-semibold tracking-tight">Wheels</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Manage your spin-to-win campaigns</p>
         </div>
-        <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => setShowCreate(true)}>
-          + New Wheel
+        <Button
+          size="sm"
+          className="bg-violet-600 hover:bg-violet-700 gap-1.5 h-8"
+          onClick={() => setShowCreate(true)}
+        >
+          <Plus className="h-3.5 w-3.5" /> New Wheel
         </Button>
       </div>
 
+      {/* Content */}
       {loading ? (
-        <div className="grid gap-4">
-          {[1, 2, 3].map((i) => <div key={i} className="h-20 rounded-xl bg-muted animate-pulse" />)}
+        <div className="space-y-2">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-[68px] rounded-xl bg-muted/60 animate-pulse" />
+          ))}
         </div>
       ) : wheels.length === 0 ? (
         <Card className="border-dashed">
-          <CardContent className="py-16 text-center">
-            <p className="text-5xl mb-4">🎡</p>
-            <p className="text-lg font-medium mb-1">No wheels yet</p>
-            <p className="text-sm text-muted-foreground mb-5">Create your first campaign to start collecting leads</p>
-            <Button className="bg-violet-600 hover:bg-violet-700" onClick={() => setShowCreate(true)}>
-              Create Your First Wheel
+          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted mb-4">
+              <Disc3 className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm font-medium mb-1">No wheels yet</p>
+            <p className="text-xs text-muted-foreground mb-5 max-w-xs">
+              Create your first campaign to start collecting leads and giving away prizes
+            </p>
+            <Button
+              size="sm"
+              className="bg-violet-600 hover:bg-violet-700 gap-1.5"
+              onClick={() => setShowCreate(true)}
+            >
+              <Plus className="h-3.5 w-3.5" /> Create your first wheel
             </Button>
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {wheels.map((wheel) => (
-            <Card key={wheel.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="flex items-center justify-between py-4 px-5">
-                <div className="flex items-center gap-4 min-w-0">
-                  <span className="text-3xl shrink-0">🎡</span>
-                  <div className="min-w-0">
-                    <p className="font-semibold truncate">{wheel.name}</p>
-                    <div className="flex items-center gap-3 mt-0.5">
-                      <StatusBadge status={wheel.status} />
-                      <span className="text-xs text-muted-foreground">{wheel.total_spins.toLocaleString()} spins</span>
-                      <span className="text-xs text-muted-foreground font-mono truncate max-w-[140px]">
-                        token: {wheel.embed_token.slice(0, 12)}…
-                      </span>
+        <Card>
+          <div className="divide-y">
+            {wheels.map((wheel) => {
+              const s = STATUS_MAP[wheel.status] ?? STATUS_MAP.draft;
+              return (
+                <div key={wheel.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors group">
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
+                      <Disc3 className="h-4.5 w-4.5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-medium truncate">{wheel.name}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center gap-1.5">
+                          <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                          <span className="text-xs text-muted-foreground">{s.label}</span>
+                        </div>
+                        <span className="text-muted-foreground/30 text-xs">·</span>
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          {wheel.total_spins.toLocaleString()} spins
+                        </span>
+                        <span className="text-muted-foreground/30 text-xs hidden sm:inline">·</span>
+                        <span className="text-xs text-muted-foreground font-mono hidden sm:inline truncate max-w-[100px]">
+                          {wheel.embed_token.slice(0, 10)}…
+                        </span>
+                      </div>
                     </div>
                   </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs hidden sm:flex"
+                      nativeButton={false}
+                      render={<Link href={`/dashboard/wheels/${wheel.id}`} />}
+                    >
+                      <Pencil className="h-3 w-3 mr-1" /> Edit
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-44">
+                        <DropdownMenuItem render={<Link href={`/dashboard/wheels/${wheel.id}`} />}>
+                          <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => toggleStatus(wheel.id, wheel.status)}
+                          disabled={wheel.status === 'archived'}
+                        >
+                          {wheel.status === 'active'
+                            ? <><Pause className="mr-2 h-3.5 w-3.5" /> Pause</>
+                            : <><Play  className="mr-2 h-3.5 w-3.5" /> Activate</>
+                          }
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(wheel.id, wheel.name)}
+                          className="text-red-500 focus:text-red-500"
+                        >
+                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => toggleStatus(wheel.id, wheel.status)}
-                    disabled={wheel.status === 'archived'}
-                  >
-                    {wheel.status === 'active' ? 'Pause' : 'Activate'}
-                  </Button>
-                  <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/dashboard/wheels/${wheel.id}`} />}>
-                    Edit
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50"
-                    onClick={() => handleDelete(wheel.id, wheel.name)}
-                  >
-                    Delete
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              );
+            })}
+          </div>
+        </Card>
       )}
 
       {/* Create dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Create New Wheel</DialogTitle>
+            <DialogTitle className="text-base">Create new wheel</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 py-2">
-            <Label htmlFor="wheel-name">Wheel Name</Label>
-            <Input
-              id="wheel-name"
-              placeholder="e.g. Summer Sale Campaign"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-              autoFocus
-            />
-            <p className="text-xs text-muted-foreground">This is an internal label — not shown to end users.</p>
+          <div className="space-y-3 py-1">
+            <div className="space-y-1.5">
+              <Label htmlFor="wheel-name" className="text-xs font-medium">Wheel name</Label>
+              <Input
+                id="wheel-name"
+                placeholder="e.g. Summer Sale Campaign"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                autoFocus
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">Internal label — not visible to end users.</p>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowCreate(false)}>Cancel</Button>
-            <Button className="bg-violet-600 hover:bg-violet-700" onClick={handleCreate} disabled={creating || !newName.trim()}>
-              {creating ? 'Creating…' : 'Create Wheel'}
+          <DialogFooter className="gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowCreate(false)}>Cancel</Button>
+            <Button
+              size="sm"
+              className="bg-violet-600 hover:bg-violet-700"
+              onClick={handleCreate}
+              disabled={creating || !newName.trim()}
+            >
+              {creating ? 'Creating…' : 'Create'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    active: 'bg-green-100 text-green-700',
-    draft: 'bg-gray-100 text-gray-600',
-    paused: 'bg-yellow-100 text-yellow-700',
-    archived: 'bg-red-100 text-red-600',
-  };
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${map[status] ?? ''}`}>
-      {status}
-    </span>
   );
 }

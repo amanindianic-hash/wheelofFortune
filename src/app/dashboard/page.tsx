@@ -2,13 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { BarChart2, Disc3, Trophy, Users, ArrowRight, Plus } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { useAuth } from '@/components/providers/auth-provider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface AnalyticsSummary { total_spins: number; total_winners: number; unique_leads: number; }
+
+const STATUS_MAP: Record<string, { dot: string; label: string }> = {
+  active:   { dot: 'bg-emerald-500', label: 'Active' },
+  draft:    { dot: 'bg-slate-400',   label: 'Draft' },
+  paused:   { dot: 'bg-amber-400',   label: 'Paused' },
+  archived: { dot: 'bg-rose-400',    label: 'Archived' },
+};
 
 export default function DashboardPage() {
   const { user, client } = useAuth();
@@ -21,114 +28,172 @@ export default function DashboardPage() {
   }, []);
 
   const activeWheels = wheels.filter((w) => w.status === 'active').length;
+  const usedPct = client ? Math.min(100, (client.spins_used_this_month / client.plan_spin_limit) * 100) : 0;
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-8">
+
+      {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold">Welcome back, {user?.full_name?.split(' ')[0]} 👋</h1>
-        <p className="text-muted-foreground">{client?.name} — here&apos;s your platform overview</p>
+        <h1 className="text-xl font-semibold tracking-tight">
+          Good to see you, {user?.full_name?.split(' ')[0]}
+        </h1>
+        <p className="text-sm text-muted-foreground mt-0.5">{client?.name} — platform overview</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard title="Total Spins (30d)" value={summary?.total_spins ?? 0} icon="🎰" />
-        <StatCard title="Prize Winners (30d)" value={summary?.total_winners ?? 0} icon="🏆" />
-        <StatCard title="Leads Captured (30d)" value={summary?.unique_leads ?? 0} icon="📧" />
-        <StatCard title="Active Wheels" value={activeWheels} icon="🎡" />
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <StatCard
+          label="Total Spins"
+          value={summary?.total_spins ?? 0}
+          icon={<BarChart2 className="h-4 w-4" />}
+          iconBg="bg-violet-500/10 text-violet-600"
+          sub="Last 30 days"
+        />
+        <StatCard
+          label="Prize Winners"
+          value={summary?.total_winners ?? 0}
+          icon={<Trophy className="h-4 w-4" />}
+          iconBg="bg-amber-500/10 text-amber-600"
+          sub="Last 30 days"
+        />
+        <StatCard
+          label="Leads Captured"
+          value={summary?.unique_leads ?? 0}
+          icon={<Users className="h-4 w-4" />}
+          iconBg="bg-blue-500/10 text-blue-600"
+          sub="Last 30 days"
+        />
+        <StatCard
+          label="Active Wheels"
+          value={activeWheels}
+          icon={<Disc3 className="h-4 w-4" />}
+          iconBg="bg-emerald-500/10 text-emerald-600"
+          sub="Running now"
+        />
       </div>
 
-      {/* Spin quota */}
+      {/* Monthly quota */}
       {client && (
         <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Spin Quota</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-2xl font-bold">{client.spins_used_this_month.toLocaleString()}</span>
-              <span className="text-sm text-muted-foreground">of {client.plan_spin_limit.toLocaleString()}</span>
+          <CardContent className="py-5 px-6">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-medium">Monthly spin quota</p>
+                <p className="text-xs text-muted-foreground mt-0.5 capitalize">{client.plan} plan</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-semibold tabular-nums">
+                  {client.spins_used_this_month.toLocaleString()}
+                  <span className="text-muted-foreground font-normal"> / {client.plan_spin_limit.toLocaleString()}</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">{usedPct.toFixed(0)}% used</p>
+              </div>
             </div>
-            <div className="w-full bg-secondary rounded-full h-2">
+            <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
               <div
-                className="bg-violet-600 h-2 rounded-full transition-all"
-                style={{ width: `${Math.min(100, (client.spins_used_this_month / client.plan_spin_limit) * 100)}%` }}
+                className={`h-full rounded-full transition-all duration-700 ${
+                  usedPct >= 90 ? 'bg-rose-500' : usedPct >= 70 ? 'bg-amber-400' : 'bg-violet-600'
+                }`}
+                style={{ width: `${usedPct}%` }}
               />
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* Recent wheels */}
+      {/* Wheels list */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Your Wheels</h2>
-          <Button size="sm" className="bg-violet-600 hover:bg-violet-700" nativeButton={false} render={<Link href="/dashboard/wheels" />}>
-            View All
+          <h2 className="text-sm font-semibold">Your Wheels</h2>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 gap-1 text-xs text-muted-foreground hover:text-foreground"
+            nativeButton={false}
+            render={<Link href="/dashboard/wheels" />}
+          >
+            View all <ArrowRight className="h-3 w-3" />
           </Button>
         </div>
+
         {wheels.length === 0 ? (
           <Card className="border-dashed">
-            <CardContent className="py-12 text-center">
-              <p className="text-4xl mb-3">🎡</p>
-              <p className="font-medium">No wheels yet</p>
-              <p className="text-sm text-muted-foreground mb-4">Create your first spin-to-win campaign</p>
-              <Button className="bg-violet-600 hover:bg-violet-700" nativeButton={false} render={<Link href="/dashboard/wheels" />}>
-                Create Wheel
+            <CardContent className="flex flex-col items-center justify-center py-14 text-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted mb-4">
+                <Disc3 className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <p className="text-sm font-medium mb-1">No wheels yet</p>
+              <p className="text-xs text-muted-foreground mb-5">Create your first spin-to-win campaign to start collecting leads</p>
+              <Button
+                size="sm"
+                className="bg-violet-600 hover:bg-violet-700 gap-1.5"
+                nativeButton={false}
+                render={<Link href="/dashboard/wheels" />}
+              >
+                <Plus className="h-3.5 w-3.5" /> Create Wheel
               </Button>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-3">
-            {wheels.slice(0, 5).map((w) => (
-              <Card key={w.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="flex items-center justify-between py-4">
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl">🎡</span>
-                    <div>
-                      <p className="font-medium">{w.name}</p>
-                      <p className="text-xs text-muted-foreground">{w.total_spins.toLocaleString()} spins total</p>
+          <Card>
+            <div className="divide-y">
+              {wheels.slice(0, 5).map((w) => {
+                const s = STATUS_MAP[w.status] ?? STATUS_MAP.draft;
+                return (
+                  <div key={w.id} className="flex items-center justify-between px-5 py-3.5 hover:bg-muted/40 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted shrink-0">
+                        <Disc3 className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{w.name}</p>
+                        <p className="text-xs text-muted-foreground tabular-nums">{w.total_spins.toLocaleString()} spins</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
+                        <span className="text-xs text-muted-foreground">{s.label}</span>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-xs"
+                        nativeButton={false}
+                        render={<Link href={`/dashboard/wheels/${w.id}`} />}
+                      >
+                        Edit
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <StatusBadge status={w.status} />
-                    <Button variant="outline" size="sm" nativeButton={false} render={<Link href={`/dashboard/wheels/${w.id}`} />}>
-                      Edit
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          </Card>
         )}
       </div>
     </div>
   );
 }
 
-function StatCard({ title, value, icon }: { title: string; value: number; icon: string }) {
+function StatCard({
+  label, value, icon, iconBg, sub,
+}: {
+  label: string; value: number; icon: React.ReactNode; iconBg: string; sub: string;
+}) {
   return (
     <Card>
-      <CardContent className="flex items-center gap-4 py-5">
-        <span className="text-3xl">{icon}</span>
-        <div>
-          <p className="text-2xl font-bold">{value.toLocaleString()}</p>
-          <p className="text-xs text-muted-foreground">{title}</p>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between mb-3">
+          <p className="text-xs font-medium text-muted-foreground">{label}</p>
+          <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${iconBg}`}>
+            {icon}
+          </div>
         </div>
+        <p className="text-2xl font-semibold tabular-nums tracking-tight">{value.toLocaleString()}</p>
+        <p className="text-xs text-muted-foreground mt-1">{sub}</p>
       </CardContent>
     </Card>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    active: 'bg-green-100 text-green-700',
-    draft: 'bg-gray-100 text-gray-600',
-    paused: 'bg-yellow-100 text-yellow-700',
-    archived: 'bg-red-100 text-red-600',
-  };
-  return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${map[status] ?? 'bg-gray-100'}`}>
-      {status}
-    </span>
   );
 }
