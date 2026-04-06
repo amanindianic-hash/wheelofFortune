@@ -1,6 +1,6 @@
 // SpinPlatform Service Worker v1
 const CACHE = 'spinplatform-v1';
-const STATIC = ['/', '/login', '/icon-192.png', '/icon-512.png'];
+const STATIC = ['/login', '/icon-192.png', '/icon-512.png'];
 
 // Install — pre-cache shell
 self.addEventListener('install', e => {

@@ -1,57 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { verifyAccessToken } from '@/lib/auth';
 
-/**
- * Public routes that must never be blocked by Vercel Deployment Protection
- * or any future auth middleware layer.
- */
-const PUBLIC_PATHS = [
-  '/manifest.webmanifest',
-  '/sw.js',
-  '/favicon.ico',
-  '/icon-192.png',
-  '/icon-512.png',
-  // Public-facing spin widget & play pages
-  '/play/',
-  '/widget/',
-  // Auth endpoints
-  '/api/auth/login',
-  '/api/auth/register',
-  '/api/auth/refresh',
-  '/api/auth/google',
-  '/api/auth/google/callback',
-  '/api/auth/google-register',
-  '/api/auth/logout',
-  // Public spin APIs (session gated internally)
-  '/api/spin/session',
-  '/api/spin/execute',
-  '/api/spin/game-type',
-  '/api/push/subscribe',
-  '/api/push/unsubscribe',
-  // Referral tracking (public)
-  '/api/referral/track',
-  // Stripe webhook (public, verified by signature)
-  '/api/billing/webhook',
-  // Telegram webhook (public)
-  '/api/telegram/webhook',
-];
+const PUBLIC_PATHS = ['/login', '/register', '/widget', '/demo.html', '/forgot-password', '/reset-password'];
 
-function isPublic(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p));
-}
+export default async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-export function middleware(req: NextRequest) {
-  // Simply pass all traffic through — this middleware exists to ensure
-  // Vercel's Deployment Protection bypass header is added for public paths,
-  // and to serve as the canonical matcher config for the project.
+  // Allow public paths and all API routes (they handle their own auth)
+  if (
+    PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
+    pathname.startsWith('/api/') ||
+    pathname.startsWith('/_next/') ||
+    pathname === '/favicon.ico'
+  ) {
+    return NextResponse.next();
+  }
+
+  const token = req.cookies.get('access_token')?.value;
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  const user = await verifyAccessToken(token);
+  if (!user) {
+    const loginUrl = new URL('/login', req.url);
+    loginUrl.searchParams.set('next', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
   return NextResponse.next();
 }
 
 export const config = {
-  /*
-   * Match everything EXCEPT:
-   * - _next/static  (static assets)
-   * - _next/image   (image optimisation)
-   * - static files with extensions (fonts, images, etc.)
-   */
-  matcher: ['/((?!_next/static|_next/image|.*\\.(?:png|jpg|jpeg|gif|svg|ico|woff2?|ttf|otf|eot|css|js)$).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 };
