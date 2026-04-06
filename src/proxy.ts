@@ -3,7 +3,7 @@ import { verifyAccessToken } from '@/lib/auth';
 
 const PUBLIC_PATHS = ['/login', '/register', '/widget', '/demo.html', '/forgot-password', '/reset-password'];
 
-export default async function middleware(req: NextRequest) {
+export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Allow public paths and all API routes (they handle their own auth)
