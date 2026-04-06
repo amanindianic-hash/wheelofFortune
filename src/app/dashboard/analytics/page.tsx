@@ -219,14 +219,15 @@ function BreakdownCard({
   title, rows, valueKey, labelKey, color, colorMap, showPercent,
 }: {
   title: string;
-  rows: Record<string, unknown>[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  rows: any[];
   valueKey: string;
   labelKey: string;
   color: string;
   colorMap?: Record<string, string>;
   showPercent?: boolean;
 }) {
-  const total = showPercent ? rows.reduce((s, r) => s + (r[valueKey] as number), 0) : 0;
+  const total = showPercent ? rows.reduce((s: number, r) => s + (r[valueKey] as number), 0) : 0;
   const max   = rows.length > 0 ? (rows[0][valueKey] as number) : 1;
 
   return (
