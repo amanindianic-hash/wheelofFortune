@@ -9,15 +9,76 @@
 
 const RESEND_API_URL = 'https://api.resend.com/emails';
 
-export async function sendWinEmail(email: string, prizeTitle: string, couponCode: string | null) {
+async function sendEmail(to: string, subject: string, html: string) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.warn('[EMAIL] RESEND_API_KEY not set — skipping win email');
+    console.warn('[EMAIL] RESEND_API_KEY not set — skipping email');
     return;
   }
-
   const from = process.env.RESEND_FROM_EMAIL ?? 'noreply@spinplatform.com';
+  try {
+    const res = await fetch(RESEND_API_URL, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to, subject, html }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      console.error('[EMAIL] Resend error:', err);
+    }
+  } catch (error) {
+    console.error('[EMAIL] Fatal error:', error);
+  }
+}
 
+export async function sendPasswordResetEmail(email: string, resetUrl: string) {
+  const html = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /></head>
+<body style="margin:0;padding:0;background:#f4f4f5;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f5;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;max-width:560px;width:100%;">
+        <tr>
+          <td style="background:linear-gradient(135deg,#7c3aed,#4f46e5);padding:40px;text-align:center;">
+            <div style="font-size:48px;">🔐</div>
+            <h1 style="color:#ffffff;margin:16px 0 0;font-size:24px;font-weight:700;">Reset your password</h1>
+            <p style="color:#c4b5fd;margin:8px 0 0;font-size:15px;">We received a request to reset your password</p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px;">
+            <p style="color:#374151;font-size:16px;line-height:1.6;margin:0 0 24px;">
+              Click the button below to choose a new password. This link expires in <strong>1 hour</strong>.
+            </p>
+            <div style="text-align:center;margin:0 0 24px;">
+              <a href="${resetUrl}" style="display:inline-block;background:#7c3aed;color:#ffffff;font-size:16px;font-weight:600;padding:14px 32px;border-radius:8px;text-decoration:none;">
+                Reset Password
+              </a>
+            </div>
+            <p style="color:#6b7280;font-size:13px;margin:0;">
+              If you didn't request this, you can safely ignore this email. Your password won't change.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:24px 40px;border-top:1px solid #e5e7eb;text-align:center;">
+            <p style="color:#9ca3af;font-size:12px;margin:0;">
+              © ${new Date().getFullYear()} SpinPlatform. All rights reserved.
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`.trim();
+
+  await sendEmail(email, 'Reset your SpinPlatform password', html);
+}
+
+export async function sendWinEmail(email: string, prizeTitle: string, couponCode: string | null) {
   const html = `
 <!DOCTYPE html>
 <html>
@@ -76,26 +137,5 @@ export async function sendWinEmail(email: string, prizeTitle: string, couponCode
 </body>
 </html>`.trim();
 
-  try {
-    const res = await fetch(RESEND_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from,
-        to: email,
-        subject: `🎉 You won: ${prizeTitle}`,
-        html,
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      console.error('[EMAIL] Resend error:', err);
-    }
-  } catch (error) {
-    console.error('[EMAIL] Fatal error:', error);
-  }
+  await sendEmail(email, `🎉 You won: ${prizeTitle}`, html);
 }
