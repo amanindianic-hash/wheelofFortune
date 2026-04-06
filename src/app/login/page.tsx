@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/components/providers/auth-provider';
@@ -59,102 +59,117 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center text-2xl">🎡</div>
-          <CardTitle className="text-2xl">Welcome back</CardTitle>
-          <CardDescription>Sign in to your Wheel of Fortune dashboard</CardDescription>
-        </CardHeader>
+    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      {/* Subtle radial glow behind the card */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px]" />
+      </div>
 
-        <CardContent className="space-y-4">
-          {/* OAuth error banner */}
-          {oauthError && (
-            <div className="rounded-md bg-destructive/10 border border-destructive/20 px-3 py-2 text-sm text-destructive">
-              {oauthErrorMessages[oauthError] ?? 'Sign-in failed. Please try again.'}
-            </div>
-          )}
-
-          {/* Google Sign-In */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full gap-2.5"
-            onClick={() => { window.location.href = '/api/auth/google'; }}
-          >
-            <GoogleIcon className="h-4 w-4 shrink-0" />
-            Continue with Google
-          </Button>
-
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">or continue with email</span>
-            </div>
+      <div className="relative w-full max-w-sm">
+        {/* Logo mark */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-[0_0_0_1px_rgb(124_58_237/0.3),0_8px_24px_-4px_rgb(124_58_237/0.5)] mb-5">
+            <svg viewBox="0 0 24 24" className="h-7 w-7 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2v10l4 4" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+            </svg>
           </div>
+          <h1 className="text-[26px] font-bold tracking-[-0.03em] text-foreground">Welcome back</h1>
+          <p className="text-sm text-muted-foreground mt-1">Sign in to your Wheel of Fortune dashboard</p>
+        </div>
 
-          {/* Email / Password form */}
-          <form id="login-form" onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@company.com"
-                required
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="/forgot-password" className="text-xs text-violet-600 hover:underline">
-                  Forgot password?
-                </Link>
+        <Card className="overflow-hidden">
+          <CardContent className="p-6 space-y-4">
+            {/* OAuth error banner */}
+            {oauthError && (
+              <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2.5 text-sm text-destructive">
+                {oauthErrorMessages[oauthError] ?? 'Sign-in failed. Please try again.'}
               </div>
-              <div className="relative">
+            )}
+
+            {/* Google Sign-In */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full gap-2.5 h-10 font-medium"
+              onClick={() => { window.location.href = '/api/auth/google'; }}
+            >
+              <GoogleIcon className="h-4 w-4 shrink-0" />
+              Continue with Google
+            </Button>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border/60" />
+              </div>
+              <div className="relative flex justify-center text-[11px] uppercase tracking-[0.06em]">
+                <span className="bg-card px-3 text-muted-foreground font-semibold">or continue with email</span>
+              </div>
+            </div>
+
+            {/* Email / Password form */}
+            <form id="login-form" onSubmit={handleSubmit} className="space-y-3.5">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-xs font-medium">Email</Label>
                 <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="••••••••"
+                  id="email"
+                  type="email"
+                  placeholder="you@company.com"
                   required
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="pr-10"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="h-10"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                  tabIndex={-1}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
-            </div>
-          </form>
-        </CardContent>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="password" className="text-xs font-medium">Password</Label>
+                  <Link href="/forgot-password" className="text-xs text-violet-500 hover:text-violet-400 transition-colors">
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    required
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="h-10 pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    tabIndex={-1}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </CardContent>
 
-        <CardFooter className="flex flex-col gap-3">
-          <Button
-            type="submit"
-            form="login-form"
-            className="w-full bg-violet-600 hover:bg-violet-700"
-            disabled={loading}
-          >
-            {loading ? 'Signing in…' : 'Sign In'}
-          </Button>
-          <p className="text-sm text-muted-foreground text-center">
-            Don&apos;t have an account?{' '}
-            <Link href="/register" className="text-violet-600 hover:underline font-medium">Sign up free</Link>
-          </p>
-        </CardFooter>
-      </Card>
+          <CardFooter className="flex flex-col gap-3 px-6 pb-6 pt-0">
+            <Button
+              type="submit"
+              form="login-form"
+              className="w-full h-10 bg-violet-600 hover:bg-violet-500 text-white font-semibold shadow-[0_0_0_1px_rgb(124_58_237/0.4),0_4px_12px_-2px_rgb(124_58_237/0.35)] transition-all duration-200"
+              disabled={loading}
+            >
+              {loading ? 'Signing in…' : 'Sign In'}
+            </Button>
+            <p className="text-sm text-muted-foreground text-center">
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="text-violet-500 hover:text-violet-400 transition-colors font-medium">Sign up free</Link>
+            </p>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }
