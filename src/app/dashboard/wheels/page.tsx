@@ -125,7 +125,7 @@ export default function WheelsPage() {
                 <div key={wheel.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors group">
                   <div className="flex items-center gap-3.5 min-w-0">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
-                      <Disc3 className="h-4.5 w-4.5 text-muted-foreground" />
+                      <Disc3 className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-medium truncate">{wheel.name}</p>
@@ -157,10 +157,10 @@ export default function WheelsPage() {
                       <Pencil className="h-3 w-3 mr-1" /> Edit
                     </Button>
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-7 w-7 p-0">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                      <DropdownMenuTrigger
+                        render={<Button variant="ghost" size="sm" className="h-7 w-7 p-0" nativeButton={false} />}
+                      >
+                        <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-44">
                         <DropdownMenuItem render={<Link href={`/dashboard/wheels/${wheel.id}`} />}>

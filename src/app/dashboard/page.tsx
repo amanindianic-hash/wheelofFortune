@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { BarChart2, Disc3, Trophy, Users, ArrowRight, Plus } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { useAuth } from '@/components/providers/auth-provider';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 interface AnalyticsSummary { total_spins: number; total_winners: number; unique_leads: number; }
