@@ -17,8 +17,10 @@ function Card({
         "bg-card",
         // Border — crisp single pixel
         "ring-1 ring-white/[0.06] dark:ring-white/[0.055]",
-        // Elevation: outer shadow + inner top-edge highlight (Linear-style)
+        // Elevation + hover lift (Linear-style)
         "shadow-[inset_0_1px_0_0_rgb(255_255_255/0.07),0_1px_3px_0_rgb(0_0_0/0.2),0_4px_16px_-4px_rgb(0_0_0/0.18)]",
+        "transition-[box-shadow,transform] duration-200",
+        "hover:-translate-y-px hover:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.09),0_2px_8px_0_rgb(0_0_0/0.28),0_12px_28px_-4px_rgb(0_0_0/0.22)]",
         // Spacing
         "py-4",
         // Size overrides

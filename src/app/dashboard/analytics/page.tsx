@@ -78,140 +78,140 @@ export default function AnalyticsPage() {
   const maxSpins = Math.max(...daily.map(r => r.spins), 1);
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto space-y-6">
+    <div className="min-h-full bg-background">
+      <div className="max-w-6xl mx-auto px-6 md:px-8 py-8 space-y-6">
 
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Analytics</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Spin performance and lead capture data</p>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-[26px] font-bold tracking-[-0.03em]">Analytics</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Spin performance and lead capture data</p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={selectedWheel} onValueChange={(v) => setSelectedWheel(v ?? 'all')}>
+              <SelectTrigger className="h-8 w-44 text-xs">
+                <SelectValue placeholder="All Wheels" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Wheels</SelectItem>
+                {wheels.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Select value={range} onValueChange={(v) => setRange(v ?? '30')}>
+              <SelectTrigger className="h-8 w-32 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">Last 7 days</SelectItem>
+                <SelectItem value="30">Last 30 days</SelectItem>
+                <SelectItem value="90">Last 90 days</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={handleExport} disabled={exporting}>
+              {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+              Export CSV
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Select value={selectedWheel} onValueChange={(v) => setSelectedWheel(v ?? 'all')}>
-            <SelectTrigger className="h-8 w-44 text-xs"><SelectValue placeholder="All Wheels" /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Wheels</SelectItem>
-              {wheels.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          <Select value={range} onValueChange={(v) => setRange(v ?? '30')}>
-            <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 90 days</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs" onClick={handleExport} disabled={exporting}>
-            {exporting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-            Export CSV
-          </Button>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            { label: 'Total Spins',   value: summary?.total_spins ?? 0,   icon: BarChart2, iconCls: 'text-violet-600 dark:text-violet-400', bgCls: 'bg-violet-500/10', bar: 'from-violet-600 to-violet-400', fmt: 'num' },
+            { label: 'Winners',       value: summary?.total_winners ?? 0, icon: Trophy,    iconCls: 'text-amber-600 dark:text-amber-400',   bgCls: 'bg-amber-500/10',  bar: 'from-amber-500 to-yellow-400', fmt: 'num' },
+            { label: 'Unique Leads',  value: summary?.unique_leads ?? 0,  icon: Users,     iconCls: 'text-blue-600 dark:text-blue-400',     bgCls: 'bg-blue-500/10',   bar: 'from-blue-600 to-blue-400',    fmt: 'num' },
+            { label: 'Win Rate',      value: winRate,                     icon: Percent,   iconCls: 'text-emerald-600 dark:text-emerald-400', bgCls: 'bg-emerald-500/10', bar: 'from-emerald-600 to-emerald-400', fmt: 'str' },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.label} className="relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${s.bar}`} />
+                <CardContent className="p-5 pt-6">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.bgCls} mb-4`}>
+                    <Icon className={`h-4 w-4 ${s.iconCls}`} />
+                  </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">{s.label}</p>
+                  <p className="text-[36px] font-bold tabular-nums tracking-[-0.04em] leading-none text-foreground">
+                    {s.fmt === 'num' ? (s.value as number).toLocaleString() : `${s.value}%`}
+                  </p>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
-      </div>
 
-      {/* Summary cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <MiniStat label="Total Spins"   value={summary?.total_spins ?? 0}  icon={<BarChart2 className="h-4 w-4" />} color="bg-violet-500/10 text-violet-600" />
-        <MiniStat label="Winners"        value={summary?.total_winners ?? 0} icon={<Trophy    className="h-4 w-4" />} color="bg-amber-500/10 text-amber-600" />
-        <MiniStat label="Unique Leads"   value={summary?.unique_leads ?? 0}  icon={<Users     className="h-4 w-4" />} color="bg-blue-500/10 text-blue-600" />
-        <MiniStat label="Win Rate"       value={`${winRate}%`}               icon={<Percent   className="h-4 w-4" />} color="bg-emerald-500/10 text-emerald-600" isString />
-      </div>
-
-      {/* Daily spins chart */}
-      {daily.length > 0 && (
-        <Card>
-          <CardHeader className="pb-2 pt-5 px-6">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-medium">Daily Spins</CardTitle>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-violet-200 inline-block" /> Spins
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-sm bg-violet-600 inline-block" /> Winners
-                </span>
+        {/* Daily Spins Chart */}
+        {daily.length > 0 && (
+          <Card>
+            <CardHeader className="pb-2 pt-5 px-6">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold">Daily Spins</CardTitle>
+                <div className="flex items-center gap-4 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-sm bg-violet-200 dark:bg-violet-800 inline-block" /> Spins
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="h-2 w-2 rounded-sm bg-violet-600 inline-block" /> Winners
+                  </span>
+                </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="px-6 pb-5">
-            <div className="flex items-end gap-px h-28">
-              {daily.map((d) => {
-                const pct = (d.spins / maxSpins) * 100;
-                const winPct = d.spins > 0 ? (d.winners / d.spins) * 100 : 0;
-                return (
-                  <div
-                    key={d.date}
-                    className="flex-1 flex flex-col justify-end relative group cursor-default"
-                    title={`${d.date}: ${d.spins} spins, ${d.winners} winners`}
-                  >
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <div className="flex items-end gap-px h-32">
+                {daily.map((d) => {
+                  const pct = (d.spins / maxSpins) * 100;
+                  const winPct = d.spins > 0 ? (d.winners / d.spins) * 100 : 0;
+                  return (
                     <div
-                      className="w-full rounded-t-[2px] bg-violet-100 dark:bg-violet-900/30 relative overflow-hidden"
-                      style={{ height: `${Math.max(pct, 2)}%` }}
+                      key={d.date}
+                      className="flex-1 flex flex-col justify-end relative group cursor-default"
+                      title={`${d.date}: ${d.spins} spins, ${d.winners} winners`}
                     >
                       <div
-                        className="absolute bottom-0 left-0 right-0 bg-violet-600 rounded-t-[2px]"
-                        style={{ height: `${winPct}%` }}
-                      />
-                    </div>
-                    {/* tooltip */}
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-10 pointer-events-none">
-                      <div className="bg-popover border rounded-md px-2 py-1 text-[10px] shadow-md whitespace-nowrap">
-                        <p className="font-medium">{d.date}</p>
-                        <p className="text-muted-foreground">{d.spins} spins · {d.winners} winners</p>
+                        className="w-full rounded-t-sm bg-violet-100 dark:bg-violet-900/30 relative overflow-hidden"
+                        style={{ height: `${Math.max(pct, 2)}%` }}
+                      >
+                        <div
+                          className="absolute bottom-0 left-0 right-0 bg-violet-600 rounded-t-sm"
+                          style={{ height: `${winPct}%` }}
+                        />
+                      </div>
+                      <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-10 pointer-events-none">
+                        <div className="bg-popover border border-border rounded-lg px-2.5 py-1.5 text-[11px] shadow-lg whitespace-nowrap">
+                          <p className="font-semibold">{d.date}</p>
+                          <p className="text-muted-foreground">{d.spins} spins · {d.winners} winners</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
-              <span>{daily[0]?.date}</span>
-              <span>{daily[daily.length - 1]?.date}</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                  );
+                })}
+              </div>
+              <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
+                <span>{daily[0]?.date}</span>
+                <span>{daily[daily.length - 1]?.date}</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Bottom grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <BreakdownCard title="Prize Distribution" rows={prizes} valueKey="win_count" labelKey="display_title" color="#7C3AED" />
-        <BreakdownCard title="Segment Hit Rate" rows={segments} valueKey="spin_count" labelKey="label" color="#6366f1" />
-        <BreakdownCard
-          title="Device Breakdown"
-          rows={deviceBreakdown.map(d => ({ label: d.device_type, value: d.count }))}
-          valueKey="value" labelKey="label"
-          color="#7C3AED"
-          colorMap={DEVICE_COLORS}
-          showPercent
-        />
-        <BreakdownCard
-          title="OS Breakdown"
-          rows={osBreakdown.map(d => ({ label: d.os, value: d.count }))}
-          valueKey="value" labelKey="label"
-          color="#7C3AED"
-          colorMap={OS_COLORS}
-          showPercent
-        />
+        {/* Breakdown Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <BreakdownCard title="Prize Distribution"    rows={prizes}             valueKey="win_count"  labelKey="display_title" color="#7C3AED" />
+          <BreakdownCard title="Segment Hit Rate"      rows={segments}           valueKey="spin_count" labelKey="label"          color="#6366f1" />
+          <BreakdownCard
+            title="Device Breakdown"
+            rows={deviceBreakdown.map(d => ({ label: d.device_type, value: d.count }))}
+            valueKey="value" labelKey="label" color="#7C3AED" colorMap={DEVICE_COLORS} showPercent
+          />
+          <BreakdownCard
+            title="OS Breakdown"
+            rows={osBreakdown.map(d => ({ label: d.os, value: d.count }))}
+            valueKey="value" labelKey="label" color="#7C3AED" colorMap={OS_COLORS} showPercent
+          />
+        </div>
+
       </div>
     </div>
-  );
-}
-
-function MiniStat({
-  label, value, icon, color, isString,
-}: { label: string; value: number | string; icon: React.ReactNode; color: string; isString?: boolean }) {
-  return (
-    <Card>
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${color}`}>{icon}</div>
-        </div>
-        <p className="text-2xl font-semibold tabular-nums tracking-tight">
-          {isString ? value : typeof value === 'number' ? value.toLocaleString() : value}
-        </p>
-      </CardContent>
-    </Card>
   );
 }
 
@@ -232,10 +232,10 @@ function BreakdownCard({
 
   return (
     <Card>
-      <CardHeader className="pb-2 pt-5 px-6">
-        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <CardHeader className="pb-2 pt-5 px-5">
+        <CardTitle className="text-sm font-semibold">{title}</CardTitle>
       </CardHeader>
-      <CardContent className="px-6 pb-5">
+      <CardContent className="px-5 pb-5">
         {rows.length === 0 ? (
           <p className="text-xs text-muted-foreground py-6 text-center">No data in this period</p>
         ) : (
@@ -247,11 +247,11 @@ function BreakdownCard({
               const bar   = colorMap?.[label] ?? color;
               return (
                 <div key={i} className="flex items-center gap-3">
-                  <span className="text-xs text-muted-foreground flex-1 truncate capitalize">{label}</span>
-                  <div className="w-28 h-1.5 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: bar }} />
+                  <span className="text-xs text-muted-foreground flex-1 truncate capitalize">{label || '—'}</span>
+                  <div className="w-24 h-1.5 rounded-full bg-muted overflow-hidden">
+                    <div className="h-full rounded-full transition-all duration-300" style={{ width: `${pct}%`, backgroundColor: bar }} />
                   </div>
-                  <span className="text-xs font-medium tabular-nums w-10 text-right">
+                  <span className="text-xs font-semibold tabular-nums w-10 text-right text-foreground/80">
                     {showPercent ? `${pct.toFixed(0)}%` : val}
                   </span>
                 </div>

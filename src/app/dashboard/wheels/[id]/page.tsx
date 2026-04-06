@@ -161,7 +161,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{wheel.name}</h1>
+          <h1 className="text-[26px] font-bold tracking-[-0.03em]">{wheel.name}</h1>
           <div className="flex items-center gap-2 mt-1">
             <StatusBadge status={wheel.status} />
             <span className="text-sm text-muted-foreground">{wheel.total_spins.toLocaleString()} total spins</span>

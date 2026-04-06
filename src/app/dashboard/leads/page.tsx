@@ -75,185 +75,177 @@ export default function LeadsPage() {
   const totalPages = Math.ceil(total / 50);
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="min-h-full bg-background">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 py-8 space-y-6">
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Leads</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Contact details collected before each spin</p>
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 text-xs"
-          onClick={exportCSV}
-          disabled={leads.length === 0}
-        >
-          <Download className="h-3.5 w-3.5" /> Export CSV
-        </Button>
-      </div>
-
-      {/* Summary tiles */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-xs font-medium text-muted-foreground">Total Leads</p>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600">
-                <Users className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="text-2xl font-semibold tabular-nums tracking-tight">{total.toLocaleString()}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-xs font-medium text-muted-foreground">With Email</p>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-500/10 text-blue-600">
-                <Mail className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="text-2xl font-semibold tabular-nums tracking-tight">{withEmail}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">this page</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between mb-2">
-              <p className="text-xs font-medium text-muted-foreground">With Phone</p>
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600">
-                <Phone className="h-4 w-4" />
-              </div>
-            </div>
-            <p className="text-2xl font-semibold tabular-nums tracking-tight">{withPhone}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">this page</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Filters */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <Select value={wheelId || 'all'} onValueChange={v => setWheelId(v === 'all' ? '' : (v ?? ''))}>
-          <SelectTrigger className="h-8 w-44 text-xs">
-            <SelectValue placeholder="All Wheels" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Wheels</SelectItem>
-            {wheels.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        <div className="relative flex-1 min-w-48 max-w-sm">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            placeholder="Search name, email or phone…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && fetchLeads(1)}
-            className="h-8 pl-8 text-xs"
-          />
-        </div>
-        <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => fetchLeads(1)}>
-          Search
-        </Button>
-      </div>
-
-      {/* Table */}
-      <Card>
-        <CardContent className="p-0">
-          {loading ? (
-            <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">
-              <div className="flex items-center gap-2">
-                <div className="h-4 w-4 rounded-full border-2 border-violet-600 border-t-transparent animate-spin" />
-                Loading…
-              </div>
-            </div>
-          ) : leads.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted mb-4">
-                <Users className="h-5 w-5 text-muted-foreground" />
-              </div>
-              <p className="text-sm font-medium mb-1">No leads yet</p>
-              <p className="text-xs text-muted-foreground max-w-xs">
-                Enable the lead form on a wheel to start collecting contacts
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-xs font-medium pl-5">Name</TableHead>
-                  <TableHead className="text-xs font-medium">Email</TableHead>
-                  <TableHead className="text-xs font-medium hidden md:table-cell">Phone</TableHead>
-                  <TableHead className="text-xs font-medium hidden lg:table-cell">Wheel</TableHead>
-                  <TableHead className="text-xs font-medium">Prize</TableHead>
-                  <TableHead className="text-xs font-medium hidden sm:table-cell">Coupon</TableHead>
-                  <TableHead className="text-xs font-medium hidden md:table-cell">GDPR</TableHead>
-                  <TableHead className="text-xs font-medium pr-5">Date</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {leads.map(l => (
-                  <TableRow key={l.session_id} className="text-sm">
-                    <TableCell className="font-medium pl-5 py-3">
-                      {l.lead_name || <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {l.lead_email
-                        ? <span className="text-xs">{l.lead_email}</span>
-                        : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell className="py-3 hidden md:table-cell">
-                      {l.lead_phone
-                        ? <span className="text-xs">{l.lead_phone}</span>
-                        : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell className="py-3 hidden lg:table-cell">
-                      <span className="text-xs text-muted-foreground">{l.wheel_name}</span>
-                    </TableCell>
-                    <TableCell className="py-3">
-                      {l.prize_won
-                        ? <span className="inline-flex items-center rounded-full bg-violet-50 dark:bg-violet-900/20 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:text-violet-300">{l.prize_won}</span>
-                        : <span className="text-muted-foreground text-xs">—</span>}
-                    </TableCell>
-                    <TableCell className="py-3 hidden sm:table-cell">
-                      {l.coupon_code
-                        ? <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded font-mono">{l.coupon_code}</code>
-                        : <span className="text-muted-foreground">—</span>}
-                    </TableCell>
-                    <TableCell className="py-3 hidden md:table-cell">
-                      {l.gdpr_consent
-                        ? <span className="inline-flex items-center rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">Yes</span>
-                        : <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">No</span>}
-                    </TableCell>
-                    <TableCell className="py-3 pr-5">
-                      <span className="text-xs text-muted-foreground tabular-nums">
-                        {new Date(l.created_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
-                      </span>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
-          <span>Showing {(page - 1) * 50 + 1}–{Math.min(page * 50, total)} of {total.toLocaleString()} leads</span>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page <= 1} onClick={() => fetchLeads(page - 1)}>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page >= totalPages} onClick={() => fetchLeads(page + 1)}>
-              Next
-            </Button>
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-[26px] font-bold tracking-[-0.03em]">Leads</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Contact details collected before each spin</p>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5 text-xs self-start sm:self-auto"
+            onClick={exportCSV}
+            disabled={leads.length === 0}
+          >
+            <Download className="h-3.5 w-3.5" /> Export CSV
+          </Button>
         </div>
-      )}
+
+        {/* Summary tiles */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Total Leads', value: total,     icon: Users, iconCls: 'text-violet-600 dark:text-violet-400', bg: 'bg-violet-500/10', bar: 'from-violet-600 to-violet-400', sub: 'all time' },
+            { label: 'With Email',  value: withEmail, icon: Mail,  iconCls: 'text-blue-600 dark:text-blue-400',     bg: 'bg-blue-500/10',   bar: 'from-blue-600 to-blue-400',    sub: 'this page' },
+            { label: 'With Phone',  value: withPhone, icon: Phone, iconCls: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-500/10', bar: 'from-emerald-600 to-emerald-400', sub: 'this page' },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <Card key={s.label} className="relative overflow-hidden transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+                <div className={`absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r ${s.bar}`} />
+                <CardContent className="p-5 pt-6">
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${s.bg} mb-4`}>
+                    <Icon className={`h-4 w-4 ${s.iconCls}`} />
+                  </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">{s.label}</p>
+                  <p className="text-[36px] font-bold tabular-nums tracking-[-0.04em] leading-none text-foreground">
+                    {s.value.toLocaleString()}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-2">{s.sub}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Select value={wheelId || 'all'} onValueChange={v => setWheelId(v === 'all' ? '' : (v ?? ''))}>
+            <SelectTrigger className="h-8 w-44 text-xs">
+              <SelectValue placeholder="All Wheels" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Wheels</SelectItem>
+              {wheels.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)}
+            </SelectContent>
+          </Select>
+          <div className="relative flex-1 min-w-48 max-w-sm">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <Input
+              placeholder="Search name, email or phone…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && fetchLeads(1)}
+              className="h-8 pl-8 text-xs"
+            />
+          </div>
+          <Button size="sm" variant="secondary" className="h-8 text-xs" onClick={() => fetchLeads(1)}>
+            Search
+          </Button>
+        </div>
+
+        {/* Table */}
+        <Card className="overflow-hidden">
+          <CardContent className="p-0">
+            {loading ? (
+              <div className="flex items-center justify-center h-40 text-sm text-muted-foreground">
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 rounded-full border-2 border-violet-600 border-t-transparent animate-spin" />
+                  Loading…
+                </div>
+              </div>
+            ) : leads.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-500/10 ring-1 ring-violet-500/20 mb-4">
+                  <Users className="h-6 w-6 text-violet-500" />
+                </div>
+                <p className="text-sm font-semibold mb-1">No leads yet</p>
+                <p className="text-xs text-muted-foreground max-w-xs">
+                  Enable the lead form on a wheel to start collecting contacts
+                </p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent border-border/50">
+                    <TableHead className="text-xs font-medium pl-5">Name</TableHead>
+                    <TableHead className="text-xs font-medium">Email</TableHead>
+                    <TableHead className="text-xs font-medium hidden md:table-cell">Phone</TableHead>
+                    <TableHead className="text-xs font-medium hidden lg:table-cell">Wheel</TableHead>
+                    <TableHead className="text-xs font-medium">Prize</TableHead>
+                    <TableHead className="text-xs font-medium hidden sm:table-cell">Coupon</TableHead>
+                    <TableHead className="text-xs font-medium hidden md:table-cell">GDPR</TableHead>
+                    <TableHead className="text-xs font-medium pr-5">Date</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {leads.map(l => (
+                    <TableRow key={l.session_id} className="border-border/50 hover:bg-muted/30">
+                      <TableCell className="font-medium pl-5 py-3 text-sm">
+                        {l.lead_name || <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell className="py-3">
+                        {l.lead_email
+                          ? <span className="text-xs">{l.lead_email}</span>
+                          : <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell className="py-3 hidden md:table-cell">
+                        {l.lead_phone
+                          ? <span className="text-xs">{l.lead_phone}</span>
+                          : <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell className="py-3 hidden lg:table-cell">
+                        <span className="text-xs text-muted-foreground">{l.wheel_name}</span>
+                      </TableCell>
+                      <TableCell className="py-3">
+                        {l.prize_won
+                          ? <span className="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-700 dark:text-violet-300 ring-1 ring-violet-500/20">{l.prize_won}</span>
+                          : <span className="text-muted-foreground text-xs">—</span>}
+                      </TableCell>
+                      <TableCell className="py-3 hidden sm:table-cell">
+                        {l.coupon_code
+                          ? <code className="text-[11px] bg-muted px-1.5 py-0.5 rounded font-mono">{l.coupon_code}</code>
+                          : <span className="text-muted-foreground">—</span>}
+                      </TableCell>
+                      <TableCell className="py-3 hidden md:table-cell">
+                        {l.gdpr_consent
+                          ? <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-500/20">Yes</span>
+                          : <span className="inline-flex items-center rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">No</span>}
+                      </TableCell>
+                      <TableCell className="py-3 pr-5">
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                          {new Date(l.created_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' })}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>
+              Showing {(page - 1) * 50 + 1}–{Math.min(page * 50, total)} of {total.toLocaleString()} leads
+            </span>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page <= 1} onClick={() => fetchLeads(page - 1)}>
+                Previous
+              </Button>
+              <Button variant="outline" size="sm" className="h-7 text-xs" disabled={page >= totalPages} onClick={() => fetchLeads(page + 1)}>
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
+
+      </div>
     </div>
   );
 }

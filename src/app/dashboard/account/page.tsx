@@ -104,7 +104,7 @@ export default function AccountPage() {
   return (
     <div className="p-8 space-y-8 max-w-3xl">
       <div>
-        <h1 className="text-2xl font-bold">Account Settings</h1>
+        <h1 className="text-[26px] font-bold tracking-[-0.03em]">Account Settings</h1>
         <p className="text-muted-foreground">Manage your company settings and team</p>
       </div>
 
