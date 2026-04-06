@@ -2,12 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAccessToken } from '@/lib/auth';
 
 const PUBLIC_PATHS = ['/login', '/register', '/widget', '/demo.html', '/forgot-password', '/reset-password'];
+const PUBLIC_EXACT = ['/'];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Allow public paths and all API routes (they handle their own auth)
   if (
+    PUBLIC_EXACT.includes(pathname) ||
     PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
