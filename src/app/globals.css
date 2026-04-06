@@ -49,91 +49,99 @@
 }
 
 :root {
-  /* Backgrounds — very subtle violet-tinted off-white, not pure white */
+  /* Backgrounds — very subtle violet-tinted off-white */
   --background: oklch(0.975 0.006 264);
-  --foreground: oklch(0.15 0.02 264);
+  --foreground: oklch(0.12 0.025 264);
 
-  /* Cards sit white so they pop against the background */
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 264);
+  --card-foreground: oklch(0.12 0.025 264);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 264);
+  --popover-foreground: oklch(0.12 0.025 264);
 
-  /* Primary = violet brand #7C3AED */
   --primary: oklch(0.488 0.243 264.376);
   --primary-foreground: oklch(0.985 0 0);
 
-  /* Secondary — light violet tint */
   --secondary: oklch(0.94 0.018 264);
   --secondary-foreground: oklch(0.488 0.243 264.376);
 
-  /* Muted — cool gray with just a touch of violet */
   --muted: oklch(0.945 0.012 264);
-  --muted-foreground: oklch(0.52 0.04 264);
+  --muted-foreground: oklch(0.50 0.04 264);
 
-  /* Accent — soft violet */
   --accent: oklch(0.92 0.03 264);
   --accent-foreground: oklch(0.35 0.15 264);
 
   --destructive: oklch(0.577 0.245 27.325);
 
-  /* Borders & inputs — slightly violet-tinted */
-  --border: oklch(0.88 0.015 264);
+  --border: oklch(0.875 0.018 264);
   --input: oklch(0.92 0.012 264);
   --ring: oklch(0.488 0.243 264.376);
 
-  /* Chart colors — vibrant, varied hues */
-  --chart-1: oklch(0.488 0.243 264.376);   /* violet */
-  --chart-2: oklch(0.72 0.19 180);          /* teal */
-  --chart-3: oklch(0.75 0.18 140);          /* green */
-  --chart-4: oklch(0.78 0.18 55);           /* amber */
-  --chart-5: oklch(0.65 0.22 20);           /* coral */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.72 0.19 180);
+  --chart-3: oklch(0.75 0.18 140);
+  --chart-4: oklch(0.78 0.18 55);
+  --chart-5: oklch(0.65 0.22 20);
 
   --radius: 0.75rem;
 
-  /* Sidebar — deep violet/navy */
   --sidebar: oklch(0.19 0.055 264);
   --sidebar-foreground: oklch(0.92 0.015 264);
   --sidebar-primary: oklch(0.488 0.243 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.26 0.06 264);
   --sidebar-accent-foreground: oklch(0.92 0.015 264);
-  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-border: oklch(1 0 0 / 7%);
   --sidebar-ring: oklch(0.488 0.243 264.376);
 }
 
 .dark {
-  --background: oklch(0.13 0.025 264);
-  --foreground: oklch(0.95 0.012 264);
-  --card: oklch(0.17 0.03 264);
-  --card-foreground: oklch(0.95 0.012 264);
-  --popover: oklch(0.17 0.03 264);
-  --popover-foreground: oklch(0.95 0.012 264);
-  --primary: oklch(0.62 0.22 264.376);
+  /* Deep neutral dark background — #0B0F14 level */
+  --background: oklch(0.105 0.018 264);
+  --foreground: oklch(0.94 0.01 264);
+
+  /* Surface sits 1 layer above background */
+  --card: oklch(0.135 0.022 264);
+  --card-foreground: oklch(0.94 0.01 264);
+  --popover: oklch(0.135 0.022 264);
+  --popover-foreground: oklch(0.94 0.01 264);
+
+  /* Violet accent — slightly brighter for dark mode pop */
+  --primary: oklch(0.64 0.22 264.376);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.22 0.04 264);
-  --secondary-foreground: oklch(0.92 0.015 264);
-  --muted: oklch(0.22 0.035 264);
-  --muted-foreground: oklch(0.65 0.04 264);
-  --accent: oklch(0.25 0.05 264);
-  --accent-foreground: oklch(0.92 0.015 264);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.62 0.22 264.376);
-  --chart-1: oklch(0.62 0.22 264.376);
+
+  --secondary: oklch(0.195 0.035 264);
+  --secondary-foreground: oklch(0.88 0.015 264);
+
+  /* Muted sits midway between card and background */
+  --muted: oklch(0.175 0.028 264);
+  --muted-foreground: oklch(0.58 0.04 264);
+
+  /* Accent - used for hover states on interactive elements */
+  --accent: oklch(0.2 0.04 264);
+  --accent-foreground: oklch(0.9 0.012 264);
+
+  --destructive: oklch(0.65 0.22 22.216);
+
+  /* Subtle borders — white/8 equivalent */
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.64 0.22 264.376);
+
+  --chart-1: oklch(0.64 0.22 264.376);
   --chart-2: oklch(0.72 0.19 180);
   --chart-3: oklch(0.75 0.18 140);
   --chart-4: oklch(0.78 0.18 55);
   --chart-5: oklch(0.65 0.22 20);
-  --sidebar: oklch(0.11 0.03 264);
-  --sidebar-foreground: oklch(0.92 0.015 264);
-  --sidebar-primary: oklch(0.62 0.22 264.376);
+
+  /* Sidebar — deepest layer */
+  --sidebar: oklch(0.085 0.018 264);
+  --sidebar-foreground: oklch(0.90 0.012 264);
+  --sidebar-primary: oklch(0.64 0.22 264.376);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.19 0.04 264);
-  --sidebar-accent-foreground: oklch(0.92 0.015 264);
-  --sidebar-border: oklch(1 0 0 / 8%);
-  --sidebar-ring: oklch(0.62 0.22 264.376);
+  --sidebar-accent: oklch(0.155 0.03 264);
+  --sidebar-accent-foreground: oklch(0.90 0.012 264);
+  --sidebar-border: oklch(1 0 0 / 6%);
+  --sidebar-ring: oklch(0.64 0.22 264.376);
 }
 
 @layer base {
@@ -142,8 +150,49 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   html {
     @apply font-sans;
   }
+}
+
+/* ─── Premium UI Utilities ────────────────────────────────────────── */
+
+/* Glass surface effect */
+.glass {
+  background: oklch(1 0 0 / 4%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid oklch(1 0 0 / 8%);
+}
+
+.dark .glass {
+  background: oklch(1 0 0 / 4%);
+  border: 1px solid oklch(1 0 0 / 8%);
+}
+
+/* Card glow hover effect */
+.card-glow {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 0 1px oklch(0.64 0.22 264.376 / 30%), 0 4px 24px oklch(0 0 0 / 40%);
+}
+
+/* Gradient text utility */
+.gradient-text {
+  background: linear-gradient(135deg, oklch(0.94 0.01 264) 0%, oklch(0.75 0.18 264) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Subtle inset surface */
+.surface-inset {
+  background: oklch(0 0 0 / 20%);
+  box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 5%);
 }

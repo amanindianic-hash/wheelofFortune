@@ -28,11 +28,11 @@ const NAV_ITEMS = [
   { href: '/dashboard/account',         label: 'Account',      icon: Settings },
 ];
 
-const PLAN_COLOR: Record<string, string> = {
-  starter:    'bg-slate-500/15 text-slate-400',
-  growth:     'bg-blue-500/15 text-blue-400',
-  pro:        'bg-violet-500/15 text-violet-400',
-  enterprise: 'bg-amber-500/15 text-amber-400',
+const PLAN_BADGE: Record<string, string> = {
+  starter:    'bg-slate-500/20 text-slate-400 ring-slate-500/20',
+  growth:     'bg-blue-500/15 text-blue-400 ring-blue-500/20',
+  pro:        'bg-violet-500/15 text-violet-400 ring-violet-500/20',
+  enterprise: 'bg-amber-500/15 text-amber-400 ring-amber-500/20',
 };
 
 function SidebarContent({ onNav }: { onNav?: () => void }) {
@@ -48,45 +48,48 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
 
   const initials = user?.full_name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) ?? '??';
   const usedPct  = client ? Math.min(100, (client.spins_used_this_month / client.plan_spin_limit) * 100) : 0;
-  const planCls  = PLAN_COLOR[client?.plan ?? ''] ?? PLAN_COLOR.starter;
+  const planBadge = PLAN_BADGE[client?.plan ?? ''] ?? PLAN_BADGE.starter;
 
   return (
     <div className="flex flex-col h-full">
 
-      {/* Logo */}
-      <div className="flex items-center gap-3 px-5 h-14 border-b border-sidebar-border shrink-0">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-600 shrink-0">
-          <Zap className="h-3.5 w-3.5 text-white" />
+      {/* ── Logo / Brand ───────────────────────────────────── */}
+      <div className="flex items-center gap-3 px-5 h-[60px] shrink-0" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-600 shadow-[0_0_12px_0_rgb(124_58_237/0.5)] shrink-0">
+          <Zap className="h-3.5 w-3.5 text-white fill-white" />
         </div>
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-sidebar-foreground leading-none">SpinPlatform</p>
+          <p className="text-[13px] font-semibold text-sidebar-foreground leading-none tracking-tight">SpinPlatform</p>
           {client && (
-            <p className="text-xs text-sidebar-foreground/50 truncate mt-0.5 max-w-[140px]">{client.name}</p>
+            <p className="text-[11px] text-sidebar-foreground/40 truncate mt-0.5 max-w-[140px]">{client.name}</p>
           )}
         </div>
       </div>
 
-      {/* Plan pill + quota */}
+      {/* ── Plan Badge + Quota Bar ──────────────────────────── */}
       {client && (
-        <div className="px-4 py-3 border-b border-sidebar-border shrink-0">
-          <div className="flex items-center justify-between mb-2">
-            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ${planCls}`}>
+        <div className="px-4 py-3 shrink-0" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ring-1 capitalize ${planBadge}`}>
               {client.plan}
             </span>
-            <span className="text-[11px] text-sidebar-foreground/40 tabular-nums">
-              {client.spins_used_this_month.toLocaleString()} / {client.plan_spin_limit.toLocaleString()}
+            <span className="text-[11px] text-sidebar-foreground/35 tabular-nums font-medium">
+              {client.spins_used_this_month.toLocaleString()} <span className="text-sidebar-foreground/20">/</span> {client.plan_spin_limit.toLocaleString()}
             </span>
           </div>
-          <div className="h-1 w-full rounded-full bg-sidebar-border overflow-hidden">
+          {/* Progress bar */}
+          <div className="h-[3px] w-full rounded-full overflow-hidden" style={{ background: 'oklch(1 0 0 / 6%)' }}>
             <div
-              className={`h-full rounded-full transition-all duration-500 ${usedPct >= 90 ? 'bg-rose-500' : usedPct >= 70 ? 'bg-amber-400' : 'bg-violet-500'}`}
+              className={`h-full rounded-full transition-all duration-700 ease-out ${
+                usedPct >= 90 ? 'bg-rose-500' : usedPct >= 70 ? 'bg-amber-400' : 'bg-violet-500'
+              }`}
               style={{ width: `${usedPct}%` }}
             />
           </div>
         </div>
       )}
 
-      {/* Navigation */}
+      {/* ── Navigation ─────────────────────────────────────── */}
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -96,31 +99,42 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
               key={item.href}
               href={item.href}
               onClick={onNav}
-              className={`group flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150 ${
+              className={`group flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium transition-all duration-150 ${
                 active
-                  ? 'bg-sidebar-accent text-sidebar-foreground'
-                  : 'text-sidebar-foreground/60 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground'
+                  ? 'bg-violet-600/15 text-sidebar-foreground ring-1 ring-violet-500/20'
+                  : 'text-sidebar-foreground/50 hover:bg-sidebar-accent hover:text-sidebar-foreground/80'
               }`}
             >
-              <Icon className={`h-4 w-4 shrink-0 transition-colors ${active ? 'text-violet-400' : 'text-sidebar-foreground/40 group-hover:text-sidebar-foreground/70'}`} />
+              <Icon
+                className={`h-[15px] w-[15px] shrink-0 transition-colors duration-150 ${
+                  active
+                    ? 'text-violet-400'
+                    : 'text-sidebar-foreground/30 group-hover:text-sidebar-foreground/60'
+                }`}
+              />
               {item.label}
+              {active && (
+                <span className="ml-auto h-1.5 w-1.5 rounded-full bg-violet-400 shrink-0" />
+              )}
             </Link>
           );
         })}
       </nav>
 
-      {/* User section */}
-      <div className="shrink-0 border-t border-sidebar-border p-2">
+      {/* ── User Section ────────────────────────────────────── */}
+      <div className="shrink-0 p-2" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
         <DropdownMenu>
-          <DropdownMenuTrigger className="w-full flex items-center gap-2.5 rounded-md px-3 py-2 text-sm hover:bg-sidebar-accent/60 transition-colors duration-150 group">
+          <DropdownMenuTrigger className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-sidebar-accent transition-all duration-150 group outline-none">
             <Avatar className="h-7 w-7 shrink-0">
-              <AvatarFallback className="bg-violet-600 text-white text-[10px] font-semibold">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-gradient-to-br from-violet-500 to-violet-700 text-white text-[10px] font-bold shadow-[0_0_8px_0_rgb(124_58_237/0.4)]">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div className="text-left min-w-0 flex-1">
-              <p className="text-xs font-medium text-sidebar-foreground truncate leading-none">{user?.full_name}</p>
-              <p className="text-[11px] text-sidebar-foreground/40 truncate mt-0.5">{user?.email}</p>
+              <p className="text-[12px] font-semibold text-sidebar-foreground truncate leading-none">{user?.full_name}</p>
+              <p className="text-[11px] text-sidebar-foreground/35 truncate mt-0.5">{user?.email}</p>
             </div>
-            <ChevronUp className="h-3.5 w-3.5 text-sidebar-foreground/30 shrink-0" />
+            <ChevronUp className="h-3.5 w-3.5 text-sidebar-foreground/25 shrink-0 group-hover:text-sidebar-foreground/50 transition-colors" />
           </DropdownMenuTrigger>
           <DropdownMenuContent side="top" align="start" className="w-56 mb-1">
             <DropdownMenuLabel className="text-xs font-normal text-muted-foreground py-1.5">
@@ -153,35 +167,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="flex h-screen overflow-hidden bg-background">
 
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-60 flex-col bg-sidebar shrink-0">
+      {/* ── Desktop Sidebar ──────────────────────────────────── */}
+      <aside className="hidden md:flex w-[220px] flex-col bg-sidebar shrink-0" style={{ borderRight: '1px solid var(--sidebar-border)' }}>
         <SidebarContent />
       </aside>
 
-      {/* Mobile overlay */}
+      {/* ── Mobile Overlay ───────────────────────────────────── */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
-      {/* Mobile drawer */}
+      {/* ── Mobile Drawer ────────────────────────────────────── */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-sidebar flex flex-col transform transition-transform duration-200 ease-in-out md:hidden ${
+        className={`fixed inset-y-0 left-0 z-50 w-[220px] bg-sidebar flex flex-col transform transition-transform duration-250 ease-in-out md:hidden ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
+        style={{ borderRight: '1px solid var(--sidebar-border)' }}
       >
-        <div className="flex items-center justify-between px-5 h-14 border-b border-sidebar-border shrink-0">
+        <div className="flex items-center justify-between px-5 h-[60px] shrink-0" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
           <div className="flex items-center gap-2.5">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-600">
-              <Zap className="h-3 w-3 text-white" />
+              <Zap className="h-3 w-3 text-white fill-white" />
             </div>
-            <span className="font-semibold text-sm text-sidebar-foreground">SpinPlatform</span>
+            <span className="font-semibold text-[13px] text-sidebar-foreground tracking-tight">SpinPlatform</span>
           </div>
           <button
             onClick={() => setMobileOpen(false)}
-            className="p-1.5 rounded-md text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
+            className="p-1.5 rounded-md text-sidebar-foreground/40 hover:text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
             aria-label="Close menu"
           >
             <X className="w-4 h-4" />
@@ -192,11 +207,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      {/* Main content area */}
+      {/* ── Main Content ─────────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* Mobile top bar */}
-        <header className="md:hidden flex items-center gap-3 px-4 h-14 border-b bg-card shrink-0">
+        <header className="md:hidden flex items-center gap-3 px-4 h-[56px] border-b bg-card/50 backdrop-blur-sm shrink-0">
           <button
             onClick={() => setMobileOpen(true)}
             className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
@@ -206,9 +221,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </button>
           <div className="flex items-center gap-2">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-600">
-              <Zap className="h-3 w-3 text-white" />
+              <Zap className="h-3 w-3 text-white fill-white" />
             </div>
-            <span className="font-semibold text-sm">SpinPlatform</span>
+            <span className="font-semibold text-[13px] tracking-tight">SpinPlatform</span>
           </div>
         </header>
 
