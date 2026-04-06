@@ -1,0 +1,73 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Next.js build output
+.next/
+out/
+
+# Production build
+build/
+dist/
+
+# Environment variables (NEVER commit these)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Vercel
+.vercel/
+
+# TypeScript build info
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Editor / IDE config
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# AI / MCP tool configs (not needed in repo)
+.claude/
+.cursor/
+.cursorrules
+.windsurfrules
+.opencode.json
+.mcp.json
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+
+# Code review graph cache
+.code-review-graph/
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Misc
+*.pem
+.cache/

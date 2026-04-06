@@ -1,0 +1,2475 @@
+openapi: 3.0.3
+
+info:
+  title: Wheel of Fortune Platform API
+  version: "1.0"
+  description: |
+    Complete API specification for the Wheel of Fortune Customization Platform.
+
+    **Authentication**
+    - Dashboard endpoints require a Bearer JWT in the `Authorization` header.
+    - Widget/public endpoints are authenticated via `embed_token` in the request body.
+    - JWT access tokens expire after **15 minutes**. Use `POST /auth/refresh` to renew.
+
+    **Base URL**
+    `https://api.spinplatform.io/v1`
+
+    **Standard Error Envelope**
+    ```json
+    {
+      "error": {
+        "code": "ERROR_CODE",
+        "message": "Human readable description",
+        "details": {}
+      }
+    }
+    ```
+
+    **Rate Limit Headers**
+    All responses include: `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+
+    **Related Documents**
+    - WheelOfFortune_TRD_v1.0 — Technical Requirements Document
+    - WheelOfFortune_SOP_v1.0 — Standard Operating Procedure
+    - WheelOfFortune_Schema_v1.0.sql — PostgreSQL Database Schema
+  contact:
+    name: Engineering Team
+  license:
+    name: Confidential — Internal Use Only
+
+servers:
+  - url: https://api.spinplatform.io/v1
+    description: Production
+  - url: https://staging-api.spinplatform.io/v1
+    description: Staging
+  - url: http://localhost:4000/v1
+    description: Local development
+
+tags:
+  - name: Auth
+    description: Registration, login, token management
+  - name: Wheels
+    description: Wheel campaign lifecycle management
+  - name: Segments
+    description: Wheel segment configuration
+  - name: Prizes
+    description: Prize definition and management
+  - name: Coupons
+    description: Coupon code pool management
+  - name: Spin
+    description: Public widget endpoints — session creation and spin execution
+  - name: Integrations
+    description: Third-party integration configuration
+  - name: Analytics
+    description: Spin event analytics and reporting
+  - name: Account
+    description: Client account and team management
+
+# ==============================================================================
+# SECURITY SCHEMES
+# ==============================================================================
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT access token (HS256, 15-minute expiry). Obtain from POST /auth/login."
+
+  # ============================================================================
+  # REUSABLE SCHEMAS
+  # ============================================================================
+
+  schemas:
+
+    # --- Primitives & Shared ---------------------------------------------------
+
+    UUID:
+      type: string
+      format: uuid
+      example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+
+    HexColor:
+      type: string
+      pattern: '^#[0-9A-Fa-f]{6}$'
+      example: "#1E3A5F"
+
+    Timestamp:
+      type: string
+      format: date-time
+      example: "2026-03-15T12:00:00Z"
+
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              example: "VALIDATION_ERROR"
+            message:
+              type: string
+              example: "Human readable description of the error."
+            details:
+              type: object
+              additionalProperties: true
+              example: { "field": "email", "issue": "Invalid format" }
+
+    # --- Enums ----------------------------------------------------------------
+
+    ClientPlan:
+      type: string
+      enum: [starter, growth, pro, enterprise]
+
+    UserRole:
+      type: string
+      enum: [owner, admin, editor, viewer]
+
+    WheelStatus:
+      type: string
+      enum: [draft, active, paused, archived]
+
+    PrizeType:
+      type: string
+      enum: [coupon, points, gift_card, message, url_redirect, try_again]
+
+    CouponMode:
+      type: string
+      enum: [static, unique_pool, auto_generate]
+
+    CouponStatus:
+      type: string
+      enum: [available, issued, redeemed, expired, cancelled]
+
+    IntegrationType:
+      type: string
+      enum: [mailchimp, klaviyo, hubspot, salesforce, zapier, webhook, google_sheets]
+
+    # --- Config Sub-Schemas ---------------------------------------------------
+
+    WheelConfig:
+      type: object
+      description: "Wheel behaviour configuration. All fields optional — defaults applied by server."
+      properties:
+        spin_duration_ms:
+          type: integer
+          minimum: 2000
+          maximum: 10000
+          default: 4000
+          example: 4000
+        animation_speed:
+          type: string
+          enum: [slow, medium, fast, custom]
+          default: medium
+        pointer_position:
+          type: string
+          enum: [top, right, bottom, left]
+          default: top
+        confetti_enabled:
+          type: boolean
+          default: true
+        sound_enabled:
+          type: boolean
+          default: false
+        sound_url:
+          type: string
+          nullable: true
+          description: "S3 URL to audio file. NULL if sound_enabled = false."
+        show_segment_labels:
+          type: boolean
+          default: true
+        center_image_url:
+          type: string
+          nullable: true
+          description: "S3 URL for optional center logo image."
+        guaranteed_win_every_n:
+          type: integer
+          nullable: true
+          minimum: 1
+          description: "Force a win every N spins. NULL = disabled."
+        guaranteed_win_segment_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: "Segment ID to force-land on for guaranteed wins."
+
+    WheelFormConfig:
+      type: object
+      description: "Lead capture form shown before the spin. Empty object = no form."
+      properties:
+        enabled:
+          type: boolean
+          default: false
+        fields:
+          type: array
+          items:
+            type: object
+            required: [key, label, type]
+            properties:
+              key:
+                type: string
+                description: "Field identifier. Reserved: email, name, phone. Custom keys allowed."
+                example: "email"
+              label:
+                type: string
+                example: "Your Email Address"
+              type:
+                type: string
+                enum: [email, text, tel, checkbox]
+              required:
+                type: boolean
+                default: false
+        gdpr_enabled:
+          type: boolean
+          default: false
+        gdpr_text:
+          type: string
+          example: "I agree to receive marketing emails."
+        privacy_policy_url:
+          type: string
+          nullable: true
+        terms_url:
+          type: string
+          nullable: true
+
+    CreatePrizeRequest:
+      type: object
+      description: "Request body for creating a new prize. Excludes server-set fields (id, client_id, created_at)."
+      required: [name, type, display_title]
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/PrizeType'
+        display_title:
+          type: string
+          maxLength: 100
+        display_description:
+          type: string
+          nullable: true
+          maxLength: 500
+        coupon_mode:
+          $ref: '#/components/schemas/CouponMode'
+        static_coupon_code:
+          type: string
+          nullable: true
+          maxLength: 100
+        auto_gen_prefix:
+          type: string
+          nullable: true
+          maxLength: 20
+        auto_gen_length:
+          type: integer
+          nullable: true
+          default: 8
+        coupon_expiry_days:
+          type: integer
+          nullable: true
+        points_value:
+          type: integer
+          nullable: true
+        redirect_url:
+          type: string
+          nullable: true
+          maxLength: 2000
+        custom_message_html:
+          type: string
+          nullable: true
+
+    WheelBranding:
+      type: object
+      description: "Visual branding configuration."
+      properties:
+        logo_url:
+          type: string
+          nullable: true
+        logo_position:
+          type: string
+          enum: [above, center]
+          default: above
+        primary_color:
+          $ref: '#/components/schemas/HexColor'
+        secondary_color:
+          $ref: '#/components/schemas/HexColor'
+        background_type:
+          type: string
+          enum: [solid, gradient, image]
+          default: solid
+        background_value:
+          type: string
+          description: "Hex string, CSS gradient, or S3 URL depending on background_type."
+          example: "#FFFFFF"
+        font_family:
+          type: string
+          default: Inter
+          example: "Inter"
+        custom_font_url:
+          type: string
+          nullable: true
+          description: "S3 URL to woff2 font file. Used when font_family = custom."
+        button_text:
+          type: string
+          maxLength: 30
+          default: "SPIN NOW!"
+        button_color:
+          $ref: '#/components/schemas/HexColor'
+        border_color:
+          $ref: '#/components/schemas/HexColor'
+        border_width:
+          type: integer
+          minimum: 1
+          maximum: 20
+          default: 4
+          description: "Border width in pixels."
+
+    # --- Core Resource Schemas ------------------------------------------------
+
+    Client:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        slug:
+          type: string
+        email:
+          type: string
+          format: email
+        plan:
+          $ref: '#/components/schemas/ClientPlan'
+        plan_spin_limit:
+          type: integer
+        spins_used_this_month:
+          type: integer
+        billing_cycle_day:
+          type: integer
+          minimum: 1
+          maximum: 28
+        custom_domain:
+          type: string
+          nullable: true
+        timezone:
+          type: string
+          example: "Asia/Kolkata"
+        is_active:
+          type: boolean
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    User:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        client_id:
+          $ref: '#/components/schemas/UUID'
+        email:
+          type: string
+          format: email
+        full_name:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        email_verified:
+          type: boolean
+        last_login_at:
+          $ref: '#/components/schemas/Timestamp'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    Wheel:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        client_id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+        status:
+          $ref: '#/components/schemas/WheelStatus'
+        config:
+          $ref: '#/components/schemas/WheelConfig'
+        branding:
+          $ref: '#/components/schemas/WheelBranding'
+        trigger_rules:
+          type: object
+          additionalProperties: true
+        frequency_rules:
+          type: object
+          additionalProperties: true
+        active_from:
+          $ref: '#/components/schemas/Timestamp'
+        active_until:
+          $ref: '#/components/schemas/Timestamp'
+        total_spin_cap:
+          type: integer
+          nullable: true
+        total_spins:
+          type: integer
+        embed_token:
+          type: string
+          example: "a3f9c2e1b8d74506..."
+        form_config:
+          $ref: '#/components/schemas/WheelFormConfig'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    Segment:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        wheel_id:
+          $ref: '#/components/schemas/UUID'
+        position:
+          type: integer
+          minimum: 0
+        label:
+          type: string
+          maxLength: 60
+        bg_color:
+          $ref: '#/components/schemas/HexColor'
+        text_color:
+          $ref: '#/components/schemas/HexColor'
+        icon_url:
+          type: string
+          nullable: true
+        weight:
+          type: number
+          format: float
+          minimum: 0.0001
+          maximum: 99999.9999
+          default: 1.0
+        prize_id:
+          type: string
+          format: uuid
+          nullable: true
+        is_no_prize:
+          type: boolean
+          default: false
+        consolation_message:
+          type: string
+          nullable: true
+          maxLength: 255
+        win_cap_daily:
+          type: integer
+          nullable: true
+          minimum: 1
+        win_cap_total:
+          type: integer
+          nullable: true
+          minimum: 1
+        wins_today:
+          type: integer
+          readOnly: true
+        wins_total:
+          type: integer
+          readOnly: true
+
+    Prize:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        client_id:
+          $ref: '#/components/schemas/UUID'
+        name:
+          type: string
+          maxLength: 255
+        type:
+          $ref: '#/components/schemas/PrizeType'
+        display_title:
+          type: string
+          maxLength: 100
+        display_description:
+          type: string
+          nullable: true
+          maxLength: 500
+        coupon_mode:
+          $ref: '#/components/schemas/CouponMode'
+        static_coupon_code:
+          type: string
+          nullable: true
+          maxLength: 100
+        auto_gen_prefix:
+          type: string
+          nullable: true
+          maxLength: 20
+        auto_gen_length:
+          type: integer
+          nullable: true
+          default: 8
+        coupon_expiry_days:
+          type: integer
+          nullable: true
+          description: "Days from win date until coupon expires. NULL = no expiry."
+        points_value:
+          type: integer
+          nullable: true
+        redirect_url:
+          type: string
+          nullable: true
+          maxLength: 2000
+        custom_message_html:
+          type: string
+          nullable: true
+          description: "Sanitized HTML. Allowed tags: p, b, i, br, a, ul, li."
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    CouponCode:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        prize_id:
+          $ref: '#/components/schemas/UUID'
+        code:
+          type: string
+        status:
+          $ref: '#/components/schemas/CouponStatus'
+        issued_to_spin_id:
+          type: string
+          format: uuid
+          nullable: true
+        issued_at:
+          $ref: '#/components/schemas/Timestamp'
+        expires_at:
+          $ref: '#/components/schemas/Timestamp'
+        redeemed_at:
+          $ref: '#/components/schemas/Timestamp'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    SpinSession:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        wheel_id:
+          $ref: '#/components/schemas/UUID'
+        fingerprint:
+          type: string
+        status:
+          type: string
+          enum: [loaded, form_submitted, spun, expired]
+        lead_email:
+          type: string
+          nullable: true
+        expires_at:
+          $ref: '#/components/schemas/Timestamp'
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+
+    SpinResult:
+      type: object
+      properties:
+        spin_result_id:
+          $ref: '#/components/schemas/UUID'
+        segment:
+          type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/UUID'
+            label:
+              type: string
+            position:
+              type: integer
+        prize:
+          type: object
+          nullable: true
+          properties:
+            type:
+              $ref: '#/components/schemas/PrizeType'
+            display_title:
+              type: string
+            display_description:
+              type: string
+              nullable: true
+            coupon_code:
+              type: string
+              nullable: true
+            expires_at:
+              $ref: '#/components/schemas/Timestamp'
+            points_value:
+              type: integer
+              nullable: true
+            redirect_url:
+              type: string
+              nullable: true
+            custom_message_html:
+              type: string
+              nullable: true
+        is_no_prize:
+          type: boolean
+
+    Integration:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+        wheel_id:
+          $ref: '#/components/schemas/UUID'
+        type:
+          $ref: '#/components/schemas/IntegrationType'
+        is_enabled:
+          type: boolean
+        config:
+          type: object
+          additionalProperties: true
+          description: "Non-secret config (list IDs, field mappings). Credentials excluded from response."
+        last_triggered_at:
+          $ref: '#/components/schemas/Timestamp'
+        last_error:
+          type: string
+          nullable: true
+        created_at:
+          $ref: '#/components/schemas/Timestamp'
+
+  # ============================================================================
+  # REUSABLE RESPONSES
+  # ============================================================================
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid JWT token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            error:
+              code: UNAUTHORIZED
+              message: "Bearer token is missing or expired."
+              details: {}
+
+    Forbidden:
+      description: Authenticated but insufficient role or plan.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+
+    NotFound:
+      description: Resource not found or not owned by this client.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            error:
+              code: NOT_FOUND
+              message: "The requested resource does not exist."
+              details: {}
+
+    ValidationError:
+      description: Request body failed validation.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            error:
+              code: VALIDATION_ERROR
+              message: "One or more fields are invalid."
+              details:
+                email: "Must be a valid email address."
+                password: "Must contain at least one uppercase letter."
+
+    RateLimited:
+      description: Too many requests.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: "Seconds until the rate limit window resets."
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            error:
+              code: TOO_MANY_REQUESTS
+              message: "Rate limit exceeded. Please retry after the window resets."
+              details: {}
+
+# ==============================================================================
+# PATHS
+# ==============================================================================
+
+paths:
+
+  # ============================================================================
+  # SECTION 1 — AUTH
+  # ============================================================================
+
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new client account
+      description: |
+        Creates a new client account and owner user in a single operation.
+        Returns a JWT access token immediately. A verification email is sent
+        to the provided address — the dashboard remains accessible but certain
+        features require `email_verified = true`.
+      operationId: registerClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [company_name, email, password, full_name]
+              properties:
+                company_name:
+                  type: string
+                  maxLength: 255
+                  example: "Acme Corp"
+                email:
+                  type: string
+                  format: email
+                  example: "founder@acme.com"
+                password:
+                  type: string
+                  minLength: 8
+                  description: "Min 8 chars, at least 1 uppercase letter and 1 number."
+                  example: "SecurePass1"
+                full_name:
+                  type: string
+                  example: "Jane Doe"
+      responses:
+        "201":
+          description: Account created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    $ref: '#/components/schemas/Client'
+                  user:
+                    $ref: '#/components/schemas/User'
+                  access_token:
+                    type: string
+                    description: "JWT (HS256, expires 15 min)."
+                  refresh_token:
+                    type: string
+                    description: "Opaque token (expires 30 days)."
+        "409":
+          description: Email already registered.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: EMAIL_ALREADY_EXISTS
+                  message: "This email address is already associated with an account."
+                  details: {}
+        "422":
+          $ref: '#/components/responses/ValidationError'
+        "429":
+          description: "Registration rate limit exceeded (3 attempts / 1 hour / IP)."
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate and obtain tokens
+      description: |
+        Validates credentials and returns a JWT access token and opaque refresh token.
+
+        **Rate limit:** 5 failed attempts per IP per 10 minutes triggers a 30-minute lockout.
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Login successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    description: "JWT (HS256, expires 15 min)."
+                  refresh_token:
+                    type: string
+                    description: "Opaque token (expires 30 days)."
+                  user:
+                    $ref: '#/components/schemas/User'
+        "401":
+          description: Invalid credentials.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: INVALID_CREDENTIALS
+                  message: "Email or password is incorrect."
+                  details: {}
+        "403":
+          description: Account access denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                email_not_verified:
+                  summary: Email not verified
+                  value:
+                    error:
+                      code: EMAIL_NOT_VERIFIED
+                      message: "Please verify your email address before logging in."
+                      details: {}
+                account_suspended:
+                  summary: Account suspended
+                  value:
+                    error:
+                      code: ACCOUNT_SUSPENDED
+                      message: "This account has been suspended. Contact support."
+                      details: {}
+        "429":
+          description: "Login rate limit — 5 failed attempts in 10 min. Lockout 30 min."
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: "Exchange a valid refresh token for a new access token and rotated refresh token."
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: Tokens refreshed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  refresh_token:
+                    type: string
+                    description: "Rotated. Previous refresh token is invalidated."
+        "401":
+          description: Refresh token invalid or expired.
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Invalidate refresh token
+      description: "Revokes the provided refresh token. Access tokens remain valid until natural expiry (max 15 min)."
+      operationId: logout
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh_token]
+              properties:
+                refresh_token:
+                  type: string
+      responses:
+        "204":
+          description: Logged out successfully. No response body.
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+  # ============================================================================
+  # SECTION 2 — WHEELS
+  # ============================================================================
+
+  /wheels:
+    get:
+      tags: [Wheels]
+      summary: List all wheels for the authenticated client
+      operationId: listWheels
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/WheelStatus'
+          description: "Filter by wheel status."
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        "200":
+          description: Paginated list of wheels.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Wheel'
+                  total:
+                    type: integer
+                  page:
+                    type: integer
+                  per_page:
+                    type: integer
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Wheels]
+      summary: Create a new wheel
+      description: |
+        Creates a new wheel in `draft` status. Requires `editor` role or above.
+
+        **Plan limits** — maximum active wheels per plan:
+        - starter: 1
+        - growth: 5
+        - pro: 20
+        - enterprise: unlimited
+      operationId: createWheel
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+                  maxLength: 255
+                  example: "Summer Sale Spinner"
+                config:
+                  $ref: '#/components/schemas/WheelConfig'
+                branding:
+                  $ref: '#/components/schemas/WheelBranding'
+      responses:
+        "201":
+          description: Wheel created in draft status.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wheel:
+                    $ref: '#/components/schemas/Wheel'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          description: Plan wheel limit reached.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: PLAN_WHEEL_LIMIT
+                  message: "Your plan allows a maximum of 1 active wheel. Upgrade to create more."
+                  details:
+                    current_plan: "starter"
+                    limit: 1
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /wheels/{id}:
+    get:
+      tags: [Wheels]
+      summary: Get a single wheel
+      operationId: getWheel
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: Wheel object with segments included.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wheel:
+                    allOf:
+                      - $ref: '#/components/schemas/Wheel'
+                      - type: object
+                        properties:
+                          segments:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Segment'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Wheels]
+      summary: Update wheel config or branding
+      description: "Partial update. Only provide fields you wish to change. Requires `editor` role or above."
+      operationId: updateWheel
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 255
+                config:
+                  $ref: '#/components/schemas/WheelConfig'
+                branding:
+                  $ref: '#/components/schemas/WheelBranding'
+                trigger_rules:
+                  type: object
+                frequency_rules:
+                  type: object
+                active_from:
+                  $ref: '#/components/schemas/Timestamp'
+                active_until:
+                  $ref: '#/components/schemas/Timestamp'
+                total_spin_cap:
+                  type: integer
+                  nullable: true
+                form_config:
+                  $ref: '#/components/schemas/WheelFormConfig'
+      responses:
+        "200":
+          description: Updated wheel object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wheel:
+                    $ref: '#/components/schemas/Wheel'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /wheels/{id}/status:
+    patch:
+      tags: [Wheels]
+      summary: Change wheel status
+      description: |
+        Transitions the wheel through its lifecycle.
+
+        **Allowed transitions:**
+        - `draft` → `active`: Validates ≥ 2 segments, ≥ 1 prize segment with valid prize, embed_token present.
+        - `active` → `paused`: Immediately stops new sessions. Existing open sessions may complete.
+        - `active` → `archived`: Soft-archives. Cannot be reactivated. Spin history preserved.
+        - `paused` → `active`: Re-activates.
+        - `paused` → `archived`: Soft-archives.
+
+        Requires `admin` role or above.
+      operationId: updateWheelStatus
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [active, paused, archived]
+      responses:
+        "200":
+          description: Status updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wheel:
+                    $ref: '#/components/schemas/Wheel'
+        "400":
+          description: Invalid status transition.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: INVALID_STATUS_TRANSITION
+                  message: "Cannot transition from 'archived' to 'active'."
+                  details: {}
+        "422":
+          description: Wheel cannot be activated — validation failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: WHEEL_NOT_READY
+                  message: "Wheel requires at least 2 segments and 1 prize segment before activation."
+                  details:
+                    segment_count: 1
+                    prize_segment_count: 0
+
+  # ============================================================================
+  # SECTION 3 — SEGMENTS
+  # ============================================================================
+
+  /wheels/{wheel_id}/segments:
+    get:
+      tags: [Segments]
+      summary: List segments for a wheel
+      operationId: listSegments
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: Ordered list of segments.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  segments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Segment'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      tags: [Segments]
+      summary: Replace all segments (atomic)
+      description: |
+        Replaces all segments for the wheel in a single atomic operation.
+        **Min 2, max 24 segments.**
+
+        **Validation rules:**
+        - `position` values must be 0-indexed consecutive integers starting at 0.
+        - Sum of all `weight` values must be > 0.
+        - If `is_no_prize = false`, `prize_id` must reference a valid prize owned by the same client.
+        - `weight` must be ≥ 0.0001 and ≤ 99999.9999.
+        - Hex colors must match `^#[0-9A-Fa-f]{6}$`.
+
+        Requires `editor` role or above.
+      operationId: replaceSegments
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [segments]
+              properties:
+                segments:
+                  type: array
+                  minItems: 2
+                  maxItems: 24
+                  items:
+                    type: object
+                    required: [position, label, bg_color, text_color, weight]
+                    properties:
+                      position:
+                        type: integer
+                        minimum: 0
+                      label:
+                        type: string
+                        maxLength: 60
+                      bg_color:
+                        $ref: '#/components/schemas/HexColor'
+                      text_color:
+                        $ref: '#/components/schemas/HexColor'
+                      icon_url:
+                        type: string
+                        nullable: true
+                      weight:
+                        type: number
+                        minimum: 0.0001
+                        maximum: 99999.9999
+                      prize_id:
+                        type: string
+                        format: uuid
+                        nullable: true
+                      is_no_prize:
+                        type: boolean
+                        default: false
+                      consolation_message:
+                        type: string
+                        nullable: true
+                        maxLength: 255
+                      win_cap_daily:
+                        type: integer
+                        nullable: true
+                        minimum: 1
+                      win_cap_total:
+                        type: integer
+                        nullable: true
+                        minimum: 1
+      responses:
+        "200":
+          description: Segments replaced successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  segments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Segment'
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  # ============================================================================
+  # SECTION 4 — PRIZES
+  # ============================================================================
+
+  /prizes:
+    get:
+      tags: [Prizes]
+      summary: List prizes for the authenticated client
+      operationId: listPrizes
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            $ref: '#/components/schemas/PrizeType'
+      responses:
+        "200":
+          description: List of prizes.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Prize'
+
+    post:
+      tags: [Prizes]
+      summary: Create a prize
+      operationId: createPrize
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrizeRequest'
+      responses:
+        "201":
+          description: Prize created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prize:
+                    $ref: '#/components/schemas/Prize'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+  /prizes/{id}:
+    get:
+      tags: [Prizes]
+      summary: Get a prize
+      operationId: getPrize
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: Prize object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prize:
+                    $ref: '#/components/schemas/Prize'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Prizes]
+      summary: Update a prize
+      description: "Partial update. Cannot change `type` after creation."
+      operationId: updatePrize
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Prize'
+      responses:
+        "200":
+          description: Updated prize.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prize:
+                    $ref: '#/components/schemas/Prize'
+        "422":
+          $ref: '#/components/responses/ValidationError'
+
+    delete:
+      tags: [Prizes]
+      summary: Delete a prize
+      description: |
+        Hard delete. Blocked if the prize is referenced by any active segment.
+      operationId: deletePrize
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "204":
+          description: Deleted successfully.
+        "409":
+          description: Prize is referenced by active segments.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: PRIZE_IN_USE
+                  message: "Cannot delete this prize — it is referenced by active segments."
+                  details:
+                    segment_ids: ["uuid-1", "uuid-2"]
+
+  # ============================================================================
+  # SECTION 5 — COUPON CODES
+  # ============================================================================
+
+  /prizes/{prize_id}/coupons:
+    get:
+      tags: [Coupons]
+      summary: List coupon codes for a prize
+      operationId: listCoupons
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: prize_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/CouponStatus'
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
+      responses:
+        "200":
+          description: Paginated coupon code list with inventory summary.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CouponCode'
+                  total:
+                    type: integer
+                  available_count:
+                    type: integer
+                    description: "Count of codes with status = available."
+                  issued_count:
+                    type: integer
+                  redeemed_count:
+                    type: integer
+
+    post:
+      tags: [Coupons]
+      summary: Upload coupon codes to a prize pool
+      description: |
+        Bulk-upload unique coupon codes for prizes with `coupon_mode = unique_pool`.
+        Duplicate codes within the same prize are silently ignored.
+      operationId: uploadCoupons
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: prize_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [codes]
+              properties:
+                codes:
+                  type: array
+                  items:
+                    type: string
+                    maxLength: 100
+                  minItems: 1
+                  maxItems: 10000
+                  example: ["SUMMER10", "SUMMER11", "SUMMER12"]
+      responses:
+        "201":
+          description: Codes uploaded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  inserted:
+                    type: integer
+                  duplicates_skipped:
+                    type: integer
+                  available_total:
+                    type: integer
+
+  /prizes/{prize_id}/coupons/{id}/redeem:
+    post:
+      tags: [Coupons]
+      summary: Mark a coupon code as redeemed
+      description: "Clients call this when an end-user redeems a coupon in their system."
+      operationId: redeemCoupon
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: prize_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: Coupon marked as redeemed.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  coupon:
+                    $ref: '#/components/schemas/CouponCode'
+        "409":
+          description: Coupon is not in 'issued' status.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: INVALID_COUPON_STATUS
+                  message: "Only issued coupons can be marked as redeemed."
+                  details:
+                    current_status: "available"
+
+  # ============================================================================
+  # SECTION 6 — SPIN (PUBLIC — widget endpoints)
+  # ============================================================================
+
+  /spin/session:
+    post:
+      tags: [Spin]
+      summary: Create a spin session (widget load)
+      description: |
+        Called by the embeddable widget on load. Authenticated via `embed_token` in
+        the request body — **no JWT required**. This endpoint is PUBLIC.
+
+        **Rate limit:** 30 requests per minute per `embed_token + IP`.
+
+        Returns the full wheel config so the widget can render without a second request.
+      operationId: createSpinSession
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [embed_token, fingerprint]
+              properties:
+                embed_token:
+                  type: string
+                  maxLength: 64
+                fingerprint:
+                  type: string
+                  maxLength: 128
+                  description: "SHA-256 hash of browser attributes (TRD Section 5.2)."
+                page_url:
+                  type: string
+                  maxLength: 2000
+                  nullable: true
+                referrer_url:
+                  type: string
+                  maxLength: 2000
+                  nullable: true
+      responses:
+        "201":
+          description: Session created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  session_id:
+                    $ref: '#/components/schemas/UUID'
+                  wheel:
+                    allOf:
+                      - $ref: '#/components/schemas/Wheel'
+                      - type: object
+                        properties:
+                          segments:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Segment'
+                  can_spin:
+                    type: boolean
+                  cannot_spin_reason:
+                    type: string
+                    nullable: true
+                    enum:
+                      - ALREADY_SPUN_TODAY
+                      - SPIN_CAP_REACHED
+                      - WHEEL_INACTIVE
+                      - OUTSIDE_DATE_RANGE
+                      - MONTHLY_LIMIT_REACHED
+        "400":
+          description: Invalid or unknown embed_token.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: INVALID_EMBED_TOKEN
+                  message: "The provided embed_token does not match any active wheel."
+                  details: {}
+        "429":
+          $ref: '#/components/responses/RateLimited'
+
+  /spin/execute:
+    post:
+      tags: [Spin]
+      summary: Execute a spin (PUBLIC)
+      description: |
+        Executes the spin. The most critical endpoint in the system. **Must be idempotent.**
+
+        Provide a client-generated `idempotency_key` (UUID) with every request.
+        If the same key is resent, the original result is returned — no second spin occurs.
+
+        **Rate limit:** 10 requests per minute per `session_id`.
+
+        **Prize Engine** runs synchronously and must complete within 200ms (TRD Section 4).
+      operationId: executeSpin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [session_id, idempotency_key]
+              properties:
+                session_id:
+                  $ref: '#/components/schemas/UUID'
+                idempotency_key:
+                  type: string
+                  format: uuid
+                  maxLength: 128
+                  description: "Client-generated UUID. Prevents duplicate spin processing."
+                lead:
+                  type: object
+                  description: "Required if wheel has a lead capture form."
+                  properties:
+                    email:
+                      type: string
+                      format: email
+                    name:
+                      type: string
+                    phone:
+                      type: string
+                      maxLength: 30
+                    custom_fields:
+                      type: object
+                      additionalProperties: true
+                    gdpr_consent:
+                      type: boolean
+      responses:
+        "200":
+          description: Spin executed. Returns the winning segment and prize.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    $ref: '#/components/schemas/SpinResult'
+        "403":
+          description: Spin not permitted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                session_expired:
+                  summary: Session expired
+                  value:
+                    error:
+                      code: SESSION_EXPIRED
+                      message: "This session has expired. Please reload the page."
+                      details: {}
+                spin_not_allowed:
+                  summary: Spin not allowed
+                  value:
+                    error:
+                      code: SPIN_NOT_ALLOWED
+                      message: "This session is not eligible to spin."
+                      details: {}
+        "409":
+          description: Duplicate spin or idempotency conflict.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                already_spun:
+                  summary: Session already has a result
+                  value:
+                    error:
+                      code: ALREADY_SPUN
+                      message: "This session has already been used to spin. Returning original result."
+                      details:
+                        existing_result: {}
+                duplicate_key:
+                  summary: Idempotency key conflict
+                  value:
+                    error:
+                      code: DUPLICATE_IDEMPOTENCY_KEY
+                      message: "This idempotency_key was used by a different session."
+                      details: {}
+        "422":
+          description: Lead data required but not provided.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: LEAD_REQUIRED
+                  message: "This wheel requires lead capture before spinning."
+                  details:
+                    required_fields: ["email"]
+        "503":
+          description: Prize Engine temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: PRIZE_ENGINE_UNAVAILABLE
+                  message: "Prize engine is temporarily unavailable. Retry after 2 seconds."
+                  details:
+                    retry_after_seconds: 2
+        "429":
+          $ref: '#/components/responses/RateLimited'
+
+  # ============================================================================
+  # SECTION 7 — INTEGRATIONS
+  # ============================================================================
+
+  /wheels/{wheel_id}/integrations:
+    get:
+      tags: [Integrations]
+      summary: List integrations for a wheel
+      operationId: listIntegrations
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "200":
+          description: List of integrations. Credentials are excluded from all responses.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Integration'
+
+    post:
+      tags: [Integrations]
+      summary: Add an integration to a wheel
+      description: "Credentials are encrypted (AES-256-GCM via AWS KMS) before storage and never returned in responses."
+      operationId: createIntegration
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type]
+              properties:
+                type:
+                  $ref: '#/components/schemas/IntegrationType'
+                credentials:
+                  type: object
+                  description: "Plain-text credentials. Encrypted before storage. Never returned."
+                  additionalProperties: true
+                  example:
+                    api_key: "sk-..."
+                    list_id: "abc123"
+                config:
+                  type: object
+                  description: "Non-secret config (list IDs, field mappings, tag names)."
+                  additionalProperties: true
+      responses:
+        "201":
+          description: Integration created.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  integration:
+                    $ref: '#/components/schemas/Integration'
+
+  /wheels/{wheel_id}/integrations/{id}:
+    patch:
+      tags: [Integrations]
+      summary: Update an integration
+      operationId: updateIntegration
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_enabled:
+                  type: boolean
+                credentials:
+                  type: object
+                  additionalProperties: true
+                config:
+                  type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Integration updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  integration:
+                    $ref: '#/components/schemas/Integration'
+
+    delete:
+      tags: [Integrations]
+      summary: Remove an integration
+      operationId: deleteIntegration
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "204":
+          description: Integration deleted.
+
+  # ============================================================================
+  # SECTION 8 — ANALYTICS
+  # ============================================================================
+
+  /wheels/{wheel_id}/analytics/summary:
+    get:
+      tags: [Analytics]
+      summary: Spin summary stats for a wheel
+      operationId: getWheelAnalyticsSummary
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-03-01"
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-03-31"
+      responses:
+        "200":
+          description: Summary analytics.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_spins:
+                    type: integer
+                  total_wins:
+                    type: integer
+                  no_prize_spins:
+                    type: integer
+                  unique_players:
+                    type: integer
+                  leads_captured:
+                    type: integer
+                  coupons_issued:
+                    type: integer
+                  coupons_redeemed:
+                    type: integer
+                  segment_breakdown:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        segment_id:
+                          $ref: '#/components/schemas/UUID'
+                        label:
+                          type: string
+                        spins:
+                          type: integer
+                        win_rate_pct:
+                          type: number
+
+  /wheels/{wheel_id}/analytics/timeseries:
+    get:
+      tags: [Analytics]
+      summary: Daily spin timeseries for a wheel
+      operationId: getWheelAnalyticsTimeseries
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: granularity
+          in: query
+          schema:
+            type: string
+            enum: [hour, day, week]
+            default: day
+      responses:
+        "200":
+          description: Timeseries data points.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        date:
+                          type: string
+                          format: date
+                        spins:
+                          type: integer
+                        wins:
+                          type: integer
+                        leads:
+                          type: integer
+
+  # ============================================================================
+  # SECTION 9 — ACCOUNT MANAGEMENT
+  # ============================================================================
+
+  /account:
+    get:
+      tags: [Account]
+      summary: Get current client account details
+      operationId: getAccount
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Client account object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    $ref: '#/components/schemas/Client'
+
+    patch:
+      tags: [Account]
+      summary: Update account settings
+      description: "Requires `owner` role."
+      operationId: updateAccount
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                timezone:
+                  type: string
+                custom_domain:
+                  type: string
+                  nullable: true
+      responses:
+        "200":
+          description: Updated client object.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  client:
+                    $ref: '#/components/schemas/Client'
+
+  /account/team:
+    get:
+      tags: [Account]
+      summary: List team members
+      operationId: listTeam
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: List of users on this client account.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+
+    post:
+      tags: [Account]
+      summary: Invite a team member
+      description: "Sends a verification email with an invite link. Requires `admin` role or above."
+      operationId: inviteTeamMember
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, full_name, role]
+              properties:
+                email:
+                  type: string
+                  format: email
+                full_name:
+                  type: string
+                role:
+                  $ref: '#/components/schemas/UserRole'
+      responses:
+        "201":
+          description: Invite sent. User created with email_verified = false.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        "409":
+          description: Email already exists in this account.
+
+  /account/team/{user_id}:
+    patch:
+      tags: [Account]
+      summary: Update team member role
+      description: "Requires `admin` role or above. Cannot demote the sole owner."
+      operationId: updateTeamMember
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role:
+                  $ref: '#/components/schemas/UserRole'
+      responses:
+        "200":
+          description: Role updated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+
+    delete:
+      tags: [Account]
+      summary: Remove a team member
+      description: "Soft-deletes the user. Cannot remove the sole owner."
+      operationId: removeTeamMember
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+      responses:
+        "204":
+          description: Team member removed.
+        "409":
+          description: Cannot remove the sole owner of the account.
+
+  /auth/verify-email:
+    post:
+      tags: [Auth]
+      summary: Verify email address
+      description: |
+        Verifies a user's email using the token sent in the verification email.
+        Sets `email_verified = true` on the user record.
+        Token is single-use and expires after 24 hours.
+      operationId: verifyEmail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+                  description: "Verification token from the email link."
+      responses:
+        "200":
+          description: Email verified successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        "400":
+          description: Token invalid or expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: INVALID_VERIFICATION_TOKEN
+                  message: "This verification link is invalid or has expired. Request a new one."
+                  details: {}
+        "409":
+          description: Email already verified.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: ALREADY_VERIFIED
+                  message: "This email address has already been verified."
+                  details: {}
+
+  /auth/resend-verification:
+    post:
+      tags: [Auth]
+      summary: Resend email verification link
+      description: "Resends the verification email. Rate-limited to 3 requests per hour per email."
+      operationId: resendVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        "204":
+          description: "Verification email sent (or silently ignored if already verified)."
+        "429":
+          $ref: '#/components/responses/RateLimited'
+
+  # ============================================================================
+  # SECTION 10 — GDPR & DATA MANAGEMENT
+  # ============================================================================
+
+  /account/data-export:
+    post:
+      tags: [Account]
+      summary: Request a full data export
+      description: |
+        Triggers a full export of the client's data (wheels, prizes, spin logs, leads).
+        The export is compiled asynchronously and emailed to the account owner within 24 hours.
+        Requires `owner` role.
+      operationId: requestDataExport
+      security:
+        - BearerAuth: []
+      responses:
+        "202":
+          description: Export request accepted. Email will be sent within 24 hours.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Data export has been queued. You will receive an email within 24 hours."
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+        "429":
+          description: "Data export already requested in last 24 hours."
+          $ref: '#/components/responses/RateLimited'
+
+  /account/gdpr/erase-end-user:
+    post:
+      tags: [Account]
+      summary: Erase end-user PII (GDPR Right to Erasure)
+      description: |
+        Anonymises all personally identifiable information (PII) for an end-user
+        identified by their email address across all `spin_sessions`.
+
+        **What is erased:** email, name, phone, custom_fields, ip_address, fingerprint, user_agent, gdpr_consent.
+
+        **What is preserved:** `spin_results` rows (immutable audit trail — prize and segment data only, no PII).
+
+        Requires `owner` or `admin` role. Action is logged in `audit_logs`.
+      operationId: eraseEndUserData
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: "Email address of the end-user whose data should be erased."
+      responses:
+        "200":
+          description: PII erased successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessions_anonymised:
+                    type: integer
+                    description: "Number of spin_sessions rows where PII was cleared."
+                  message:
+                    type: string
+                    example: "3 session records anonymised. Spin result audit records preserved."
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403":
+          $ref: '#/components/responses/Forbidden'
+
+  # ============================================================================
+  # SECTION 11 — ANALYTICS EXPORT
+  # ============================================================================
+
+  /wheels/{wheel_id}/analytics/export:
+    get:
+      tags: [Analytics]
+      summary: Export spin log as CSV
+      description: |
+        Downloads a CSV file of all spin events for the wheel within the date range.
+
+        **Columns:** spin_result_id, timestamp, lead_email, lead_name, segment_label, prize_type, prize_display_title, coupon_code, is_no_prize.
+
+        **Plan restriction:** Available on Growth plan and above.
+        **Row limit:** 100,000 rows per export. For larger datasets, use date range filtering.
+      operationId: exportWheelAnalytics
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: wheel_id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID'
+        - name: from
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-03-01"
+        - name: to
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+          example: "2026-03-31"
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [csv, json]
+            default: csv
+      responses:
+        "200":
+          description: CSV or JSON file download.
+          headers:
+            Content-Disposition:
+              schema:
+                type: string
+              example: "attachment; filename=\"spin_export_2026-03-01_2026-03-31.csv\""
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+        "403":
+          description: Plan does not include export feature.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                error:
+                  code: FEATURE_NOT_IN_PLAN
+                  message: "CSV export is available on the Growth plan and above."
+                  details:
+                    current_plan: "starter"
+                    required_plan: "growth"
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "404":
+          $ref: '#/components/responses/NotFound'
+
+# ==============================================================================
+# GLOBAL SECURITY DEFAULT
+# ==============================================================================
+
+security:
+  - BearerAuth: []

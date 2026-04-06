@@ -1,0 +1,24 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/reset-daily",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/reset-monthly",
+      "schedule": "5 0 * * *"
+    },
+    {
+      "path": "/api/cron/expire-sessions",
+      "schedule": "*/30 * * * *"
+    },
+    {
+      "path": "/api/cron/push-reminder",
+      "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/cron/whatsapp-reminder",
+      "schedule": "0 11 * * *"
+    }
+  ]
+}
