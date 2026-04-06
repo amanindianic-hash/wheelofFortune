@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/expire-sessions",
-      "schedule": "*/30 * * * *"
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/push-reminder",
