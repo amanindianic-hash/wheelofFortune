@@ -424,10 +424,17 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     <Switch checked={wheel.config.confetti_enabled ?? true}
                       onCheckedChange={(v) => setWheel({ ...wheel, config: { ...wheel.config, confetti_enabled: v } })} />
                   </div>
-                  <div className="flex items-center justify-between col-span-2">
-                    <Label>Show segment labels</Label>
-                    <Switch checked={wheel.config.show_segment_labels ?? true}
-                      onCheckedChange={(v) => setWheel({ ...wheel, config: { ...wheel.config, show_segment_labels: v } })} />
+                  <div className="col-span-2 space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label>Show segment labels</Label>
+                      <Switch checked={wheel.config.show_segment_labels ?? true}
+                        onCheckedChange={(v) => setWheel({ ...wheel, config: { ...wheel.config, show_segment_labels: v } })} />
+                    </div>
+                    {wheel.branding.premium_face_url && (
+                      <p className="text-[11px] text-amber-400/80 leading-relaxed">
+                        Turn <strong>OFF</strong> if your wheel image already has labels drawn into it — otherwise labels will appear twice.
+                      </p>
+                    )}
                   </div>
                   {/* Sound */}
                   <div className="flex items-center justify-between col-span-2">

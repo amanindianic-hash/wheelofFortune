@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import {
   drawWheel, preloadSegmentImages,
@@ -249,6 +250,7 @@ export default function ThemeTesterPage() {
   const [labelPosition, setLabelPosition] = useState<'inner'|'center'|'outer'>('outer');
   const [textColor,     setTextColor]     = useState('#FFFFFF');
   const [primaryColor,  setPrimaryColor]  = useState('#7C3AED');
+  const [showLabels,    setShowLabels]    = useState(false); // default OFF — most PNG wheels have pre-baked labels
 
   const [isSpinning,    setIsSpinning]    = useState(true);
   const [spinSpeed,     setSpinSpeed]     = useState(30);
@@ -348,6 +350,7 @@ export default function ThemeTesterPage() {
     setContentScale(0.75); setCenterOffsetY(0);
     setFontSize(12); setFontWeight('800');
     setLabelPosition('outer'); setTextColor('#FFFFFF'); setPrimaryColor('#7C3AED');
+    setShowLabels(false);
     setCompareId('none');
     setCacheKey(`reset-${Date.now()}`);
   }
@@ -361,6 +364,7 @@ export default function ThemeTesterPage() {
       label_font_size:   fontSize,
       label_font_weight: fontWeight,
       label_position:    labelPosition,
+      show_segment_labels: showLabels,
       outer_ring_width:  faceInfo ? 0 : 20,
       ...(faceInfo ? { inner_ring_enabled: false, rim_tick_style: 'none' } : {}),
     };
@@ -387,6 +391,7 @@ export default function ThemeTesterPage() {
 
   const showCompare = compareTemplate !== null;
   const customCacheKey = `${cacheKey}-${faceInfo?.url ?? ''}-${standInfo?.url ?? ''}`;
+  const customConfig: WheelConfig = { ...BASE_CONFIG, show_segment_labels: showLabels };
 
   return (
     <div className="min-h-full p-6 space-y-6">
@@ -497,6 +502,23 @@ export default function ThemeTesterPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Show / hide dynamic labels */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs text-muted-foreground">Show Dynamic Labels</Label>
+                  <Switch checked={showLabels} onCheckedChange={setShowLabels} />
+                </div>
+                {faceInfo && !showLabels && (
+                  <p className="text-[11px] text-amber-400/80 leading-relaxed">
+                    Labels hidden — using image&apos;s own pre-baked labels.
+                  </p>
+                )}
+                {faceInfo && showLabels && (
+                  <p className="text-[11px] text-muted-foreground/60 leading-relaxed">
+                    Dynamic labels visible. Turn OFF if your wheel image already has labels drawn in.
+                  </p>
+                )}
+              </div>
               <SliderRow label="Content Scale"  value={contentScale}  min={0.2} max={1.2} step={0.05} onChange={setContentScale} />
               <SliderRow label="Center Offset Y" value={centerOffsetY} min={-80} max={80}  step={1}    unit="px" onChange={setCenterOffsetY} />
               <SliderRow label="Font Size"        value={fontSize}      min={7}   max={22}  step={1}    unit="px" onChange={setFontSize} />
@@ -614,7 +636,7 @@ export default function ThemeTesterPage() {
                     {/* Custom */}
                     <div className="pr-4">
                       <SpinningCanvas
-                        segments={customSegments} config={BASE_CONFIG} branding={customBranding}
+                        segments={customSegments} config={customConfig} branding={customBranding}
                         isSpinning={isSpinning} spinSpeed={spinSpeed} cacheKey={customCacheKey}
                         label="Your Custom Theme"
                       />
@@ -657,7 +679,7 @@ export default function ThemeTesterPage() {
                 /* ── Single preview ───────────────────────────────────────── */
                 <div className="flex flex-col items-center gap-6">
                   <SpinningCanvas
-                    segments={customSegments} config={BASE_CONFIG} branding={customBranding}
+                    segments={customSegments} config={customConfig} branding={customBranding}
                     isSpinning={isSpinning} spinSpeed={spinSpeed} cacheKey={customCacheKey}
                   />
 

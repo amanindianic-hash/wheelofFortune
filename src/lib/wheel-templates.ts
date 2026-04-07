@@ -24,7 +24,7 @@ export const WHEEL_TEMPLATES: WheelTemplate[] = [
     gameType: 'wheel',
     config: {
       animation_speed: 'medium',
-      show_segment_labels: true,
+      show_segment_labels: false, // Image has pre-baked labels — dynamic labels would double-render
       sound_enabled: true,
     },
     branding: {
