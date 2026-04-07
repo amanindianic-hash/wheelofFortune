@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import {
   LayoutDashboard, Disc3, Gift, BarChart2, Users, Trophy,
   Bell, FileText, Settings, LogOut, Menu, X, ChevronsUpDown,
-  Zap,
+  Zap, Wand2,
 } from 'lucide-react';
 import { useAuth } from '@/components/providers/auth-provider';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -35,6 +35,12 @@ const NAV_GROUPS = [
       { href: '/dashboard/push',    label: 'Push Alerts', icon: Bell },
       { href: '/dashboard/audit',   label: 'Audit Logs',  icon: FileText },
       { href: '/dashboard/account', label: 'Account',     icon: Settings },
+    ],
+  },
+  {
+    label: 'Tools',
+    items: [
+      { href: '/dashboard/theme-tester', label: 'Theme Tester', icon: Wand2 },
     ],
   },
 ];

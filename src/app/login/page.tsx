@@ -52,7 +52,7 @@ function LoginForm() {
         return;
       }
       await refresh();
-      router.push(searchParams.get('next') ?? '/dashboard');
+      window.location.href = searchParams.get('next') ?? '/dashboard';
     } finally {
       setLoading(false);
     }
