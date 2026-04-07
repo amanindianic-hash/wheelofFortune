@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { drawWheel, preloadSegmentImages, type WheelSegment, type WheelConfig, type WheelBranding, type ImageCache, easeOutQuart } from '@/lib/utils/wheel-renderer';
 
 interface FormConfig { enabled?: boolean; fields?: Array<{ key: string; label: string; type: string; required?: boolean }>; gdpr_enabled?: boolean; gdpr_text?: string; privacy_policy_url?: string | null; }
-interface SpinResult { is_winner: boolean; segment: { label: string }; prize?: { display_title: string; display_description?: string; type: string; custom_message_html?: string; redirect_url?: string } | null; coupon_code?: string | null; consolation_message?: string | null; }
+interface SpinResult { is_winner: boolean; segment: { id: string; label: string }; prize?: { display_title: string; display_description?: string; type: string; custom_message_html?: string; redirect_url?: string } | null; coupon_code?: string | null; consolation_message?: string | null; }
 
 type Phase = 'loading' | 'form' | 'ready' | 'spinning' | 'result' | 'error';
 
@@ -75,48 +75,10 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
     spinningRef.current = true;
     setPhase('spinning');
 
-    // Play sound if configured
-    if (config.sound_enabled && config.sound_url) {
-      try { new Audio(config.sound_url).play(); } catch { /* ignore */ }
-    }
-
+    // 1. Fetch result from server securely BEFORE visually spinning
     const idempotencyKey = crypto.randomUUID();
-    const duration = Math.max(config.spin_duration_ms ?? 4000, 1000);
-
-    // Pick a random segment weighted by weight
-    const total = segments.reduce((s, seg) => s + seg.weight, 0);
-    const rand = Math.random() * total;
-    let cumul = 0;
-    let targetIdx = 0;
-    for (let i = 0; i < segments.length; i++) {
-      cumul += segments[i].weight;
-      if (rand <= cumul) { targetIdx = i; break; }
-    }
-
-    const segAngle = (2 * Math.PI) / segments.length;
-    const targetAngle = segAngle * targetIdx + segAngle / 2;
-    const extraSpins = 5 * 2 * Math.PI;
-    const finalRotation = extraSpins + (2 * Math.PI - targetAngle);
-
-    // Animate
-    const startTime = performance.now();
-    const startRot = currentRotRef.current;
-    const endRot = startRot + finalRotation;
-
-    function animate(now: number) {
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const ease = easeOutQuart(progress);
-      const currentRot = startRot + (endRot - startRot) * ease;
-      currentRotRef.current = currentRot;
-      setRotation(currentRot);
-      if (progress < 1) { requestAnimationFrame(animate); }
-      else { finalizeSpin(idempotencyKey); }
-    }
-    requestAnimationFrame(animate);
-  }
-
-  async function finalizeSpin(idempotencyKey: string) {
+    let resultData: SpinResult | null = null;
+    
     try {
       const res = await fetch('/api/spin/execute', {
         method: 'POST',
@@ -129,11 +91,66 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
         }),
       });
       const data = await res.json();
-      if (res.ok) { setSpinResult(data.result); setPhase('result'); }
-      else { toast.error(data.error?.message ?? 'Spin failed'); setPhase('ready'); }
-    } finally {
+      
+      if (res.ok) {
+        resultData = data.result;
+      } else {
+        toast.error(data.error?.message ?? 'Spin failed');
+        setPhase('ready');
+        spinningRef.current = false;
+        return;
+      }
+    } catch {
+      toast.error('Spin execution failed. Please check connection and try again.');
+      setPhase('ready');
       spinningRef.current = false;
+      return;
     }
+
+    // Play sound if configured
+    if (config.sound_enabled && config.sound_url) {
+      try { new Audio(config.sound_url).play(); } catch { /* ignore */ }
+    }
+
+    const duration = Math.max(config.spin_duration_ms ?? 4000, 1000);
+
+    // 2. Find target segment index matching the verified server result
+    const targetSegId = resultData?.segment.id;
+    let targetIdx = segments.findIndex(s => s.id === targetSegId);
+    if (targetIdx === -1) targetIdx = 0; // fallback
+
+    const segAngle = (2 * Math.PI) / segments.length;
+    // Add slightly randomized offset within the winning segment for realism
+    const randomOffset = (Math.random() * 0.8 + 0.1) * segAngle; // 10% to 90% across the slice
+    const targetAngle = segAngle * targetIdx + randomOffset;
+    
+    const extraSpins = 5 * 2 * Math.PI;
+    const finalRotation = extraSpins + (2 * Math.PI - targetAngle);
+
+    // 3. Animate the wheel
+    const startTime = performance.now();
+    const startRot = currentRotRef.current;
+    const endRot = startRot + finalRotation;
+
+    function animate(now: number) {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = easeOutQuart(progress);
+      const currentRot = startRot + (endRot - startRot) * ease;
+      
+      currentRotRef.current = currentRot;
+      setRotation(currentRot);
+      
+      if (progress < 1) { 
+        requestAnimationFrame(animate); 
+      } else { 
+        // 4. Reveal result
+        setSpinResult(resultData); 
+        setPhase('result');
+        spinningRef.current = false;
+      }
+    }
+    requestAnimationFrame(animate);
   }
 
   async function handleFormSubmit(e: React.FormEvent) {
