@@ -17,7 +17,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WheelPreview } from '@/components/dashboard/wheels/wheel-preview';
 import { ScratchPreview } from '@/components/dashboard/wheels/scratch-preview';
-import { SlotPreview } from '@/components/dashboard/wheels/slot-machine/slot-preview';
+import { SlotPreview } from '@/components/dashboard/wheels/slot-preview';
 import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview';
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
