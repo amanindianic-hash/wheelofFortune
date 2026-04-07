@@ -81,6 +81,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     segment_palette: Array<{ bg_color: string; text_color: string }>;
   }>>([]);
 
+  // ── Currently applied theme ────────────────────────────────────────────────
+  const [appliedTheme, setAppliedTheme] = useState<{
+    id: string; name: string; emoji: string; type: 'custom' | 'built-in';
+  } | null>(null);
+
   async function load() {
     const [wRes, pRes, tRes] = await Promise.all([
       api.get(`/api/wheels/${id}`),
@@ -1356,6 +1361,24 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 Apply a template to instantly change colours, style, and branding. Your segment labels and prizes are kept.
               </p>
 
+              {/* ── Currently applied theme indicator ── */}
+              {appliedTheme && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                  <span className="text-lg">{appliedTheme.emoji}</span>
+                  <span className="text-sm font-medium">Currently applied:</span>
+                  <span className="text-sm text-amber-400">{appliedTheme.name}</span>
+                  <span className="text-xs text-muted-foreground capitalize">({appliedTheme.type})</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="ml-auto h-6 text-xs text-muted-foreground hover:text-foreground"
+                    onClick={() => setAppliedTheme(null)}
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
+
               {/* ── Saved custom themes ── */}
               {savedThemes.length > 0 && (
                 <div className="space-y-2">
@@ -1384,8 +1407,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                           )}
                           <Button
                             size="sm"
-                            variant="outline"
-                            className="w-full group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 transition-colors"
+                            variant={appliedTheme?.id === theme.id ? 'default' : 'outline'}
+                            className={`w-full transition-colors ${appliedTheme?.id === theme.id ? 'bg-amber-500 text-black border-amber-500' : 'group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500'}`}
                             onClick={() => {
                               if (!wheel) return;
                               setWheel({
@@ -1400,11 +1423,15 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                     return { ...seg, bg_color: palette.bg_color, text_color: palette.text_color };
                                   }),
                                 );
+                                setAppliedTheme({ id: theme.id, name: theme.name, emoji: theme.emoji, type: 'custom' });
+                                toast.success(`"${theme.name}" applied — save to persist`);
+                              } else {
+                                setAppliedTheme({ id: theme.id, name: theme.name, emoji: theme.emoji, type: 'custom' });
+                                toast.warning(`"${theme.name}" branding applied — this theme has no segment colors saved`);
                               }
-                              toast.success(`"${theme.name}" applied — save to persist`);
                             }}
                           >
-                            Apply Theme
+                            {appliedTheme?.id === theme.id ? 'Applied' : 'Apply Theme'}
                           </Button>
                         </CardContent>
                       </Card>
@@ -1439,8 +1466,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                         </div>
                         <Button
                           size="sm"
-                          variant="outline"
-                          className="w-full group-hover:bg-violet-600 group-hover:text-white group-hover:border-violet-600 transition-colors"
+                          variant={appliedTheme?.id === tpl.id ? 'default' : 'outline'}
+                          className={`w-full transition-colors ${appliedTheme?.id === tpl.id ? 'bg-violet-600 text-white border-violet-600' : 'group-hover:bg-violet-600 group-hover:text-white group-hover:border-violet-600'}`}
                           onClick={() => {
                             if (!wheel) return;
                             setWheel({
@@ -1454,10 +1481,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                 return { ...seg, bg_color: palette.bg_color, text_color: palette.text_color };
                               }),
                             );
+                            setAppliedTheme({ id: tpl.id, name: tpl.name, emoji: tpl.emoji, type: 'built-in' });
                             toast.success(`"${tpl.name}" template applied — save to persist`);
                           }}
                         >
-                          Apply Template
+                          {appliedTheme?.id === tpl.id ? 'Applied' : 'Apply Template'}
                         </Button>
                       </CardContent>
                     </Card>
