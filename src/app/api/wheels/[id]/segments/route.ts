@@ -3,6 +3,13 @@ import { sql } from '@/lib/db';
 import { requireAuth, okResponse, errorResponse } from '@/lib/middleware-utils';
 import { logAuditAction } from '@/lib/audit';
 
+// Validate color: must be valid hex (#RGB, #RRGGBB) or "transparent"
+function isValidColor(color: string | undefined): boolean {
+  if (!color) return false;
+  if (color.toLowerCase() === 'transparent') return true;
+  return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(color);
+}
+
 // GET /api/wheels/[id]/segments
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireAuth(req);
@@ -48,6 +55,17 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     if (!Array.isArray(segments) || segments.length < 2 || segments.length > 24) {
       return errorResponse('VALIDATION_ERROR', 'segments must be an array of 2-24 items.', 400);
+    }
+
+    // Validate colors are valid hex or "transparent"
+    for (let i = 0; i < segments.length; i++) {
+      const seg = segments[i];
+      if (!isValidColor(seg.bg_color)) {
+        return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid bg_color "${seg.bg_color}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);
+      }
+      if (!isValidColor(seg.text_color)) {
+        return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid text_color "${seg.text_color}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);
+      }
     }
 
     // Fetch existing segments so we know which ones have spin_results references
