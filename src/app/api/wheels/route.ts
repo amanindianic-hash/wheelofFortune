@@ -59,15 +59,15 @@ export async function POST(req: NextRequest) {
     `;
     const wheel = (wheelResults as any)[0];
 
-    // Insert 6 default segments — odd positions are prize winners (no prize assigned yet),
-    // even positions are "Try Again" so new users see wins without needing to configure prizes first.
+    // Insert 6 default segments — all marked is_no_prize=true until the user assigns prizes.
+    // The constraint chk_prize_or_no_prize requires either is_no_prize=true or prize_id IS NOT NULL.
     const defaultSegments = [
-      { label: '🎁 Prize 1',   color: '#E74C3C', isNoPrize: false },
-      { label: 'Try Again',    color: '#3498DB', isNoPrize: true  },
-      { label: '🎁 Prize 2',   color: '#2ECC71', isNoPrize: false },
-      { label: 'Try Again',    color: '#F39C12', isNoPrize: true  },
-      { label: '🎁 Prize 3',   color: '#9B59B6', isNoPrize: false },
-      { label: 'Try Again',    color: '#1ABC9C', isNoPrize: true  },
+      { label: '🎁 Prize 1',   color: '#E74C3C', isNoPrize: true },
+      { label: 'Try Again',    color: '#3498DB', isNoPrize: true },
+      { label: '🎁 Prize 2',   color: '#2ECC71', isNoPrize: true },
+      { label: 'Try Again',    color: '#F39C12', isNoPrize: true },
+      { label: '🎁 Prize 3',   color: '#9B59B6', isNoPrize: true },
+      { label: 'Try Again',    color: '#1ABC9C', isNoPrize: true },
     ];
     for (let i = 0; i < defaultSegments.length; i++) {
       const seg = defaultSegments[i];

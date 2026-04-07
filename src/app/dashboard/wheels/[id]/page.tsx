@@ -17,10 +17,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { WheelPreview } from '@/components/dashboard/wheels/wheel-preview';
 import { ScratchPreview } from '@/components/dashboard/wheels/scratch-preview';
-import { SlotPreview } from '@/components/dashboard/wheels/slot-preview';
+import { SlotPreview } from '@/components/dashboard/wheels/slot-machine/slot-preview';
 import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview';
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
+import {
+  ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
+  Palette, Type, Globe, Users, Code, QrCode,
+  Share2, Monitor, Link, Camera, Search, CreditCard,
+  Dices, Circle as CircleIcon, Play, Pause,
+} from 'lucide-react';
 
 const PLAN_COLORS = ['#E74C3C', '#3498DB', '#2ECC71', '#F39C12', '#9B59B6', '#1ABC9C', '#E67E22', '#2980B9'];
 
@@ -168,9 +174,15 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => router.push('/dashboard/wheels')}>Back</Button>
+          <Button variant="ghost" size="sm" onClick={() => router.push('/dashboard/wheels')} className="gap-1.5 text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
           <Button
-            className={wheel.status === 'active' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-600 hover:bg-green-700'}
+            size="sm"
+            className={wheel.status === 'active'
+              ? 'bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 ring-1 ring-amber-500/30'
+              : 'bg-emerald-600 hover:bg-emerald-500 text-white'}
             onClick={async () => {
               const newStatus = wheel.status === 'active' ? 'paused' : 'active';
               const res = await api.post(`/api/wheels/${id}/publish`, { status: newStatus });
@@ -179,7 +191,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               else toast.error(data.error?.message);
             }}
           >
-            {wheel.status === 'active' ? 'Pause' : 'Activate'}
+            {wheel.status === 'active' ? <><Pause className="w-3.5 h-3.5 mr-1.5" />Pause</> : <><Play className="w-3.5 h-3.5 mr-1.5" />Activate</>}
           </Button>
         </div>
       </div>
@@ -200,7 +212,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 <p className="text-sm text-muted-foreground">{segments.length} segments (min 2, max 24)</p>
                 <div className="flex gap-2">
                   <Button variant="outline" size="sm" onClick={addSegment}>+ Add Segment</Button>
-                  <Button size="sm" className="bg-violet-600 hover:bg-violet-700" onClick={saveSegments} disabled={saving}>
+                  <Button size="sm" className="bg-violet-600 hover:bg-violet-500 shadow-[0_0_0_1px_rgb(124_58_237/0.4),0_4px_8px_-2px_rgb(124_58_237/0.3)] transition-all duration-200" onClick={saveSegments} disabled={saving}>
+                    <Save className="w-3 h-3 mr-1" />
                     {saving ? 'Saving…' : 'Save Segments'}
                   </Button>
                 </div>
@@ -326,7 +339,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
             {/* SETTINGS TAB */}
             <TabsContent value="settings" className="space-y-6 mt-0">
               <Card>
-                <CardHeader><CardTitle className="text-base">General</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Layers className="h-4 w-4 text-muted-foreground" />
+                    General
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
                     <Label>Wheel Name (internal)</Label>
@@ -352,7 +370,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               </Card>
 
               <Card>
-                <CardHeader><CardTitle className="text-base">Spin Behaviour</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-muted-foreground" />
+                    Spin Behaviour
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Spin Duration (ms)</Label>
@@ -423,8 +446,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
               {/* ── GUARANTEED WIN ─────────────────────────────────────────── */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">Guaranteed Win</CardTitle>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-muted-foreground" />
+                    Guaranteed Win
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-xs text-muted-foreground">Force a specific segment to win every N plays. Useful for promotions where every Nth visitor is guaranteed a prize.</p>
@@ -463,7 +489,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               </Card>
 
               <Card>
-                <CardHeader><CardTitle className="text-base">Branding</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Palette className="h-4 w-4 text-muted-foreground" />
+                    Branding
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Button Text</Label>
@@ -501,7 +532,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               </Card>
 
               <Card>
-                <CardHeader><CardTitle className="text-base">Visual Ring</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <CircleIcon className="h-4 w-4 text-muted-foreground" />
+                    Visual Ring
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-4">
 
                   {/* Outer ring */}
@@ -617,7 +653,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               {/* ── SEGMENT LABELS (wheel only) ── */}
               {(!wheel.config.game_type || wheel.config.game_type === 'wheel') && (
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Segment Labels</CardTitle></CardHeader>
+                  <CardHeader className="border-b border-border/50 px-4 py-3">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <Type className="h-4 w-4 text-muted-foreground" />
+                      Segment Labels
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       {/* Font size */}
@@ -741,7 +782,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               {/* ── SCRATCH CARD SETTINGS (shown only when game_type = scratch_card) ── */}
               {wheel.config.game_type === 'scratch_card' && (
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Scratch Card</CardTitle></CardHeader>
+                  <CardHeader className="border-b border-border/50 px-4 py-3">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <CreditCard className="h-4 w-4 text-muted-foreground" />
+                      Scratch Card
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       {/* Layer color */}
@@ -858,7 +904,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               {/* ── SLOT MACHINE SETTINGS (shown only when game_type = slot_machine) ── */}
               {wheel.config.game_type === 'slot_machine' && (
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Slot Machine</CardTitle></CardHeader>
+                  <CardHeader className="border-b border-border/50 px-4 py-3">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <Dices className="h-4 w-4 text-muted-foreground" />
+                      Slot Machine
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       {/* Reel count */}
@@ -951,7 +1002,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               {/* ── ROULETTE SETTINGS (shown only when game_type = roulette) ── */}
               {wheel.config.game_type === 'roulette' && (
                 <Card>
-                  <CardHeader><CardTitle className="text-base">Roulette</CardTitle></CardHeader>
+                  <CardHeader className="border-b border-border/50 px-4 py-3">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <Dices className="h-4 w-4 text-muted-foreground" />
+                      Roulette
+                    </CardTitle>
+                  </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       {/* Pocket style */}
@@ -985,7 +1041,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
               {/* ── GEO-FENCE ─────────────────────────────────────────────── */}
               <Card>
-                <CardHeader><CardTitle className="text-base">🌍 Geo-fence</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Globe className="h-4 w-4 text-muted-foreground" />
+                    Geo-fence
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-xs text-muted-foreground">
                     Control which countries can see this wheel. Uses visitor IP via Vercel edge headers.
@@ -1037,7 +1098,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               </Card>
 
               <div className="flex justify-end">
-                <Button className="bg-violet-600 hover:bg-violet-700" onClick={saveWheel} disabled={saving}>
+                <Button className="bg-violet-600 hover:bg-violet-500 shadow-[0_0_0_1px_rgb(124_58_237/0.4),0_4px_12px_-2px_rgb(124_58_237/0.35)] transition-all duration-200" onClick={saveWheel} disabled={saving}>
+                  <Save className="w-3.5 h-3.5 mr-1.5" />
                   {saving ? 'Saving…' : 'Save Settings'}
                 </Button>
               </div>
@@ -1098,7 +1160,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
             {/* LEAD FORM TAB */}
             <TabsContent value="form" className="space-y-4 mt-0">
               <Card>
-                <CardHeader><CardTitle className="text-base">Lead Capture Form</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    Lead Capture Form
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between">
                     <Label>Enable lead form before spin</Label>
@@ -1184,7 +1251,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 </CardContent>
               </Card>
               <div className="flex justify-end">
-                <Button className="bg-violet-600 hover:bg-violet-700" onClick={saveWheel} disabled={saving}>
+                <Button className="bg-violet-600 hover:bg-violet-500 shadow-[0_0_0_1px_rgb(124_58_237/0.4),0_4px_12px_-2px_rgb(124_58_237/0.35)] transition-all duration-200" onClick={saveWheel} disabled={saving}>
+                  <Save className="w-3.5 h-3.5 mr-1.5" />
                   {saving ? 'Saving…' : 'Save Form Settings'}
                 </Button>
               </div>
@@ -1193,7 +1261,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
             {/* EMBED TAB */}
             <TabsContent value="embed" className="space-y-4 mt-0">
               <Card>
-                <CardHeader><CardTitle className="text-base">Embed Code</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Code className="h-4 w-4 text-muted-foreground" />
+                    Embed Code
+                  </CardTitle>
+                </CardHeader>
                 <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     Copy and paste this code into your website to display the spin wheel.
@@ -1207,11 +1280,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 </CardContent>
               </Card>
               {/* Public Play Page */}
-              <Card className="border-violet-200 bg-violet-50/50 dark:bg-violet-950/20 dark:border-violet-800">
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    🔗 Public Play Page
-                    <Badge className="bg-green-500 text-white text-xs">Shareable</Badge>
+              <Card className="border-violet-500/20 bg-violet-500/5">
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Share2 className="h-4 w-4 text-violet-400" />
+                    Public Play Page
+                    <Badge className="bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/30 text-[10px] font-medium">Shareable</Badge>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -1269,9 +1343,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
               {/* QR Code */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center justify-between">
-                    <span>📱 QR Code</span>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <QrCode className="h-4 w-4 text-muted-foreground" />
+                      QR Code
+                    </span>
                     <div className="flex gap-1">
                       {[128, 256, 512].map(s => (
                         <button key={s} onClick={() => setQrSize(s)}
@@ -1305,7 +1382,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               </Card>
 
               <Card>
-                <CardHeader><CardTitle className="text-base">Direct Widget URL</CardTitle></CardHeader>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Link className="h-4 w-4 text-muted-foreground" />
+                    Direct Widget URL
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-3">Minimal iframe/preview URL (no header or branding):</p>
                   <div className="flex gap-2">
@@ -1319,9 +1401,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
               {/* Instagram QR Image */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base flex items-center gap-2">
-                    <span style={{ background: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>📸</span>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Camera className="h-4 w-4 text-muted-foreground" />
                     Instagram Post QR
                   </CardTitle>
                 </CardHeader>
@@ -1380,8 +1462,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
               {/* Google Business */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">🔍 Google Business</CardTitle>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Search className="h-4 w-4 text-muted-foreground" />
+                    Google Business
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-muted-foreground">Share your spin wheel link in your Google Business profile posts to drive foot traffic.</p>
@@ -1401,8 +1486,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
               {/* Kiosk Mode */}
               <Card>
-                <CardHeader>
-                  <CardTitle className="text-base">🏪 In-Store Kiosk</CardTitle>
+                <CardHeader className="border-b border-border/50 px-4 py-3">
+                  <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                    <Monitor className="h-4 w-4 text-muted-foreground" />
+                    In-Store Kiosk
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <p className="text-sm text-muted-foreground">Open this URL on a tablet or display in your store. The wheel auto-resets after each spin for the next customer.</p>
@@ -1421,12 +1509,19 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
           </div>
 
           {/* PREVIEW SIDEBAR */}
-          <div className="lg:col-span-5 sticky top-24 space-y-6">
-            <Card className="border-2 border-violet-100 shadow-xl overflow-hidden">
-              <CardHeader className="bg-violet-50/50 pb-4">
-                <CardTitle className="text-sm font-bold text-violet-900 uppercase tracking-tighter">Live Widget Console</CardTitle>
-              </CardHeader>
-              <CardContent className="p-6">
+          <div className="lg:col-span-5 sticky top-24 space-y-4">
+            <Card className="overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
+                <div className="flex items-center gap-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                  <span className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">Live Preview</span>
+                </div>
+                <span className="text-[10px] text-muted-foreground/60">1:1 simulation</span>
+              </div>
+              <CardContent className="p-5">
                 {wheel.config.game_type === 'scratch_card' ? (
                   <ScratchPreview
                     segments={segments as unknown as WheelSegment[]}
@@ -1452,34 +1547,29 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     branding={wheel.branding}
                   />
                 )}
-                
-                <div className="mt-6 space-y-3">
-                  <Button 
-                    className="w-full bg-violet-600 hover:bg-violet-700 font-bold h-12 shadow-md"
-                    onClick={() => {
-                      saveWheel();
-                      saveSegments();
-                    }}
+
+                <div className="mt-5">
+                  <Button
+                    className="w-full bg-violet-600 hover:bg-violet-500 font-semibold h-10 shadow-[0_0_0_1px_rgb(124_58_237/0.4),0_4px_12px_-2px_rgb(124_58_237/0.35)] transition-all duration-200"
+                    onClick={() => { saveWheel(); saveSegments(); }}
                     disabled={saving}
                   >
-                    {saving ? 'Saving Changes…' : 'Quick Save All'}
+                    <Save className="w-3.5 h-3.5 mr-1.5" />
+                    {saving ? 'Saving…' : 'Save Changes'}
                   </Button>
-                  <p className="text-[10px] text-center text-muted-foreground animate-pulse">
-                    Rendering 1:1 Widget Simulation
-                  </p>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-xs font-bold">!</div>
-                <div className="text-xs">
-                  <p className="font-semibold text-indigo-900">Pro Tip</p>
-                  <p className="text-indigo-700/80">Keep segments between 4-12 for best visual clarity on mobile devices.</p>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="rounded-lg border border-violet-500/20 bg-violet-500/5 p-3.5 flex items-start gap-3">
+              <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-500/15 ring-1 ring-violet-500/25">
+                <Lightbulb className="h-3.5 w-3.5 text-violet-400" />
+              </div>
+              <div className="text-xs text-muted-foreground">
+                <p className="font-semibold text-foreground mb-0.5">Pro Tip</p>
+                Keep segments between 4–12 for best visual clarity on mobile devices.
+              </div>
+            </div>
           </div>
         </div>
       </Tabs>
@@ -1488,12 +1578,16 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 }
 
 function StatusBadge({ status }: { status: string }) {
-  const map: Record<string, string> = {
-    active: 'bg-green-100 text-green-700', draft: 'bg-gray-100 text-gray-600',
-    paused: 'bg-yellow-100 text-yellow-700', archived: 'bg-red-100 text-red-600',
+  const map: Record<string, { cls: string; dot: string }> = {
+    active:   { cls: 'ring-emerald-500/30 text-emerald-400 bg-emerald-500/10', dot: 'bg-emerald-400' },
+    draft:    { cls: 'ring-zinc-500/30 text-zinc-400 bg-zinc-500/10',          dot: 'bg-zinc-400' },
+    paused:   { cls: 'ring-amber-500/30 text-amber-400 bg-amber-500/10',       dot: 'bg-amber-400' },
+    archived: { cls: 'ring-rose-500/30 text-rose-400 bg-rose-500/10',          dot: 'bg-rose-400' },
   };
+  const s = map[status] ?? map.draft;
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium capitalize ${map[status] ?? ''}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ring-1 capitalize ${s.cls}`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${s.dot} ${status === 'active' ? 'animate-pulse' : ''}`} />
       {status}
     </span>
   );
