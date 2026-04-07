@@ -209,10 +209,10 @@ export default function HomePage() {
                       const startRad = (seg.start - 90) * Math.PI / 180;
                       const endRad   = (seg.end   - 90) * Math.PI / 180;
                       const cx = 120, cy = 120, r = 108;
-                      const x1 = cx + r * Math.cos(startRad);
-                      const y1 = cy + r * Math.sin(startRad);
-                      const x2 = cx + r * Math.cos(endRad);
-                      const y2 = cy + r * Math.sin(endRad);
+                      const x1 = (cx + r * Math.cos(startRad)).toFixed(3);
+                      const y1 = (cy + r * Math.sin(startRad)).toFixed(3);
+                      const x2 = (cx + r * Math.cos(endRad)).toFixed(3);
+                      const y2 = (cy + r * Math.sin(endRad)).toFixed(3);
                       const largeArc = seg.end - seg.start > 180 ? 1 : 0;
                       return (
                         <path
@@ -233,8 +233,9 @@ export default function HomePage() {
                     {['10% OFF', 'FREE SHIP', '$5 OFF', 'SPIN AGAIN', '15% OFF', 'MYSTERY'].map((label, i) => {
                       const angle = (i * 60 + 30 - 90) * Math.PI / 180;
                       const textR = 70;
-                      const x = 120 + textR * Math.cos(angle);
-                      const y = 120 + textR * Math.sin(angle);
+                      const x = (120 + textR * Math.cos(angle)).toFixed(3);
+                      const y = (120 + textR * Math.sin(angle)).toFixed(3);
+                      const rot = i * 60 + 30;
                       return (
                         <text
                           key={i}
@@ -244,7 +245,7 @@ export default function HomePage() {
                           fontSize="7"
                           fontWeight="700"
                           fill="rgba(255,255,255,0.85)"
-                          transform={`rotate(${i * 60 + 30}, ${x}, ${y})`}
+                          transform={`rotate(${rot}, ${x}, ${y})`}
                           letterSpacing="0.05em"
                         >
                           {label}

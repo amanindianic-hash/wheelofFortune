@@ -158,7 +158,7 @@ export default function WheelsPage() {
                     </Button>
                     <DropdownMenu>
                       <DropdownMenuTrigger
-                        render={<Button variant="ghost" size="sm" className="h-7 w-7 p-0" nativeButton={false} />}
+                        render={<Button variant="ghost" size="sm" className="h-7 w-7 p-0" />}
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </DropdownMenuTrigger>

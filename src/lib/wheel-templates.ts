@@ -38,15 +38,14 @@ export const WHEEL_TEMPLATES: WheelTemplate[] = [
       // The keys that bypass math rendering
       premium_face_url: '/assets/premium-wheels/Wheel.png',
       premium_stand_url: '/assets/premium-wheels/Stand.png',
-      premium_content_scale: 0.65, // Adjusts text and icons to fit within the golden center
-      
+      premium_content_scale: 0.4, // Push text inward to avoid the Stand rim hiding it
       // Hide standard features
       outer_ring_width: 0,
       inner_ring_enabled: false,
       border_width: 0,
       rim_tick_style: 'none',
       label_font_size: undefined,
-      label_position: 'inner',
+      label_position: 'outer',
       label_font_weight: '800', // Make labels bold
     },
     segmentPalette: [
