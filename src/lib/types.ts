@@ -120,6 +120,8 @@ export interface WheelBranding {
   // Premium Image Layer URLs
   premium_face_url?: string | null;
   premium_stand_url?: string | null;
+  premium_content_scale?: number;     // e.g. 0.65 to pull text closer to center if image wheel is smaller than canvas
+  premium_center_offset_y?: number;   // e.g. 10 to shift rotation center down if image is not vertically centered
 }
 
 export interface WheelFormConfig {

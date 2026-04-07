@@ -38,6 +38,7 @@ export const WHEEL_TEMPLATES: WheelTemplate[] = [
       // The keys that bypass math rendering
       premium_face_url: '/assets/premium-wheels/Wheel.png',
       premium_stand_url: '/assets/premium-wheels/Stand.png',
+      premium_content_scale: 0.65, // Adjusts text and icons to fit within the golden center
       
       // Hide standard features
       outer_ring_width: 0,

@@ -66,6 +66,8 @@ export interface WheelBranding {
   // Premium Image Layer URLs
   premium_face_url?: string | null;
   premium_stand_url?: string | null;
+  premium_content_scale?: number;
+  premium_center_offset_y?: number;
 }
 
 // ─── Image cache ──────────────────────────────────────────────────────────────
@@ -157,12 +159,26 @@ export function drawWheel(
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
-    const cx = cssWidth / 2;
-    const cy = cssHeight / 2;
+    let cx = cssWidth / 2;
+    let cy = cssHeight / 2;
 
     const outerRingWidth = branding.outer_ring_width ?? 20;
     const outerRadius = Math.min(cx, cy) - 2;
-    const innerRadius = outerRadius - outerRingWidth;
+    let innerRadius = outerRadius - outerRingWidth;
+    
+    const hasPremiumFace = branding.premium_face_url && imageCache?.has(branding.premium_face_url);
+    const hasPremiumStand = branding.premium_stand_url && imageCache?.has(branding.premium_stand_url);
+
+    // Apply premium scaling and offsets for labels
+    if (hasPremiumFace) {
+      if (branding.premium_content_scale) {
+        innerRadius *= branding.premium_content_scale;
+      }
+      if (branding.premium_center_offset_y) {
+        cy += branding.premium_center_offset_y;
+      }
+    }
+
     const segAngle = (2 * Math.PI) / (segments.length || 1);
 
     const primaryColor = branding.primary_color ?? '#7C3AED';
@@ -194,9 +210,6 @@ export function drawWheel(
       ctx.fill();
       return;
     }
-
-    const hasPremiumFace = branding.premium_face_url && imageCache?.has(branding.premium_face_url);
-    const hasPremiumStand = branding.premium_stand_url && imageCache?.has(branding.premium_stand_url);
 
     // ── 1. Segment wedges (or Premium Image Layer) ────────────────────────────
     if (hasPremiumFace) {
