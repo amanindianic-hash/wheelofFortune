@@ -6,7 +6,7 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from '@/components/ui/sonner';
 import { ServiceWorkerRegistrar } from '@/components/providers/sw-registrar';
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans' });
+const geist = Geist({ subsets: ['latin'], variable: '--font-geist-sans', preload: false });
 
 export const metadata: Metadata = {
   title: 'Wheel of Fortune Platform',
