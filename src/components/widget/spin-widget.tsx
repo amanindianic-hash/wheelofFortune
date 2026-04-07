@@ -173,38 +173,39 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
   if (phase === 'form') {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: bgColor, fontFamily }}>
-        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-5">
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 space-y-5 text-gray-900 border border-gray-100">
           <div className="text-center">
-            <p className="text-3xl mb-2">🎡</p>
-            <h2 className="text-xl font-bold">Spin to Win!</h2>
-            <p className="text-sm text-gray-500">Enter your details to spin the wheel</p>
+            <p className="text-4xl mb-3 drop-shadow-md">🎡</p>
+            <h2 className="text-2xl font-bold text-gray-900">Spin to Win!</h2>
+            <p className="text-sm text-gray-500 mt-1">Enter your details to spin the wheel</p>
           </div>
           <form onSubmit={handleFormSubmit} className="space-y-4">
             {(formConfig.fields ?? [{ key: 'email', label: 'Email', type: 'email', required: true }, { key: 'name', label: 'Name', type: 'text', required: false }]).map((field) => (
-              <div key={field.key} className="space-y-1.5">
-                <Label htmlFor={field.key}>{field.label}{field.required && ' *'}</Label>
+              <div key={field.key} className="space-y-2">
+                <Label htmlFor={field.key} className="text-sm font-semibold text-gray-700">{field.label}{field.required && ' *'}</Label>
                 <Input
                   id={field.key}
                   type={field.type}
                   required={field.required}
                   value={leadData[field.key] ?? ''}
                   onChange={(e) => setLeadData({ ...leadData, [field.key]: e.target.value })}
+                  className="bg-gray-50 border-gray-200 text-gray-900 focus-visible:ring-gray-300"
                 />
               </div>
             ))}
             {formConfig.gdpr_enabled && (
-              <div className="flex items-start gap-2">
+              <div className="flex items-start gap-3 mt-6 bg-gray-50 p-3 rounded-lg border border-gray-100">
                 <input type="checkbox" id="gdpr" checked={gdprConsent} onChange={(e) => setGdprConsent(e.target.checked)}
-                  className="mt-1 rounded" required />
-                <label htmlFor="gdpr" className="text-xs text-gray-500">
+                  className="mt-1 rounded border-gray-300 text-violet-600 focus:ring-violet-500" required />
+                <label htmlFor="gdpr" className="text-xs text-gray-600 leading-relaxed">
                   {formConfig.gdpr_text ?? 'I agree to receive marketing communications.'}{' '}
                   {formConfig.privacy_policy_url && (
-                    <a href={formConfig.privacy_policy_url} target="_blank" rel="noreferrer" className="underline">Privacy Policy</a>
+                    <a href={formConfig.privacy_policy_url} target="_blank" rel="noreferrer" className="underline font-medium text-gray-900">Privacy Policy</a>
                   )}
                 </label>
               </div>
             )}
-            <Button type="submit" className="w-full font-bold" style={{ backgroundColor: buttonColor }}>
+            <Button type="submit" className="w-full font-bold h-12 mt-2 shadow-md hover:shadow-lg transition-all" style={{ backgroundColor: buttonColor, color: '#fff' }}>
               Continue to Spin
             </Button>
           </form>
@@ -216,7 +217,7 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
   if (phase === 'result' && spinResult) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: bgColor, fontFamily }}>
-        <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-5 text-center">
+        <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 space-y-5 text-center text-gray-900 border border-gray-100">
           {spinResult.is_winner ? (
             <>
               <p className="text-5xl">🎉</p>
@@ -249,9 +250,9 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
             </>
           ) : (
             <>
-              <p className="text-5xl">😢</p>
-              <h2 className="text-2xl font-bold">Better luck next time!</h2>
-              <p className="text-sm text-gray-500">{spinResult.consolation_message ?? "You didn't win this time. Try again soon!"}</p>
+              <p className="text-5xl drop-shadow-sm">😢</p>
+              <h2 className="text-2xl font-bold text-gray-900">Better luck next time!</h2>
+              <p className="text-sm text-gray-600">{spinResult.consolation_message ?? "You didn't win this time. Try again soon!"}</p>
             </>
           )}
         </div>
