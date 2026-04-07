@@ -189,18 +189,38 @@ export function drawWheel(
 
     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
+    // ── 0. Premium Stand Layer (STATIC BACKGROUND — drawn first so wheel spins on top) ──
+    // Stand.png contains the ring frame + pedestal. It is fully opaque, including the
+    // disc area. By drawing it FIRST, the spinning Wheel.png (Layer 1) overlaps it in
+    // the disc zone, while the transparent outer area of Wheel.png lets the ring and
+    // pedestal show through. Labels (Layer 2) then appear on top of the spinning disc.
+    if (hasPremiumStand) {
+      const standImg = imageCache!.get(branding.premium_stand_url!);
+      if (standImg) {
+        ctx.save();
+        const standScale = (outerRadius * 2) / Math.max(standImg.width, standImg.height);
+        const sw = standImg.width * standScale;
+        const sh = standImg.height * standScale;
+        // Draw at original canvas center (not offset by premium_center_offset_y)
+        ctx.drawImage(standImg, cssWidth / 2 - sw / 2, cssHeight / 2 - sh / 2, sw, sh);
+        ctx.restore();
+      }
+    }
+
     // ── Pre-calculate shadow base ─────────────────────────────────────────────
     // To make it look like a physical 3D object on the screen, add a soft drop shadow
     // beneath the entire wheel to give depth before drawing anything.
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.45)';
-    ctx.shadowBlur = 25;
-    ctx.shadowOffsetY = 15;
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
-    ctx.fillStyle = 'rgba(0,0,0,0.1)';
-    ctx.fill();
-    ctx.restore();
+    if (!hasPremiumStand) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.45)';
+      ctx.shadowBlur = 25;
+      ctx.shadowOffsetY = 15;
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      ctx.fill();
+      ctx.restore();
+    }
 
     // ── Empty state ───────────────────────────────────────────────────────────
     if (segments.length === 0) {
@@ -613,18 +633,7 @@ export function drawWheel(
     ctx.fill();
     } // <-- End if (!hasPremiumFace)
 
-    // ── 7. Premium Stand Layer (STATIC) ───────────────────────────────────────
-    if (hasPremiumStand) {
-      const standImg = imageCache!.get(branding.premium_stand_url!);
-      if (standImg) {
-        ctx.save();
-        const scale = (outerRadius * 2) / Math.max(standImg.width, standImg.height);
-        const w = standImg.width * scale;
-        const h = standImg.height * scale;
-        ctx.drawImage(standImg, cx - w / 2, cy - h / 2, w, h);
-        ctx.restore();
-      }
-    }
+    // Stand layer is now drawn as Layer 0 (background) above.
 
   } catch (e) {
     console.error('drawWheel error', e);

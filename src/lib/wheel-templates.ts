@@ -38,23 +38,24 @@ export const WHEEL_TEMPLATES: WheelTemplate[] = [
       // The keys that bypass math rendering
       premium_face_url: '/assets/premium-wheels/Wheel.png',
       premium_stand_url: '/assets/premium-wheels/Stand.png',
-      premium_content_scale: 0.4, // Push text inward to avoid the Stand rim hiding it
-      // Hide standard features
+      // Wheel.png disc radius ≈ 51.75% of outerRadius.
+      // Labels at innerRadius * positionRatio = scale * outerRadius * 0.58 (label_position:'outer')
+      // scale=0.75 → labels at 43.5% of outerRadius = ~84% inside the disc = good sweet spot.
+      premium_content_scale: 0.75,
+      // Hide standard decorative ring (the PNG provides it)
       outer_ring_width: 0,
       inner_ring_enabled: false,
       border_width: 0,
       rim_tick_style: 'none',
-      label_font_size: undefined,
+      label_font_size: 12,
       label_position: 'outer',
-      label_font_weight: '800', // Make labels bold
+      label_font_weight: '800',
     },
     segmentPalette: [
-      // Standard segment colours that would match what we want labels to do
-      // Here bg is 'transparent' so no math segments draw properly OR the renderer ignores bg when premium_img exists.
       { bg_color: 'transparent', text_color: '#FFFFFF' },
-      { bg_color: 'transparent', text_color: '#000000' },
       { bg_color: 'transparent', text_color: '#FFFFFF' },
-      { bg_color: 'transparent', text_color: '#000000' },
+      { bg_color: 'transparent', text_color: '#FFFFFF' },
+      { bg_color: 'transparent', text_color: '#FFFFFF' },
     ],
   },
   {
