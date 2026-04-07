@@ -74,10 +74,18 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [qrSize, setQrSize]       = useState(256);
 
+  // ── Saved custom themes ────────────────────────────────────────────────────
+  const [savedThemes, setSavedThemes] = useState<Array<{
+    id: string; name: string; emoji: string; description: string;
+    branding: Record<string, unknown>; config: Record<string, unknown>;
+    segment_palette: Array<{ bg_color: string; text_color: string }>;
+  }>>([]);
+
   async function load() {
-    const [wRes, pRes] = await Promise.all([
+    const [wRes, pRes, tRes] = await Promise.all([
       api.get(`/api/wheels/${id}`),
       api.get('/api/prizes'),
+      api.get('/api/themes'),
     ]);
     const wData = await wRes.json();
     const pData = await pRes.json();
@@ -85,6 +93,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     setWheel(wData.wheel);
     setSegments(wData.segments ?? []);
     setPrizes(pData.prizes ?? []);
+    if (tRes.ok) { const tData = await tRes.json(); setSavedThemes(tData.themes ?? []); }
   }
 
   useEffect(() => { load(); }, [id]);
@@ -691,6 +700,65 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                           </div>
                         </div>
 
+                        {/* Paste Config from Theme Tester */}
+                        <div className="rounded-lg bg-violet-500/8 border border-violet-500/20 p-3 space-y-2">
+                          <p className="text-[11px] font-semibold text-violet-300 flex items-center gap-1.5">
+                            <Layers className="w-3.5 h-3.5" />
+                            Import from Theme Tester
+                          </p>
+                          <p className="text-[11px] text-muted-foreground/70 leading-relaxed">
+                            Paste the JSON copied from Theme Tester and all settings will be applied automatically.
+                          </p>
+                          <div className="flex gap-2">
+                            <Textarea
+                              id="paste-config-input"
+                              placeholder={'{\n  "premium_content_scale": 0.75,\n  "label_font_size": 12,\n  ...\n}'}
+                              className="h-20 text-xs font-mono resize-none bg-black/30"
+                            />
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            className="w-full h-7 text-xs gap-1.5 border-violet-500/30 text-violet-300 hover:bg-violet-500/10"
+                            onClick={() => {
+                              const textarea = document.getElementById('paste-config-input') as HTMLTextAreaElement;
+                              try {
+                                const cfg = JSON.parse(textarea.value);
+                                setWheel((prev) => {
+                                  if (!prev) return prev;
+                                  return {
+                                    ...prev,
+                                    config: {
+                                      ...prev.config,
+                                      ...(cfg.show_segment_labels !== undefined ? { show_segment_labels: cfg.show_segment_labels } : {}),
+                                    },
+                                    branding: {
+                                      ...prev.branding,
+                                      ...(cfg.premium_face_url        !== undefined ? { premium_face_url:        cfg.premium_face_url        } : {}),
+                                      ...(cfg.premium_stand_url       !== undefined ? { premium_stand_url:       cfg.premium_stand_url       } : {}),
+                                      ...(cfg.premium_content_scale   !== undefined ? { premium_content_scale:   cfg.premium_content_scale   } : {}),
+                                      ...(cfg.premium_center_offset_y !== undefined ? { premium_center_offset_y: cfg.premium_center_offset_y } : {}),
+                                      ...(cfg.label_font_size         !== undefined ? { label_font_size:         cfg.label_font_size         } : {}),
+                                      ...(cfg.label_font_weight       !== undefined ? { label_font_weight:       cfg.label_font_weight       } : {}),
+                                      ...(cfg.label_position          !== undefined ? { label_position:          cfg.label_position          } : {}),
+                                      ...(cfg.outer_ring_width        !== undefined ? { outer_ring_width:        cfg.outer_ring_width        } : {}),
+                                      ...(cfg.inner_ring_enabled      !== undefined ? { inner_ring_enabled:      cfg.inner_ring_enabled      } : {}),
+                                      ...(cfg.rim_tick_style          !== undefined ? { rim_tick_style:          cfg.rim_tick_style          } : {}),
+                                    },
+                                  };
+                                });
+                                textarea.value = '';
+                                toast.success('Config applied — remember to Save');
+                              } catch {
+                                toast.error('Invalid JSON — copy again from Theme Tester');
+                              }
+                            }}
+                          >
+                            Apply Config
+                          </Button>
+                        </div>
+
                         <div className="flex items-start gap-2 rounded-lg bg-amber-500/8 border border-amber-500/15 p-2.5">
                           <ImageIcon className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
                           <p className="text-[11px] text-amber-300/80 leading-relaxed">
@@ -1283,54 +1351,118 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
             </TabsContent>
 
             {/* TEMPLATES TAB */}
-            <TabsContent value="templates" className="space-y-4 mt-0">
+            <TabsContent value="templates" className="space-y-5 mt-0">
               <p className="text-sm text-muted-foreground">
-                Apply a preset template to instantly change colours, style, and branding. Your segment labels and prizes are kept.
+                Apply a template to instantly change colours, style, and branding. Your segment labels and prizes are kept.
               </p>
-              <div className="grid grid-cols-2 gap-3">
-                {WHEEL_TEMPLATES.filter((tpl) => tpl.gameType === (wheel.config.game_type ?? 'wheel')).map((tpl) => (
-                  <Card key={tpl.id} className="overflow-hidden hover:border-violet-400 transition-colors cursor-pointer group">
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-start gap-3">
-                        <span className="text-2xl">{tpl.emoji}</span>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm">{tpl.name}</p>
-                          <p className="text-xs text-muted-foreground">{tpl.description}</p>
+
+              {/* ── Saved custom themes ── */}
+              {savedThemes.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Your Saved Themes</p>
+                    <div className="flex-1 h-px bg-amber-500/20" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {savedThemes.map((theme) => (
+                      <Card key={theme.id} className="overflow-hidden hover:border-amber-400/60 transition-colors cursor-pointer group border-amber-500/20">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex items-start gap-3">
+                            <span className="text-2xl">{theme.emoji}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm">{theme.name}</p>
+                              <p className="text-[10px] text-muted-foreground">Custom theme</p>
+                            </div>
+                          </div>
+                          {theme.segment_palette.length > 0 && (
+                            <div className="flex gap-1">
+                              {theme.segment_palette.slice(0, 6).map((c, i) => (
+                                <div key={i} className="w-5 h-5 rounded-full border border-white/20 shadow-sm"
+                                  style={{ backgroundColor: c.bg_color === 'transparent' ? '#888' : c.bg_color }} />
+                              ))}
+                            </div>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="w-full group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500 transition-colors"
+                            onClick={() => {
+                              if (!wheel) return;
+                              setWheel({
+                                ...wheel,
+                                config: { ...wheel.config, ...theme.config },
+                                branding: { ...wheel.branding, ...theme.branding },
+                              });
+                              if (theme.segment_palette.length > 0) {
+                                setSegments((prev) =>
+                                  prev.map((seg, i) => {
+                                    const palette = theme.segment_palette[i % theme.segment_palette.length];
+                                    return { ...seg, bg_color: palette.bg_color, text_color: palette.text_color };
+                                  }),
+                                );
+                              }
+                              toast.success(`"${theme.name}" applied — save to persist`);
+                            }}
+                          >
+                            Apply Theme
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* ── Built-in templates ── */}
+              <div className="space-y-2">
+                {savedThemes.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Built-in Templates</p>
+                    <div className="flex-1 h-px bg-white/5" />
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                  {WHEEL_TEMPLATES.filter((tpl) => tpl.gameType === (wheel.config.game_type ?? 'wheel')).map((tpl) => (
+                    <Card key={tpl.id} className="overflow-hidden hover:border-violet-400 transition-colors cursor-pointer group">
+                      <CardContent className="p-4 space-y-3">
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl">{tpl.emoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-sm">{tpl.name}</p>
+                            <p className="text-xs text-muted-foreground">{tpl.description}</p>
+                          </div>
                         </div>
-                      </div>
-                      {/* Colour swatches */}
-                      <div className="flex gap-1">
-                        {tpl.segmentPalette.slice(0, 6).map((c, i) => (
-                          <div key={i} className="w-5 h-5 rounded-full border border-white shadow-sm" style={{ backgroundColor: c.bg_color }} />
-                        ))}
-                      </div>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="w-full group-hover:bg-violet-600 group-hover:text-white group-hover:border-violet-600 transition-colors"
-                        onClick={() => {
-                          if (!wheel) return;
-                          // Apply branding + config from template
-                          setWheel({
-                            ...wheel,
-                            config: { ...wheel.config, ...tpl.config },
-                            branding: { ...wheel.branding, ...tpl.branding },
-                          });
-                          // Re-colour segments using the palette
-                          setSegments((prev) =>
-                            prev.map((seg, i) => {
-                              const palette = tpl.segmentPalette[i % tpl.segmentPalette.length];
-                              return { ...seg, bg_color: palette.bg_color, text_color: palette.text_color };
-                            }),
-                          );
-                          toast.success(`"${tpl.name}" template applied — save to persist`);
-                        }}
-                      >
-                        Apply Template
-                      </Button>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <div className="flex gap-1">
+                          {tpl.segmentPalette.slice(0, 6).map((c, i) => (
+                            <div key={i} className="w-5 h-5 rounded-full border border-white shadow-sm" style={{ backgroundColor: c.bg_color }} />
+                          ))}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full group-hover:bg-violet-600 group-hover:text-white group-hover:border-violet-600 transition-colors"
+                          onClick={() => {
+                            if (!wheel) return;
+                            setWheel({
+                              ...wheel,
+                              config: { ...wheel.config, ...tpl.config },
+                              branding: { ...wheel.branding, ...tpl.branding },
+                            });
+                            setSegments((prev) =>
+                              prev.map((seg, i) => {
+                                const palette = tpl.segmentPalette[i % tpl.segmentPalette.length];
+                                return { ...seg, bg_color: palette.bg_color, text_color: palette.text_color };
+                              }),
+                            );
+                            toast.success(`"${tpl.name}" template applied — save to persist`);
+                          }}
+                        >
+                          Apply Template
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </TabsContent>
 

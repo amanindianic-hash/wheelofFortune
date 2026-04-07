@@ -4,10 +4,12 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Upload, Play, Pause, Copy, Check, RotateCcw,
   ImageIcon, Info, Wand2, Download, X, Layers, SplitSquareHorizontal,
+  Save, Pencil, Trash2, BookMarked,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -33,6 +35,18 @@ const WHEEL_ONLY_TEMPLATES = WHEEL_TEMPLATES.filter((t) => t.gameType === 'wheel
 
 interface ImageInfo {
   name: string; width: number; height: number; size: string; url: string;
+}
+
+interface SavedTheme {
+  id: string;
+  name: string;
+  emoji: string;
+  description: string;
+  branding: Partial<WheelBranding>;
+  config: Partial<WheelConfig>;
+  segment_palette: Array<{ bg_color: string; text_color: string }>;
+  created_at: string;
+  updated_at: string;
 }
 
 // ── Build segments from a template palette ───────────────────────────────────
@@ -257,6 +271,17 @@ export default function ThemeTesterPage() {
   const [compareId,     setCompareId]     = useState<string>('none');
   const [copied,        setCopied]        = useState(false);
 
+  // ── Saved themes (DB) ──────────────────────────────────────────────────────
+  const [savedThemes,   setSavedThemes]   = useState<SavedTheme[]>([]);
+  const [themesLoading, setThemesLoading] = useState(false);
+  const [saveName,      setSaveName]      = useState('');
+  const [saveEmoji,     setSaveEmoji]     = useState('🎨');
+  const [saving,        setSaving]        = useState(false);
+  const [editingTheme,  setEditingTheme]  = useState<SavedTheme | null>(null);
+  const [editName,      setEditName]      = useState('');
+  const [editEmoji,     setEditEmoji]     = useState('');
+  const [editSaving,    setEditSaving]    = useState(false);
+
   // ── Custom theme segments & branding ───────────────────────────────────────
   const customSegments: WheelSegment[] = PREVIEW_LABELS.map((label, i) => ({
     id: String(i + 1), position: i, label,
@@ -355,6 +380,81 @@ export default function ThemeTesterPage() {
     setCacheKey(`reset-${Date.now()}`);
   }
 
+  // ── Theme CRUD ────────────────────────────────────────────────────────────
+  async function loadThemes() {
+    setThemesLoading(true);
+    try {
+      const res = await fetch('/api/themes');
+      const data = await res.json();
+      if (res.ok) setSavedThemes(data.themes ?? []);
+    } catch { /* silent */ }
+    finally { setThemesLoading(false); }
+  }
+
+  async function handleSaveTheme() {
+    if (!saveName.trim()) { toast.error('Enter a theme name'); return; }
+    setSaving(true);
+    try {
+      const cfg = buildConfig();
+      const res = await fetch('/api/themes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: saveName.trim(),
+          emoji: saveEmoji,
+          branding: cfg,
+          config: { show_segment_labels: showLabels },
+          segment_palette: faceInfo
+            ? [{ bg_color: 'transparent', text_color: textColor }]
+            : [{ bg_color: primaryColor, text_color: textColor }],
+        }),
+      });
+      if (!res.ok) { toast.error('Failed to save theme'); return; }
+      toast.success(`Theme "${saveName.trim()}" saved`);
+      setSaveName('');
+      await loadThemes();
+    } finally { setSaving(false); }
+  }
+
+  async function handleDeleteTheme(theme: SavedTheme) {
+    if (!confirm(`Delete theme "${theme.name}"?`)) return;
+    try {
+      const res = await fetch(`/api/themes/${theme.id}`, { method: 'DELETE' });
+      if (!res.ok) { toast.error('Failed to delete theme'); return; }
+      toast.success(`"${theme.name}" deleted`);
+      setSavedThemes((prev) => prev.filter((t) => t.id !== theme.id));
+    } catch { toast.error('Failed to delete theme'); }
+  }
+
+  async function handleEditSave() {
+    if (!editingTheme || !editName.trim()) return;
+    setEditSaving(true);
+    try {
+      const res = await fetch(`/api/themes/${editingTheme.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: editName.trim(), emoji: editEmoji }),
+      });
+      if (!res.ok) { toast.error('Failed to update theme'); return; }
+      toast.success('Theme updated');
+      setEditingTheme(null);
+      await loadThemes();
+    } finally { setEditSaving(false); }
+  }
+
+  function handleLoadTheme(theme: SavedTheme) {
+    const b = theme.branding as any;
+    if (b.premium_content_scale   !== undefined) setContentScale(b.premium_content_scale);
+    if (b.premium_center_offset_y !== undefined) setCenterOffsetY(b.premium_center_offset_y);
+    if (b.label_font_size         !== undefined) setFontSize(b.label_font_size);
+    if (b.label_font_weight       !== undefined) setFontWeight(b.label_font_weight);
+    if (b.label_position          !== undefined) setLabelPosition(b.label_position);
+    if (b.primary_color           !== undefined) setPrimaryColor(b.primary_color);
+    const c = theme.config as any;
+    if (c.show_segment_labels !== undefined) setShowLabels(c.show_segment_labels);
+    toast.success(`Loaded "${theme.name}"`);
+  }
+
   function buildConfig() {
     return {
       premium_face_url:        faceInfo  ? '/assets/premium-wheels/Wheel.png' : null,
@@ -382,6 +482,7 @@ export default function ThemeTesterPage() {
   const compareKey = `compare-${compareId}`;
 
   useEffect(() => {
+    loadThemes();
     return () => {
       if (faceInfo)  URL.revokeObjectURL(faceInfo.url);
       if (standInfo) URL.revokeObjectURL(standInfo.url);
@@ -587,7 +688,122 @@ export default function ThemeTesterPage() {
             </CardContent>
           </Card>
 
-          {/* Export */}
+          {/* Save Theme */}
+          <Card className="border-white/8">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Save className="w-4 h-4 text-emerald-400" />
+                Save Theme
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex gap-2">
+                <Input
+                  value={saveEmoji}
+                  onChange={(e) => setSaveEmoji(e.target.value)}
+                  className="h-8 w-14 text-center text-base shrink-0"
+                  maxLength={2}
+                />
+                <Input
+                  placeholder="Theme name…"
+                  value={saveName}
+                  onChange={(e) => setSaveName(e.target.value)}
+                  className="h-8 text-xs flex-1"
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveTheme()}
+                />
+              </div>
+              <Button size="sm" className="w-full gap-2 text-xs bg-emerald-600 hover:bg-emerald-500 text-white"
+                onClick={handleSaveTheme} disabled={saving}>
+                {saving ? 'Saving…' : <><Save className="w-3.5 h-3.5" /> Save to Library</>}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Saved Themes Library */}
+          <Card className="border-white/8">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <BookMarked className="w-4 h-4 text-amber-400" />
+                Saved Themes
+                {savedThemes.length > 0 && (
+                  <Badge variant="outline" className="ml-auto text-[10px]">{savedThemes.length}</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {themesLoading ? (
+                <p className="text-xs text-muted-foreground text-center py-4">Loading…</p>
+              ) : savedThemes.length === 0 ? (
+                <p className="text-xs text-muted-foreground/60 text-center py-4">
+                  No saved themes yet. Tune your wheel above and save it.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {savedThemes.map((theme) => (
+                    <div key={theme.id} className="rounded-lg border border-white/8 bg-black/20 p-2.5">
+                      {editingTheme?.id === theme.id ? (
+                        /* ── Edit mode ── */
+                        <div className="space-y-2">
+                          <div className="flex gap-2">
+                            <Input value={editEmoji} onChange={(e) => setEditEmoji(e.target.value)}
+                              className="h-7 w-12 text-center text-base shrink-0" maxLength={2} />
+                            <Input value={editName} onChange={(e) => setEditName(e.target.value)}
+                              className="h-7 text-xs flex-1" />
+                          </div>
+                          <div className="flex gap-1.5">
+                            <Button size="sm" className="flex-1 h-6 text-[11px] bg-violet-600 hover:bg-violet-500"
+                              onClick={handleEditSave} disabled={editSaving}>
+                              {editSaving ? 'Saving…' : 'Save'}
+                            </Button>
+                            <Button size="sm" variant="outline" className="flex-1 h-6 text-[11px]"
+                              onClick={() => setEditingTheme(null)}>
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        /* ── View mode ── */
+                        <div className="flex items-center gap-2">
+                          <span className="text-base shrink-0">{theme.emoji}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-medium truncate">{theme.name}</p>
+                            <p className="text-[10px] text-muted-foreground/50">
+                              {new Date(theme.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              title="Load into editor"
+                              onClick={() => handleLoadTheme(theme)}
+                              className="p-1.5 rounded text-muted-foreground/50 hover:text-violet-400 hover:bg-violet-500/10 transition-colors"
+                            >
+                              <Download className="w-3 h-3" />
+                            </button>
+                            <button
+                              title="Edit name"
+                              onClick={() => { setEditingTheme(theme); setEditName(theme.name); setEditEmoji(theme.emoji); }}
+                              className="p-1.5 rounded text-muted-foreground/50 hover:text-amber-400 hover:bg-amber-500/10 transition-colors"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                            <button
+                              title="Delete"
+                              onClick={() => handleDeleteTheme(theme)}
+                              className="p-1.5 rounded text-muted-foreground/50 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Export Config (copy JSON) */}
           <Card className="border-white/8">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
@@ -604,9 +820,6 @@ export default function ThemeTesterPage() {
                   ? <><Check className="w-3.5 h-3.5 text-emerald-400" /> Copied!</>
                   : <><Copy className="w-3.5 h-3.5" /> Copy Branding Config</>}
               </Button>
-              <p className="text-[10px] text-muted-foreground/60 text-center">
-                Paste into <code className="font-mono">wheel-templates.ts</code> to save as a template.
-              </p>
             </CardContent>
           </Card>
         </div>
