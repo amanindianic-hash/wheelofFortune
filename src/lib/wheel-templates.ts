@@ -17,7 +17,49 @@ export interface WheelTemplate {
 
 export const WHEEL_TEMPLATES: WheelTemplate[] = [
   {
+    id: 'freepik-gold-test',
+    name: 'Freepik Gold Test',
+    description: 'Ultra Premium 3D Golden Wheel with separated PNG layers (Image Mode)',
+    emoji: '⭐',
+    gameType: 'wheel',
+    config: {
+      animation_speed: 'medium',
+      show_segment_labels: true,
+      sound_enabled: true,
+    },
+    branding: {
+      primary_color: '#B8860B', // Metallic Gold
+      secondary_color: '#000000', // Deep Black
+      background_type: 'solid',
+      background_value: 'rgba(0, 0, 0, 0)', // Transparent
+      font_family: 'Bebas Neue', // Common for this style
+      button_text: 'SPIN NOW',
+      button_color: '#D4AF37',
+      // The keys that bypass math rendering
+      premium_face_url: '/assets/premium-wheels/Wheel.png',
+      premium_stand_url: '/assets/premium-wheels/Stand.png',
+      
+      // Hide standard features
+      outer_ring_width: 0,
+      inner_ring_enabled: false,
+      border_width: 0,
+      rim_tick_style: 'none',
+      label_font_size: undefined,
+      label_position: 'inner',
+      label_font_weight: '800', // Make labels bold
+    },
+    segmentPalette: [
+      // Standard segment colours that would match what we want labels to do
+      // Here bg is 'transparent' so no math segments draw properly OR the renderer ignores bg when premium_img exists.
+      { bg_color: 'transparent', text_color: '#FFFFFF' },
+      { bg_color: 'transparent', text_color: '#000000' },
+      { bg_color: 'transparent', text_color: '#FFFFFF' },
+      { bg_color: 'transparent', text_color: '#000000' },
+    ],
+  },
+  {
     id: 'luxury-gold',
+
     gameType: 'wheel',
     name: 'Luxury Gold',
     description: 'Elegant black & gold premium feel',

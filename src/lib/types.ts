@@ -116,6 +116,10 @@ export interface WheelBranding {
   label_letter_spacing?: number;                                     // px, default 0
   // Icon placement (when segment has icon_url)
   icon_position?: 'outer' | 'inner' | 'overlay';                    // default 'outer' (icon near rim, label near hub); 'overlay' = label on top of icon
+  
+  // Premium Image Layer URLs
+  premium_face_url?: string | null;
+  premium_stand_url?: string | null;
 }
 
 export interface WheelFormConfig {

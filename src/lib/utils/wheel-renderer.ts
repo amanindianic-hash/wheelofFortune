@@ -62,6 +62,10 @@ export interface WheelBranding {
   label_letter_spacing?: number;
   // Icon placement
   icon_position?: 'outer' | 'inner' | 'overlay';
+  
+  // Premium Image Layer URLs
+  premium_face_url?: string | null;
+  premium_stand_url?: string | null;
 }
 
 // ─── Image cache ──────────────────────────────────────────────────────────────
@@ -71,11 +75,14 @@ export type ImageCache = Map<string, HTMLImageElement>;
 export async function preloadSegmentImages(
   segments: WheelSegment[],
   config: WheelConfig,
+  branding: WheelBranding,
   cache: ImageCache,
 ): Promise<void> {
   const urls = [
     ...segments.filter((s) => s.icon_url).map((s) => s.icon_url!),
     ...(config.center_image_url ? [config.center_image_url] : []),
+    ...(branding.premium_face_url ? [branding.premium_face_url] : []),
+    ...(branding.premium_stand_url ? [branding.premium_stand_url] : []),
   ].filter((url) => !cache.has(url));
 
   await Promise.all(
@@ -188,30 +195,47 @@ export function drawWheel(
       return;
     }
 
-    // ── 1. Segment wedges with radial gradient ────────────────────────────────
-    segments.forEach((seg, i) => {
-      const startAngle = rotation + i * segAngle - Math.PI / 2;
-      const endAngle = startAngle + segAngle;
+    const hasPremiumFace = branding.premium_face_url && imageCache?.has(branding.premium_face_url);
+    const hasPremiumStand = branding.premium_stand_url && imageCache?.has(branding.premium_stand_url);
 
-      // Deep 3D radial gradient: almost black at center → mid-color → full color at edge
-      const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.05, cx, cy, innerRadius);
-      grad.addColorStop(0, '#000000'); // Deep dark core
-      grad.addColorStop(0.35, lightenHex(seg.bg_color, 10)); // Darker mid
-      grad.addColorStop(0.85, seg.bg_color); // Pure color
-      grad.addColorStop(1, lightenHex(seg.bg_color, 25)); // Slightly lighter edge to catch light
+    // ── 1. Segment wedges (or Premium Image Layer) ────────────────────────────
+    if (hasPremiumFace) {
+      const faceImg = imageCache!.get(branding.premium_face_url!);
+      if (faceImg) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation);
+        const scale = (outerRadius * 2) / Math.max(faceImg.width, faceImg.height);
+        const w = faceImg.width * scale;
+        const h = faceImg.height * scale;
+        ctx.drawImage(faceImg, -w / 2, -h / 2, w, h);
+        ctx.restore();
+      }
+    } else {
+      segments.forEach((seg, i) => {
+        const startAngle = rotation + i * segAngle - Math.PI / 2;
+        const endAngle = startAngle + segAngle;
 
-      ctx.beginPath();
-      ctx.moveTo(cx, cy);
-      ctx.arc(cx, cy, innerRadius, startAngle, endAngle);
-      ctx.closePath();
-      ctx.fillStyle = grad;
-      ctx.fill();
+        // Deep 3D radial gradient: almost black at center → mid-color → full color at edge
+        const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.05, cx, cy, innerRadius);
+        grad.addColorStop(0, '#000000'); // Deep dark core
+        grad.addColorStop(0.35, lightenHex(seg.bg_color, 10)); // Darker mid
+        grad.addColorStop(0.85, seg.bg_color); // Pure color
+        grad.addColorStop(1, lightenHex(seg.bg_color, 25)); // Slightly lighter edge to catch light
 
-      // Crisp white divider
-      ctx.strokeStyle = 'rgba(255,255,255,0.55)';
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    });
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, innerRadius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        // Crisp white divider
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      });
+    }
 
     // ── 2. Segment icons + labels ─────────────────────────────────────────────
     const iconRadius = Math.min(innerRadius * 0.18, 26);
@@ -363,7 +387,8 @@ export function drawWheel(
     });
 
     // ── 3. Inner ring band ────────────────────────────────────────────────────
-    if (branding.inner_ring_enabled) {
+    if (!hasPremiumFace) {
+      if (branding.inner_ring_enabled) {
       const bandWidth = Math.max(6, outerRingWidth * 0.3);
       ctx.beginPath();
       ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
@@ -573,6 +598,20 @@ export function drawWheel(
     ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
     ctx.fillStyle = hubGloss;
     ctx.fill();
+    } // <-- End if (!hasPremiumFace)
+
+    // ── 7. Premium Stand Layer (STATIC) ───────────────────────────────────────
+    if (hasPremiumStand) {
+      const standImg = imageCache!.get(branding.premium_stand_url!);
+      if (standImg) {
+        ctx.save();
+        const scale = (outerRadius * 2) / Math.max(standImg.width, standImg.height);
+        const w = standImg.width * scale;
+        const h = standImg.height * scale;
+        ctx.drawImage(standImg, cx - w / 2, cy - h / 2, w, h);
+        ctx.restore();
+      }
+    }
 
   } catch (e) {
     console.error('drawWheel error', e);

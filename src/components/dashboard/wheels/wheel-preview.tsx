@@ -18,7 +18,7 @@ export function WheelPreview({ segments, config, branding, rotation = 0 }: Wheel
   useEffect(() => {
     async function draw() {
       if (!canvasRef.current) return;
-      await preloadSegmentImages(segments, config, imageCacheRef.current);
+      await preloadSegmentImages(segments, config, branding, imageCacheRef.current);
       drawWheel(canvasRef.current, segments, rotation, config, branding, imageCacheRef.current);
     }
     draw();

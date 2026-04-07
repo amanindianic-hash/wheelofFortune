@@ -64,7 +64,7 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
   useEffect(() => {
     async function draw() {
       if (segments.length === 0 || !canvasRef.current) return;
-      await preloadSegmentImages(segments, config, imageCacheRef.current);
+      await preloadSegmentImages(segments, config, branding, imageCacheRef.current);
       drawWheel(canvasRef.current, segments, rotation, config, branding, imageCacheRef.current);
     }
     draw();
