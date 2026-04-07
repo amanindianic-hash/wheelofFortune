@@ -25,7 +25,7 @@ import {
   ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
   Palette, Type, Globe, Users, Code, QrCode,
   Share2, Monitor, Link, Camera, Search, CreditCard,
-  Dices, Circle as CircleIcon, Play, Pause,
+  Dices, Circle as CircleIcon, Play, Pause, ImageIcon, X,
 } from 'lucide-react';
 
 const PLAN_COLORS = ['#E74C3C', '#3498DB', '#2ECC71', '#F39C12', '#9B59B6', '#1ABC9C', '#E67E22', '#2980B9'];
@@ -208,6 +208,17 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
           <div className="lg:col-span-7 space-y-6">
             {/* SEGMENTS TAB */}
             <TabsContent value="segments" className="space-y-4 mt-0">
+              {/* Image-mode notice */}
+              {wheel?.branding.premium_face_url && (
+                <div className="flex items-start gap-2.5 rounded-lg bg-amber-500/8 border border-amber-500/20 px-3 py-2.5">
+                  <span className="text-amber-400 text-base leading-none mt-px">🖼</span>
+                  <div className="text-[12px] leading-relaxed">
+                    <span className="font-semibold text-amber-300">Image Mode active</span>
+                    <span className="text-amber-300/70"> — the Wheel PNG provides all segment visuals. </span>
+                    <span className="text-amber-300/70"><strong className="text-amber-300">Label</strong>, <strong className="text-amber-300">Text Color</strong>, and <strong className="text-amber-300">Prize</strong> still apply. Background Color is ignored.</span>
+                  </div>
+                </div>
+              )}
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">{segments.length} segments (min 2, max 24)</p>
                 <div className="flex gap-2">
@@ -224,7 +235,14 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                   <Card key={idx} className="overflow-hidden">
                     <CardContent className="pt-4 space-y-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full border-2 border-white shadow shrink-0" style={{ backgroundColor: seg.bg_color }} />
+                        <div className="w-8 h-8 rounded-full border-2 border-white shadow shrink-0 relative overflow-hidden"
+                          style={{ backgroundColor: seg.bg_color === 'transparent' ? undefined : seg.bg_color }}>
+                          {seg.bg_color === 'transparent' && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-amber-500/30 to-amber-700/30">
+                              <span className="text-[8px] text-amber-300 font-bold leading-none">IMG</span>
+                            </div>
+                          )}
+                        </div>
                         <div className="flex-1 grid grid-cols-2 gap-3">
                           <div>
                             <Label className="text-xs">Label</Label>
@@ -291,19 +309,25 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                         )}
                       </div>
 
-                      <div className="grid grid-cols-3 gap-3">
-                        <div>
-                          <Label className="text-xs">Background Color</Label>
-                          <div className="flex gap-2 items-center">
-                            <input type="color" value={seg.bg_color} onChange={(e) => updateSegment(idx, 'bg_color', e.target.value)}
-                              className="w-8 h-8 rounded cursor-pointer border" />
-                            <Input value={seg.bg_color} onChange={(e) => updateSegment(idx, 'bg_color', e.target.value)} className="h-8 text-sm font-mono" />
+                      <div className={`grid gap-3 ${wheel?.branding.premium_face_url ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                        {!wheel?.branding.premium_face_url && (
+                          <div>
+                            <Label className="text-xs">Background Color</Label>
+                            <div className="flex gap-2 items-center">
+                              <input type="color"
+                                value={seg.bg_color.startsWith('#') ? seg.bg_color : '#7C3AED'}
+                                onChange={(e) => updateSegment(idx, 'bg_color', e.target.value)}
+                                className="w-8 h-8 rounded cursor-pointer border" />
+                              <Input value={seg.bg_color} onChange={(e) => updateSegment(idx, 'bg_color', e.target.value)} className="h-8 text-sm font-mono" />
+                            </div>
                           </div>
-                        </div>
+                        )}
                         <div>
                           <Label className="text-xs">Text Color</Label>
                           <div className="flex gap-2 items-center">
-                            <input type="color" value={seg.text_color} onChange={(e) => updateSegment(idx, 'text_color', e.target.value)}
+                            <input type="color"
+                              value={seg.text_color.startsWith('#') ? seg.text_color : '#FFFFFF'}
+                              onChange={(e) => updateSegment(idx, 'text_color', e.target.value)}
                               className="w-8 h-8 rounded cursor-pointer border" />
                             <Input value={seg.text_color} onChange={(e) => updateSegment(idx, 'text_color', e.target.value)} className="h-8 text-sm font-mono" />
                           </div>
@@ -531,14 +555,160 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 </CardContent>
               </Card>
 
+              {/* ── PREMIUM IMAGE MODE ─────────────────────────────────────── */}
+              {(!wheel.config.game_type || wheel.config.game_type === 'wheel') && (
+                <Card>
+                  <CardHeader className="border-b border-border/50 px-4 py-3">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4 text-violet-400" />
+                      Premium Image Mode
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4 pt-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">Enable Image Mode</p>
+                        <p className="text-xs text-muted-foreground">Use custom PNG layers instead of the standard rendered wheel</p>
+                      </div>
+                      <Switch
+                        checked={!!wheel.branding.premium_face_url}
+                        onCheckedChange={(enabled) => setWheel({
+                          ...wheel,
+                          branding: {
+                            ...wheel.branding,
+                            premium_face_url:  enabled ? (wheel.branding.premium_face_url  || '/assets/premium-wheels/Wheel.png') : null,
+                            premium_stand_url: enabled ? (wheel.branding.premium_stand_url || '/assets/premium-wheels/Stand.png') : null,
+                            premium_content_scale: enabled ? (wheel.branding.premium_content_scale ?? 0.75) : undefined,
+                            // Suppress standard decorators that conflict with image layers
+                            outer_ring_width:   enabled ? 0    : (wheel.branding.outer_ring_width ?? 20),
+                            inner_ring_enabled: enabled ? false : wheel.branding.inner_ring_enabled,
+                            rim_tick_style:     enabled ? 'none' : (wheel.branding.rim_tick_style ?? 'triangles'),
+                          },
+                        })}
+                      />
+                    </div>
+
+                    {!!wheel.branding.premium_face_url && (
+                      <>
+                        {/* URLs */}
+                        <div className="space-y-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-sm">Wheel Face URL <span className="text-muted-foreground font-normal">(spinning disc PNG)</span></Label>
+                            <div className="flex gap-2">
+                              <Input
+                                value={wheel.branding.premium_face_url ?? ''}
+                                placeholder="/assets/premium-wheels/Wheel.png"
+                                onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, premium_face_url: e.target.value || null } })}
+                                className="h-8 text-sm font-mono"
+                              />
+                              {wheel.branding.premium_face_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => setWheel({ ...wheel, branding: { ...wheel.branding, premium_face_url: null } })}
+                                  className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors border border-input"
+                                  title="Clear"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">Must be a publicly accessible URL or a path under <code>/public/</code></p>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <Label className="text-sm">Stand / Frame URL <span className="text-muted-foreground font-normal">(static overlay PNG)</span></Label>
+                            <div className="flex gap-2">
+                              <Input
+                                value={wheel.branding.premium_stand_url ?? ''}
+                                placeholder="/assets/premium-wheels/Stand.png"
+                                onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, premium_stand_url: e.target.value || null } })}
+                                className="h-8 text-sm font-mono"
+                              />
+                              {wheel.branding.premium_stand_url && (
+                                <button
+                                  type="button"
+                                  onClick={() => setWheel({ ...wheel, branding: { ...wheel.branding, premium_stand_url: null } })}
+                                  className="shrink-0 p-1.5 rounded-md text-muted-foreground hover:text-red-400 hover:bg-red-500/10 transition-colors border border-input"
+                                  title="Clear"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-muted-foreground">Leave empty to use no frame — just the spinning face</p>
+                          </div>
+                        </div>
+
+                        {/* Tuning sliders */}
+                        <div className="rounded-lg bg-black/20 border border-white/5 p-3 space-y-3">
+                          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Label Placement Tuning</p>
+
+                          {/* Content Scale */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs text-muted-foreground">Content Scale</Label>
+                              <span className="text-xs font-mono font-semibold tabular-nums">
+                                {(wheel.branding.premium_content_scale ?? 0.75).toFixed(2)}
+                              </span>
+                            </div>
+                            <input
+                              type="range" min="0.2" max="1.2" step="0.05"
+                              value={wheel.branding.premium_content_scale ?? 0.75}
+                              onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, premium_content_scale: parseFloat(e.target.value) } })}
+                              className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-violet-500"
+                              style={{
+                                background: `linear-gradient(to right, oklch(0.55 0.22 264) ${(((wheel.branding.premium_content_scale ?? 0.75) - 0.2) / 1.0) * 100}%, oklch(1 0 0 / 10%) ${(((wheel.branding.premium_content_scale ?? 0.75) - 0.2) / 1.0) * 100}%)`
+                              }}
+                            />
+                            <p className="text-[10px] text-muted-foreground">Move labels in/out — increase if labels are too central, decrease if they appear outside the wheel</p>
+                          </div>
+
+                          {/* Center Offset Y */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center justify-between">
+                              <Label className="text-xs text-muted-foreground">Center Offset Y</Label>
+                              <span className="text-xs font-mono font-semibold tabular-nums">
+                                {wheel.branding.premium_center_offset_y ?? 0}px
+                              </span>
+                            </div>
+                            <input
+                              type="range" min="-80" max="80" step="1"
+                              value={wheel.branding.premium_center_offset_y ?? 0}
+                              onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, premium_center_offset_y: parseFloat(e.target.value) || undefined } })}
+                              className="w-full h-1.5 rounded-full appearance-none cursor-pointer accent-violet-500"
+                              style={{
+                                background: `linear-gradient(to right, oklch(0.55 0.22 264) ${(((wheel.branding.premium_center_offset_y ?? 0) + 80) / 160) * 100}%, oklch(1 0 0 / 10%) ${(((wheel.branding.premium_center_offset_y ?? 0) + 80) / 160) * 100}%)`
+                              }}
+                            />
+                            <p className="text-[10px] text-muted-foreground">Shift label centre vertically — use if the disc is not centred in the image</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-start gap-2 rounded-lg bg-amber-500/8 border border-amber-500/15 p-2.5">
+                          <ImageIcon className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                          <p className="text-[11px] text-amber-300/80 leading-relaxed">
+                            Use the <strong className="text-amber-300">Theme Tester</strong> tool to upload and preview images locally before entering URLs here.
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
               <Card>
                 <CardHeader className="border-b border-border/50 px-4 py-3">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
                     <CircleIcon className="h-4 w-4 text-muted-foreground" />
                     Visual Ring
+                    {!!wheel.branding.premium_face_url && (
+                      <Badge variant="outline" className="ml-auto text-[10px] text-amber-400 border-amber-500/30">
+                        Overridden by Image Mode
+                      </Badge>
+                    )}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className={`space-y-4 ${wheel.branding.premium_face_url ? 'opacity-40 pointer-events-none select-none' : ''}`}>
 
                   {/* Outer ring */}
                   <div className="grid grid-cols-2 gap-4">
