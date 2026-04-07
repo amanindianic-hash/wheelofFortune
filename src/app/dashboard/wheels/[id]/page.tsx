@@ -81,10 +81,27 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     segment_palette: Array<{ bg_color: string; text_color: string }>;
   }>>([]);
 
-  // ── Currently applied theme ────────────────────────────────────────────────
+  // ── Currently applied theme (persisted in localStorage) ───────────────────
   const [appliedTheme, setAppliedTheme] = useState<{
     id: string; name: string; emoji: string; type: 'custom' | 'built-in';
-  } | null>(null);
+  } | null>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem(`wheel-${id}-theme`);
+      if (saved) {
+        try { return JSON.parse(saved); } catch { return null; }
+      }
+    }
+    return null;
+  });
+
+  // Persist applied theme to localStorage
+  useEffect(() => {
+    if (appliedTheme) {
+      localStorage.setItem(`wheel-${id}-theme`, JSON.stringify(appliedTheme));
+    } else {
+      localStorage.removeItem(`wheel-${id}-theme`);
+    }
+  }, [appliedTheme, id]);
 
   async function load() {
     const [wRes, pRes, tRes] = await Promise.all([
@@ -100,6 +117,40 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     setPrizes(pData.prizes ?? []);
     if (tRes.ok) { const tData = await tRes.json(); setSavedThemes(tData.themes ?? []); }
   }
+
+  // Apply saved theme on load if exists
+  useEffect(() => {
+    if (!wheel || !savedThemes.length) return;
+    const savedThemeStr = localStorage.getItem(`wheel-${id}-theme`);
+    if (!savedThemeStr) return;
+
+    let themeToApply: { id: string; name: string; emoji: string; type: 'custom' | 'built-in'; config?: Record<string, unknown>; branding?: Record<string, unknown>; segmentPalette?: Array<{ bg_color: string; text_color: string }> } | null = null;
+
+    try {
+      const savedTheme = JSON.parse(savedThemeStr);
+      // Check custom themes
+      const customTheme = savedThemes.find(t => t.id === savedTheme.id);
+      if (customTheme) {
+        themeToApply = { id: customTheme.id, name: customTheme.name, emoji: customTheme.emoji, type: 'custom', config: customTheme.config, branding: customTheme.branding, segmentPalette: customTheme.segment_palette };
+      } else {
+        // Check built-in templates
+        const builtIn = WHEEL_TEMPLATES.find(t => t.id === savedTheme.id);
+        if (builtIn) {
+          themeToApply = { id: builtIn.id, name: builtIn.name, emoji: builtIn.emoji, type: 'built-in', config: builtIn.config, branding: builtIn.branding, segmentPalette: builtIn.segmentPalette };
+        }
+      }
+
+      if (themeToApply) {
+        setWheel({ ...wheel, config: { ...wheel.config, ...themeToApply.config }, branding: { ...wheel.branding, ...themeToApply.branding } });
+        if (themeToApply.segmentPalette?.length) {
+          setSegments(prev => prev.map((seg, i) => ({ ...seg, bg_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].bg_color, text_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].text_color })));
+        }
+        setAppliedTheme({ id: themeToApply.id, name: themeToApply.name, emoji: themeToApply.emoji, type: themeToApply.type });
+      }
+    } catch (e) {
+      // Invalid JSON, ignore
+    }
+  }, [wheel, savedThemes, id]);
 
   useEffect(() => { load(); }, [id]);
 
@@ -1861,24 +1912,28 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               <CardContent className="p-5">
                 {wheel.config.game_type === 'scratch_card' ? (
                   <ScratchPreview
+                    key={appliedTheme?.id ?? 'default'}
                     segments={segments as unknown as WheelSegment[]}
                     branding={wheel.branding}
                     config={wheel.config}
                   />
                 ) : wheel.config.game_type === 'slot_machine' ? (
                   <SlotPreview
+                    key={appliedTheme?.id ?? 'default'}
                     segments={segments as unknown as WheelSegment[]}
                     branding={wheel.branding}
                     config={wheel.config}
                   />
                 ) : wheel.config.game_type === 'roulette' ? (
                   <RoulettePreview
+                    key={appliedTheme?.id ?? 'default'}
                     segments={segments as unknown as WheelSegment[]}
                     branding={wheel.branding}
                     config={wheel.config}
                   />
                 ) : (
                   <WheelPreview
+                    key={appliedTheme?.id ?? 'default'}
                     segments={segments as unknown as WheelSegment[]}
                     config={wheel.config}
                     branding={wheel.branding}
