@@ -166,6 +166,19 @@ export function drawWheel(
 
     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
+    // ── Pre-calculate shadow base ─────────────────────────────────────────────
+    // To make it look like a physical 3D object on the screen, add a soft drop shadow
+    // beneath the entire wheel to give depth before drawing anything.
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 25;
+    ctx.shadowOffsetY = 15;
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+    ctx.fill();
+    ctx.restore();
+
     // ── Empty state ───────────────────────────────────────────────────────────
     if (segments.length === 0) {
       ctx.beginPath();
@@ -180,11 +193,12 @@ export function drawWheel(
       const startAngle = rotation + i * segAngle - Math.PI / 2;
       const endAngle = startAngle + segAngle;
 
-      // Radial gradient: lighter at center → full color at edge (depth effect)
-      const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.1, cx, cy, innerRadius);
-      grad.addColorStop(0, lightenHex(seg.bg_color, 55));
-      grad.addColorStop(0.6, lightenHex(seg.bg_color, 18));
-      grad.addColorStop(1, seg.bg_color);
+      // Deep 3D radial gradient: almost black at center → mid-color → full color at edge
+      const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.05, cx, cy, innerRadius);
+      grad.addColorStop(0, '#000000'); // Deep dark core
+      grad.addColorStop(0.35, lightenHex(seg.bg_color, 10)); // Darker mid
+      grad.addColorStop(0.85, seg.bg_color); // Pure color
+      grad.addColorStop(1, lightenHex(seg.bg_color, 25)); // Slightly lighter edge to catch light
 
       ctx.beginPath();
       ctx.moveTo(cx, cy);
@@ -358,24 +372,53 @@ export function drawWheel(
       ctx.fill();
     }
 
-    // ── 4. Outer decorative ring with gloss ───────────────────────────────────
-    // Base ring fill
+    // ── 4. Outer decorative ring with 3D metallic/gloss gradient ──────────────
+    // To match Freepik premium designs, the ring gets a rich, dark metallic rim 
+    // instead of flat colors. We create a dual lighting linear gradient.
+    const metallicOuterGrad = ctx.createLinearGradient(cx, cy - outerRadius, cx, cy + outerRadius);
+    const [br, bg, bb] = hexToRgb(outerRingColor);
+    
+    // Create a metallic specular reflection by layering stops
+    metallicOuterGrad.addColorStop(0, `rgb(${Math.min(br+80, 255)},${Math.min(bg+80, 255)},${Math.min(bb+80, 255)})`);
+    metallicOuterGrad.addColorStop(0.15, outerRingColor);
+    metallicOuterGrad.addColorStop(0.4, `rgb(${Math.max(br-60, 0)},${Math.max(bg-60, 0)},${Math.max(bb-60, 0)})`);
+    metallicOuterGrad.addColorStop(0.8, `rgb(${Math.max(br-90, 0)},${Math.max(bg-90, 0)},${Math.max(bb-90, 0)})`);
+    metallicOuterGrad.addColorStop(0.95, outerRingColor);
+    metallicOuterGrad.addColorStop(1, `rgb(${Math.min(br+50, 255)},${Math.min(bg+50, 255)},${Math.min(bb+50, 255)})`);
+
     ctx.beginPath();
     ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
     ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI, true);
-    ctx.fillStyle = outerRingColor;
+    ctx.fillStyle = metallicOuterGrad;
     ctx.fill();
 
-    // Gloss highlight — top half brighter, bottom darker (3D cylinder illusion)
-    const glossGrad = ctx.createLinearGradient(cx, cy - outerRadius, cx, cy + outerRadius);
-    glossGrad.addColorStop(0, 'rgba(255,255,255,0.30)');
-    glossGrad.addColorStop(0.45, 'rgba(255,255,255,0.08)');
-    glossGrad.addColorStop(0.55, 'rgba(0,0,0,0.05)');
-    glossGrad.addColorStop(1, 'rgba(0,0,0,0.18)');
+    // 3D Rim Inner Bevel
     ctx.beginPath();
-    ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
-    ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI, true);
-    ctx.fillStyle = glossGrad;
+    ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    // Inner bevel highlight
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerRadius + 2, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // ── Global Gloss overlay on the wheel ──
+    // Dramatic soft crescent gloss highlight on the top left
+    const globalGloss = ctx.createRadialGradient(
+      cx - outerRadius * 0.4, cy - outerRadius * 0.6, 0,
+      cx, cy, outerRadius
+    );
+    globalGloss.addColorStop(0, 'rgba(255,255,255,0.22)');
+    globalGloss.addColorStop(0.3, 'rgba(255,255,255,0.06)');
+    globalGloss.addColorStop(0.6, 'rgba(0,0,0,0.15)');
+    globalGloss.addColorStop(1, 'rgba(0,0,0,0.45)');
+    
+    ctx.beginPath();
+    ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
+    ctx.fillStyle = globalGloss;
     ctx.fill();
 
     // ── 5. Rim tick marks ─────────────────────────────────────────────────────
@@ -404,57 +447,94 @@ export function drawWheel(
           ctx.fill();
           ctx.restore();
         } else if (rimTickStyle === 'dots') {
+          // Premium Casino Bulb Style (3D luminous bulbs)
           ctx.save();
-          ctx.shadowColor = 'rgba(0,0,0,0.25)';
-          ctx.shadowBlur = 4;
+          // Glow around bulb
+          ctx.shadowColor = rimTickColor; // Glow matches tick color
+          ctx.shadowBlur = 12;
           ctx.beginPath();
+          const bulbR = outerRingWidth * 0.28;
           ctx.arc(
             cx + Math.cos(angle) * midRingR,
             cy + Math.sin(angle) * midRingR,
-            outerRingWidth * 0.2,
+            bulbR,
             0,
             2 * Math.PI,
           );
           ctx.fillStyle = rimTickColor;
+          ctx.fill();
+          
+          // Bulb Core
+          ctx.shadowBlur = 0;
+          ctx.beginPath();
+          ctx.arc(
+            cx + Math.cos(angle) * midRingR,
+            cy + Math.sin(angle) * midRingR,
+            bulbR * 0.7,
+            0,
+            2 * Math.PI,
+          );
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fill();
+
+          // Specular bulb highlight
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          ctx.beginPath();
+          ctx.arc(
+            cx + Math.cos(angle) * midRingR - bulbR * 0.25,
+            cy + Math.sin(angle) * midRingR - bulbR * 0.25,
+            bulbR * 0.2,
+            0,
+            2 * Math.PI,
+          );
           ctx.fill();
           ctx.restore();
         }
       });
     }
 
-    // Ring edge highlights
+    // Ring outer edge highlight
     ctx.beginPath();
-    ctx.arc(cx, cy, outerRadius - 0.75, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.arc(cx, cy, outerRadius - 1, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
-
+    
     ctx.beginPath();
-    ctx.arc(cx, cy, innerRadius + 0.75, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
-    ctx.lineWidth = 1;
+    ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
+    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+    ctx.lineWidth = 2;
     ctx.stroke();
 
     // ── 6. Center hub with gloss ──────────────────────────────────────────────
-    const centerR = Math.max(18, innerRadius * 0.13);
+    const centerR = Math.max(22, innerRadius * 0.16);
 
-    // Outer shadow ring
+    // Outer shadow ring of hub
     ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.5)';
-    ctx.shadowBlur = 14;
-    ctx.shadowOffsetY = 2;
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 20;
+    ctx.shadowOffsetY = 4;
     ctx.beginPath();
-    ctx.arc(cx, cy, centerR, 0, 2 * Math.PI);
-    ctx.fillStyle = primaryColor;
+    ctx.arc(cx, cy, centerR + 4, 0, 2 * Math.PI);
+    ctx.fillStyle = '#1D1D1D'; // Dark metallic hub housing
     ctx.fill();
     ctx.restore();
 
-    // White border
+    // Secondary hub gradient ring
+    const hubOuterGrad = ctx.createLinearGradient(cx - centerR, cy - centerR, cx + centerR, cy + centerR);
+    hubOuterGrad.addColorStop(0, '#FFFFFF');
+    hubOuterGrad.addColorStop(0.5, '#777777');
+    hubOuterGrad.addColorStop(1, '#222222');
     ctx.beginPath();
     ctx.arc(cx, cy, centerR, 0, 2 * Math.PI);
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 3;
-    ctx.stroke();
+    ctx.fillStyle = hubOuterGrad;
+    ctx.fill();
+
+    // Primary Color Fill
+    ctx.beginPath();
+    ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
+    ctx.fillStyle = primaryColor;
+    ctx.fill();
 
     // Center image or gloss dot
     const centerImgUrl = config.center_image_url;
@@ -479,16 +559,18 @@ export function drawWheel(
       ctx.fill();
     }
 
-    // Gloss overlay on hub (top-left highlight = 3D sphere effect)
+    // Extreme Gloss overlay on hub (3D jewel spherical effect)
     const hubGloss = ctx.createRadialGradient(
-      cx - centerR * 0.3, cy - centerR * 0.35, 0,
+      cx - centerR * 0.35, cy - centerR * 0.45, 1,
       cx, cy, centerR,
     );
-    hubGloss.addColorStop(0, 'rgba(255,255,255,0.42)');
-    hubGloss.addColorStop(0.5, 'rgba(255,255,255,0.08)');
-    hubGloss.addColorStop(1, 'rgba(0,0,0,0.0)');
+    hubGloss.addColorStop(0, 'rgba(255,255,255,0.8)');
+    hubGloss.addColorStop(0.35, 'rgba(255,255,255,0.15)');
+    hubGloss.addColorStop(0.8, 'rgba(0,0,0,0.4)');
+    hubGloss.addColorStop(1, 'rgba(0,0,0,0.7)');
+    
     ctx.beginPath();
-    ctx.arc(cx, cy, centerR - 1, 0, 2 * Math.PI);
+    ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
     ctx.fillStyle = hubGloss;
     ctx.fill();
 

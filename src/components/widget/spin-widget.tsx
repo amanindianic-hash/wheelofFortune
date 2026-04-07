@@ -5,10 +5,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { drawWheel, preloadSegmentImages, type WheelSegment, type WheelConfig, type WheelBranding, type ImageCache, easeOutQuart } from '@/lib/utils/wheel-renderer';
 
-interface WheelSegment { id: string; position: number; label: string; bg_color: string; text_color: string; weight: number; is_no_prize: boolean; }
-interface WheelConfig { spin_duration_ms?: number; pointer_position?: string; confetti_enabled?: boolean; show_segment_labels?: boolean; sound_enabled?: boolean; sound_url?: string | null; }
-interface WheelBranding { button_text?: string; primary_color?: string; border_color?: string; border_width?: number; background_value?: string; font_family?: string; }
 interface FormConfig { enabled?: boolean; fields?: Array<{ key: string; label: string; type: string; required?: boolean }>; gdpr_enabled?: boolean; gdpr_text?: string; privacy_policy_url?: string | null; }
 interface SpinResult { is_winner: boolean; segment: { label: string }; prize?: { display_title: string; display_description?: string; type: string; custom_message_html?: string; redirect_url?: string } | null; coupon_code?: string | null; consolation_message?: string | null; }
 
@@ -29,6 +27,7 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
   const [errorMsg, setErrorMsg] = useState('');
   const spinningRef = useRef(false);
   const currentRotRef = useRef(0);
+  const imageCacheRef = useRef<ImageCache>(new Map());
 
   // Load session on mount
   useEffect(() => {
@@ -63,8 +62,12 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
 
   // Draw wheel on canvas — also depends on `phase` so it fires when canvas first mounts
   useEffect(() => {
-    if (segments.length === 0 || !canvasRef.current) return;
-    drawWheel(canvasRef.current, segments, rotation, config, branding);
+    async function draw() {
+      if (segments.length === 0 || !canvasRef.current) return;
+      await preloadSegmentImages(segments, config, imageCacheRef.current);
+      drawWheel(canvasRef.current, segments, rotation, config, branding, imageCacheRef.current);
+    }
+    draw();
   }, [segments, rotation, config, branding, phase]);
 
   async function handleSpin() {
@@ -260,18 +263,30 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4"
       style={{ backgroundColor: bgColor, fontFamily }}>
       {/* Wheel canvas */}
-      <div className="relative">
-        {/* Pointer */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-10">
-          <div className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[24px] border-l-transparent border-r-transparent"
-            style={{ borderTopColor: buttonColor }} />
+      <div className="relative isolate pt-4">
+        {/* Premium 3D Pointer */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+          {/* Base Mount */}
+          <div className="w-8 h-4 bg-gradient-to-b from-[#f8f9fa] to-[#d1d5db] rounded-t-md shadow-sm border border-b-0 border-black/10 relative z-10" />
+          {/* Arrow */}
+          <div className="relative -mt-0.5 drop-shadow-xl filter">
+            <svg width="28" height="38" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 38L2 14V2C2 2 12 4 16 4C20 4 30 2 30 2V14L16 38Z" fill={buttonColor} stroke="rgba(255,255,255,0.6)" strokeWidth="2" />
+              <path d="M16 34L4 15V5C7 6.5 11 7.5 16 7.5C21 7.5 25 6.5 28 5V15L16 34Z" fill="url(#arrow-grad-widget)" />
+              <defs>
+                <linearGradient id="arrow-grad-widget" x1="16" y1="5" x2="16" y2="34" gradientUnits="userSpaceOnUse">
+                  <stop stopColor="white" stopOpacity="0.3" />
+                  <stop offset="1" stopColor="black" stopOpacity="0.25" />
+                </linearGradient>
+              </defs>
+            </svg>
+          </div>
         </div>
         <canvas
           ref={canvasRef}
-          width={340}
-          height={340}
-          className="rounded-full shadow-2xl"
-          style={{ border: `${branding.border_width ?? 4}px solid ${branding.border_color ?? buttonColor}` }}
+          width={680} // 2x internally for crisp rendering
+          height={680}
+          className="rounded-full shadow-2xl bg-white w-[340px] h-[340px]"
         />
       </div>
 
@@ -287,69 +302,3 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
   );
 }
 
-// ============================================================
-// Canvas drawing utility
-// ============================================================
-function drawWheel(
-  canvas: HTMLCanvasElement,
-  segments: WheelSegment[],
-  rotation: number,
-  config: WheelConfig,
-  branding: WheelBranding,
-) {
-  try {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-    const radius = cx - 4;
-    const segAngle = (2 * Math.PI) / segments.length;
-
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  segments.forEach((seg, i) => {
-    const startAngle = rotation + i * segAngle - Math.PI / 2;
-    const endAngle = startAngle + segAngle;
-
-    // Segment fill
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.arc(cx, cy, radius, startAngle, endAngle);
-    ctx.closePath();
-    ctx.fillStyle = seg.bg_color || '#cccccc';
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Label
-    if (config.show_segment_labels !== false && seg.label) {
-      ctx.save();
-      ctx.translate(cx, cy);
-      ctx.rotate(startAngle + segAngle / 2);
-      ctx.textAlign = 'right';
-      ctx.fillStyle = seg.text_color || '#FFFFFF';
-      ctx.font = `bold ${segments.length > 12 ? 10 : 13}px ${branding.font_family || 'Inter, sans-serif'}`;
-      ctx.shadowColor = 'rgba(0,0,0,0.3)';
-      ctx.shadowBlur = 3;
-      ctx.fillText(seg.label, radius - 12, 5);
-      ctx.restore();
-    }
-  });
-
-  // Center circle
-  ctx.beginPath();
-  ctx.arc(cx, cy, 22, 0, 2 * Math.PI);
-  ctx.fillStyle = branding.primary_color || '#7C3AED';
-  ctx.fill();
-  ctx.strokeStyle = '#fff';
-  ctx.lineWidth = 3;
-  ctx.stroke();
-  } catch (e) {
-    console.error('drawWheel error', e);
-  }
-}
-
-function easeOutQuart(t: number): number {
-  return 1 - Math.pow(1 - t, 4);
-}
