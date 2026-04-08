@@ -21,6 +21,7 @@ import { SlotPreview } from '@/components/dashboard/wheels/slot-preview';
 import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview';
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
+import { applyTemplateToWheel } from '@/lib/utils/theme-utils';
 import {
   ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
   Palette, Type, Globe, Users, Code, QrCode,
@@ -1520,43 +1521,22 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                           variant={appliedTheme?.id === tpl.id ? 'default' : 'outline'}
                           className={`w-full transition-colors ${appliedTheme?.id === tpl.id ? 'bg-violet-600 text-white border-violet-600' : 'group-hover:bg-violet-600 group-hover:text-white group-hover:border-violet-600'}`}
                           onClick={() => {
-                            console.log('--- Applying Template:', tpl.name, '---');
-                            console.log('Selected Template Data:', {
-                              config: tpl.config,
-                              branding: tpl.branding,
-                              palette: tpl.segmentPalette
-                            });
-                            
                             if (!wheel) {
                               console.error('Apply Template Error: wheel state is null/undefined!');
                               return;
                             }
                             
+                            const { newConfig, newBranding, newSegments } = applyTemplateToWheel(tpl, segments);
+                            
                             const newWheel = {
                               ...wheel,
-                              config: { ...wheel.config, ...tpl.config },
-                              branding: { ...wheel.branding, ...tpl.branding },
+                              config: { ...wheel.config, ...newConfig },
+                              branding: { ...wheel.branding, ...newBranding },
                             };
                             
-                            console.log('New Wheel State to set:', newWheel);
                             setWheel(newWheel);
-                            
-                            let loggedSegments = false;
-                            setSegments((prev) => {
-                                const mapped = prev.map((seg, i) => {
-                                    const palette = tpl.segmentPalette[i % tpl.segmentPalette.length];
-                                    return { ...seg, bg_color: palette.bg_color, text_color: palette.text_color };
-                                });
-                                if (!loggedSegments) {
-                                    console.log('New Segments State to set:', mapped);
-                                    loggedSegments = true;
-                                }
-                                return mapped;
-                            });
-                            
-                            const newThemeData = { id: tpl.id, name: tpl.name, emoji: tpl.emoji, type: 'built-in' as const };
-                            console.log('New Applied Theme State:', newThemeData);
-                            setAppliedTheme(newThemeData);
+                            setSegments(newSegments);
+                            setAppliedTheme({ id: tpl.id, name: tpl.name, emoji: tpl.emoji, type: 'built-in' });
                             
                             toast.success(`"${tpl.name}" template applied — save to persist`);
                           }}
