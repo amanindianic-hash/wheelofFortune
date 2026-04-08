@@ -19,6 +19,9 @@ export default defineConfig({
     },
   },
   resolve: {
+    // 'development' condition ensures React 19 loads its dev build in tests,
+    // which keeps React.act available (stripped from the production bundle).
+    conditions: ['development'],
     alias: {
       '@': path.resolve(__dirname, './src'),
     },

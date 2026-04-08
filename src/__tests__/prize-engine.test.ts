@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, it, expect } from 'vitest';
 import { selectSegment, generateCouponCode } from '@/lib/prize-engine';
 import type { Segment } from '@/lib/types';
