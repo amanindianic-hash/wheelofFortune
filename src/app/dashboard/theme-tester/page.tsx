@@ -393,6 +393,19 @@ export default function ThemeTesterPage() {
 
   async function handleSaveTheme() {
     if (!saveName.trim()) { toast.error('Enter a theme name'); return; }
+    // Warn when a premium face image is loaded — saving now will bake
+    // outer_ring_width:0 / rim_tick_style:none / inner_ring_enabled:false into
+    // the theme, which makes it look broken when applied without the premium PNG.
+    if (faceInfo) {
+      const proceed = confirm(
+        'A premium face image is currently loaded.\n\n' +
+        'Saving now will bake premium-only settings (no outer ring, no rim ticks) ' +
+        'into the theme. When applied on a wheel without the premium image these ' +
+        'settings will produce a broken look.\n\n' +
+        'Remove the face image first, then save — or press OK to save anyway.'
+      );
+      if (!proceed) return;
+    }
     setSaving(true);
     try {
       const cfg = buildConfig();
