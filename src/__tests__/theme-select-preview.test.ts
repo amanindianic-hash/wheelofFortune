@@ -313,6 +313,40 @@ describe('Live preview state simulation', () => {
     expect(afterSecond.branding.primary_color).not.toBe(first.branding.primary_color);
   });
 
+  /**
+   * REGRESSION TEST — the bug reported in the screenshot:
+   * Applying a premium theme then switching to any non-premium theme must clear
+   * premium_face_url and premium_stand_url so the gold overlay disappears.
+   */
+  it('REGRESSION: switching from premium to non-premium clears premium_face_url and premium_stand_url', () => {
+    const premium = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
+    const nonPremium = WHEEL_TEMPLATES.find((t) => t.id === 'tropical')!;
+
+    // Step 1 — apply premium theme (simulates user picking "Freepik Gold Test")
+    const afterPremium = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, premium);
+    expect(afterPremium.branding.premium_face_url).toBe('/assets/premium-wheels/Wheel.png');
+
+    // Step 2 — apply non-premium theme (simulates user picking "Tropical")
+    const afterSwitch = simulateLivePreview(afterPremium.config, afterPremium.branding, afterPremium.segments, nonPremium);
+
+    // premium URLs must be null — NOT the old '/assets/premium-wheels/Wheel.png'
+    expect(afterSwitch.branding.premium_face_url).toBeNull();
+    expect(afterSwitch.branding.premium_stand_url).toBeNull();
+  });
+
+  it('REGRESSION: switching from premium to non-premium restores visible segment colors', () => {
+    const premium = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
+    const nonPremium = WHEEL_TEMPLATES.find((t) => t.id === 'neon-night')!;
+
+    const afterPremium = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, premium);
+    // After premium all segments are transparent
+    afterPremium.segments.forEach((s) => expect(s.bg_color).toBe('transparent'));
+
+    const afterSwitch = simulateLivePreview(afterPremium.config, afterPremium.branding, afterPremium.segments, nonPremium);
+    // After switching to neon-night, segments should have real colors again
+    afterSwitch.segments.forEach((s) => expect(s.bg_color).not.toBe('transparent'));
+  });
+
   it('segment label content is preserved through live preview apply', () => {
     const t = WHEEL_TEMPLATES.find((t) => t.id === 'pastel-spring')!;
     const { segments } = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, t);

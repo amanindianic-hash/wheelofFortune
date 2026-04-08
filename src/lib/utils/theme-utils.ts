@@ -19,9 +19,22 @@ export function applyTemplateToWheel(
     };
   });
 
+  // Always explicitly include premium fields so switching FROM a premium template
+  // TO a non-premium one clears them. Without this, the spread in the dashboard
+  // ( { ...wheel.branding, ...newBranding } ) would leave the previous
+  // premium_face_url / premium_stand_url intact because non-premium templates
+  // simply don't include those keys — they never get overwritten to null.
+  const newBranding: Partial<WheelBranding> = {
+    premium_face_url: template.branding.premium_face_url ?? null,
+    premium_stand_url: template.branding.premium_stand_url ?? null,
+    premium_content_scale: template.branding.premium_content_scale,
+    premium_center_offset_y: template.branding.premium_center_offset_y,
+    ...template.branding,
+  };
+
   return {
     newConfig: { ...template.config },
-    newBranding: { ...template.branding },
+    newBranding,
     newSegments,
   };
 }
