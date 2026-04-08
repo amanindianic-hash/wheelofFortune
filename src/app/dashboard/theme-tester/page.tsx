@@ -349,28 +349,29 @@ export default function ThemeTesterPage() {
     });
   }
 
+  function fileToDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleFaceUpload(file: File) {
     if (faceInfo) URL.revokeObjectURL(faceInfo.url);
-    // Show preview immediately with a local blob URL while uploading
     const localInfo = await loadImageInfo(file);
     setFaceInfo(localInfo);
     setCacheKey(`face-${Date.now()}`);
 
     setFaceUploading(true);
     try {
-      const form = new FormData();
-      form.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: form });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        URL.revokeObjectURL(localInfo.url);
-        setFaceInfo({ ...localInfo, url: data.url });
-        toast.success('Wheel face uploaded');
-      } else {
-        toast.error(data.error?.message ?? 'Upload failed — image works this session only');
-      }
+      const dataUrl = await fileToDataUrl(file);
+      URL.revokeObjectURL(localInfo.url);
+      setFaceInfo({ ...localInfo, url: dataUrl });
+      toast.success('Wheel face loaded');
     } catch {
-      toast.error('Upload failed — image works this session only');
+      toast.error('Failed to process image');
     } finally {
       setFaceUploading(false);
     }
@@ -384,19 +385,12 @@ export default function ThemeTesterPage() {
 
     setStandUploading(true);
     try {
-      const form = new FormData();
-      form.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: form });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        URL.revokeObjectURL(localInfo.url);
-        setStandInfo({ ...localInfo, url: data.url });
-        toast.success('Stand / frame uploaded');
-      } else {
-        toast.error(data.error?.message ?? 'Upload failed — image works this session only');
-      }
+      const dataUrl = await fileToDataUrl(file);
+      URL.revokeObjectURL(localInfo.url);
+      setStandInfo({ ...localInfo, url: dataUrl });
+      toast.success('Stand / frame loaded');
     } catch {
-      toast.error('Upload failed — image works this session only');
+      toast.error('Failed to process image');
     } finally {
       setStandUploading(false);
     }
