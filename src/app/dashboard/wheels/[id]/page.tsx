@@ -142,7 +142,14 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       }
 
       if (themeToApply) {
-        setWheel({ ...wheel, config: { ...wheel.config, ...themeToApply.config }, branding: { ...wheel.branding, ...themeToApply.branding } });
+        const tb = themeToApply.branding as Record<string, unknown>;
+        setWheel({ ...wheel, config: { ...wheel.config, ...themeToApply.config }, branding: {
+          ...wheel.branding,
+          // Clear premium URLs when the restored theme doesn't carry them.
+          premium_face_url: (tb.premium_face_url as string) ?? null,
+          premium_stand_url: (tb.premium_stand_url as string) ?? null,
+          ...themeToApply.branding,
+        } });
         if (themeToApply.segmentPalette?.length) {
           setSegments(prev => prev.map((seg, i) => ({ ...seg, bg_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].bg_color, text_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].text_color })));
         }
@@ -1463,10 +1470,18 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                             className={`w-full transition-colors ${appliedTheme?.id === theme.id ? 'bg-amber-500 text-black border-amber-500' : 'group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500'}`}
                             onClick={() => {
                               if (!wheel) return;
+                              const tb = theme.branding as Record<string, unknown>;
                               setWheel({
                                 ...wheel,
                                 config: { ...wheel.config, ...theme.config },
-                                branding: { ...wheel.branding, ...theme.branding },
+                                branding: {
+                                  ...wheel.branding,
+                                  // Explicitly clear premium URLs when the custom theme doesn't set them,
+                                  // so switching away from a premium theme always removes the overlay.
+                                  premium_face_url: (tb.premium_face_url as string) ?? null,
+                                  premium_stand_url: (tb.premium_stand_url as string) ?? null,
+                                  ...theme.branding,
+                                },
                               });
                               if (theme.segment_palette.length > 0) {
                                 setSegments((prev) =>

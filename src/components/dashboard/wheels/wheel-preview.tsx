@@ -52,8 +52,16 @@ export function WheelPreview({ segments, config, branding, rotation = 0 }: Wheel
           ref={canvasRef}
           width={720} // Rendering at 2x internally for crisp graphics
           height={720}
-          className="rounded-full shadow-2xl bg-white w-[360px] h-[360px]"
-          // Remove border from canvas styles because the wheel-renderer handles its own dynamic premium edge rendering
+          className="rounded-full shadow-2xl w-[360px] h-[360px]"
+          style={{
+            // Use the theme's background colour so premium transparent wheels
+            // don't show a white canvas. Fall back to transparent.
+            background:
+              branding.background_value &&
+              branding.background_value !== 'rgba(0, 0, 0, 0)'
+                ? branding.background_value
+                : 'transparent',
+          }}
         />
       </div>
 
