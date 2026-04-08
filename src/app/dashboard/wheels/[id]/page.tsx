@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use, useCallback } from 'react';
+import { useEffect, useState, use, useCallback, useRef } from 'react';
 import QRCode from 'qrcode';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -74,6 +74,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   const [saving, setSaving]       = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState('');
   const [qrSize, setQrSize]       = useState(256);
+  const themeRestoredRef = useRef(false);
 
   // ── Saved custom themes ────────────────────────────────────────────────────
   const [savedThemes, setSavedThemes] = useState<Array<{
@@ -119,9 +120,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     if (tRes.ok) { const tData = await tRes.json(); setSavedThemes(tData.themes ?? []); }
   }
 
-  // Apply saved theme on load if exists
+  // Apply saved theme on load if exists — runs only once after both wheel and themes are loaded
   useEffect(() => {
-    if (!wheel || !savedThemes.length) return;
+    if (!wheel || !savedThemes.length || themeRestoredRef.current) return;
     const savedThemeStr = localStorage.getItem(`wheel-${id}-theme`);
     if (!savedThemeStr) return;
 
@@ -142,6 +143,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       }
 
       if (themeToApply) {
+        themeRestoredRef.current = true; // prevent re-running when setWheel triggers re-render
         const tb = themeToApply.branding as Record<string, unknown>;
         setWheel({ ...wheel, config: { ...wheel.config, ...themeToApply.config }, branding: {
           ...wheel.branding,
@@ -154,9 +156,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
           setSegments(prev => prev.map((seg, i) => ({ ...seg, bg_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].bg_color, text_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].text_color })));
         }
         setAppliedTheme({ id: themeToApply.id, name: themeToApply.name, emoji: themeToApply.emoji, type: themeToApply.type });
+      } else {
+        themeRestoredRef.current = true; // no matching theme found, stop checking
       }
     } catch (e) {
-      // Invalid JSON, ignore
+      themeRestoredRef.current = true; // invalid JSON, stop checking
     }
   }, [wheel, savedThemes, id]);
 

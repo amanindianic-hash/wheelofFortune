@@ -172,16 +172,18 @@ function SliderRow({ label, value, min, max, step, unit = '', onChange }: {
 }
 
 // ── DropZone with remove button ──────────────────────────────────────────────
-function DropZone({ label, hint, info, onFile, onRemove }: {
+function DropZone({ label, hint, info, onFile, onRemove, isLoading }: {
   label: string; hint: string; info?: ImageInfo;
   onFile: (f: File) => void;
   onRemove: () => void;
+  isLoading?: boolean;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
 
   function handleDrop(e: React.DragEvent) {
     e.preventDefault(); setDragging(false);
+    if (isLoading) return;
     const file = e.dataTransfer.files?.[0];
     if (file && file.type.startsWith('image/')) onFile(file);
   }
@@ -190,8 +192,8 @@ function DropZone({ label, hint, info, onFile, onRemove }: {
     <div className="space-y-1.5">
       <Label className="text-xs font-semibold text-foreground/80">{label}</Label>
       <div
-        onClick={() => !info && inputRef.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); if (!info) setDragging(true); }}
+        onClick={() => !info && !isLoading && inputRef.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); if (!info && !isLoading) setDragging(true); }}
         onDragLeave={() => setDragging(false)}
         onDrop={handleDrop}
         className={`relative flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed transition-all duration-150 min-h-[80px] p-3
@@ -205,6 +207,13 @@ function DropZone({ label, hint, info, onFile, onRemove }: {
         <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ''; }}
         />
+
+        {/* Upload spinner overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 rounded-xl bg-black/50 flex items-center justify-center z-10">
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          </div>
+        )}
 
         {info ? (
           <div className="flex items-center gap-2 w-full">
@@ -256,6 +265,8 @@ export default function ThemeTesterPage() {
   const [faceInfo,  setFaceInfo]  = useState<ImageInfo | null>(null);
   const [standInfo, setStandInfo] = useState<ImageInfo | null>(null);
   const [cacheKey,  setCacheKey]  = useState('init');
+  const [faceUploading,  setFaceUploading]  = useState(false);
+  const [standUploading, setStandUploading] = useState(false);
 
   const [contentScale,  setContentScale]  = useState(0.75);
   const [centerOffsetY, setCenterOffsetY] = useState(0);
@@ -340,18 +351,55 @@ export default function ThemeTesterPage() {
 
   async function handleFaceUpload(file: File) {
     if (faceInfo) URL.revokeObjectURL(faceInfo.url);
-    const info = await loadImageInfo(file);
-    setFaceInfo(info);
+    // Show preview immediately with a local blob URL while uploading
+    const localInfo = await loadImageInfo(file);
+    setFaceInfo(localInfo);
     setCacheKey(`face-${Date.now()}`);
-    toast.success('Wheel face loaded');
+
+    setFaceUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: form });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        URL.revokeObjectURL(localInfo.url);
+        setFaceInfo({ ...localInfo, url: data.url });
+        toast.success('Wheel face uploaded');
+      } else {
+        toast.error(data.error?.message ?? 'Upload failed — image works this session only');
+      }
+    } catch {
+      toast.error('Upload failed — image works this session only');
+    } finally {
+      setFaceUploading(false);
+    }
   }
 
   async function handleStandUpload(file: File) {
     if (standInfo) URL.revokeObjectURL(standInfo.url);
-    const info = await loadImageInfo(file);
-    setStandInfo(info);
+    const localInfo = await loadImageInfo(file);
+    setStandInfo(localInfo);
     setCacheKey(`stand-${Date.now()}`);
-    toast.success('Stand / frame loaded');
+
+    setStandUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: form });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        URL.revokeObjectURL(localInfo.url);
+        setStandInfo({ ...localInfo, url: data.url });
+        toast.success('Stand / frame uploaded');
+      } else {
+        toast.error(data.error?.message ?? 'Upload failed — image works this session only');
+      }
+    } catch {
+      toast.error('Upload failed — image works this session only');
+    } finally {
+      setStandUploading(false);
+    }
   }
 
   function removeFace() {
@@ -470,8 +518,8 @@ export default function ThemeTesterPage() {
 
   function buildConfig() {
     return {
-      premium_face_url:        faceInfo  ? '/assets/premium-wheels/Wheel.png' : null,
-      premium_stand_url:       standInfo ? '/assets/premium-wheels/Stand.png' : null,
+      premium_face_url:        faceInfo?.url  ?? null,
+      premium_stand_url:       standInfo?.url ?? null,
       premium_content_scale:   contentScale,
       ...(centerOffsetY ? { premium_center_offset_y: centerOffsetY } : {}),
       label_font_size:   fontSize,
@@ -546,6 +594,7 @@ export default function ThemeTesterPage() {
                 info={faceInfo ?? undefined}
                 onFile={handleFaceUpload}
                 onRemove={removeFace}
+                isLoading={faceUploading}
               />
               <DropZone
                 label="Stand.png — Frame / pedestal"
@@ -553,6 +602,7 @@ export default function ThemeTesterPage() {
                 info={standInfo ?? undefined}
                 onFile={handleStandUpload}
                 onRemove={removeStand}
+                isLoading={standUploading}
               />
               <div className="flex items-start gap-2 rounded-lg bg-blue-500/8 border border-blue-500/15 p-2.5">
                 <Info className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
