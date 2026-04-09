@@ -17,48 +17,6 @@ export interface WheelTemplate {
 
 export const WHEEL_TEMPLATES: WheelTemplate[] = [
   {
-    id: 'freepik-gold-test',
-    name: 'Freepik Gold Test',
-    description: 'Ultra Premium 3D Golden Wheel with separated PNG layers (Image Mode)',
-    emoji: '⭐',
-    gameType: 'wheel',
-    config: {
-      animation_speed: 'medium',
-      show_segment_labels: false, // Image has pre-baked labels — dynamic labels would double-render
-      sound_enabled: true,
-    },
-    branding: {
-      primary_color: '#B8860B', // Metallic Gold
-      secondary_color: '#000000', // Deep Black
-      background_type: 'solid',
-      background_value: 'rgba(0, 0, 0, 0)', // Transparent
-      font_family: 'Bebas Neue', // Common for this style
-      button_text: 'SPIN NOW',
-      button_color: '#D4AF37',
-      // The keys that bypass math rendering
-      premium_face_url: '/assets/premium-wheels/Wheel.png',
-      premium_stand_url: '/assets/premium-wheels/Stand.png',
-      // Wheel.png disc radius ≈ 51.75% of outerRadius.
-      // Labels at innerRadius * positionRatio = scale * outerRadius * 0.58 (label_position:'outer')
-      // scale=0.75 → labels at 43.5% of outerRadius = ~84% inside the disc = good sweet spot.
-      premium_content_scale: 0.75,
-      // Hide standard decorative ring (the PNG provides it)
-      outer_ring_width: 0,
-      inner_ring_enabled: false,
-      border_width: 0,
-      rim_tick_style: 'none',
-      label_font_size: 12,
-      label_position: 'outer',
-      label_font_weight: '800',
-    },
-    segmentPalette: [
-      { bg_color: 'transparent', text_color: '#FFFFFF' },
-      { bg_color: 'transparent', text_color: '#FFFFFF' },
-      { bg_color: 'transparent', text_color: '#FFFFFF' },
-      { bg_color: 'transparent', text_color: '#FFFFFF' },
-    ],
-  },
-  {
     id: 'luxury-gold',
 
     gameType: 'wheel',

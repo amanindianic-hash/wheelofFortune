@@ -132,7 +132,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       // If referenced, leave it — it won't appear on the wheel (position > active count) but satisfies FK
     }
 
-    const updated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} ORDER BY position ASC` as any[];
+    const updated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} AND position < ${segments.length} ORDER BY position ASC` as any[];
 
     await logAuditAction({
       req,
