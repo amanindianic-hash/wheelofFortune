@@ -21,11 +21,24 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const wheel = (wheelResults as any)[0];
     if (!wheel) return errorResponse('NOT_FOUND', 'Wheel not found.', 404);
 
+    // Find the active segment count (highest contiguous position starting from 0)
+    const countResult = await sql`
+      WITH numbered AS (
+        SELECT position, position - ROW_NUMBER() OVER (ORDER BY position) as grp
+        FROM segments
+        WHERE wheel_id = ${id}
+      )
+      SELECT COALESCE(MAX(position) + 1, 0) as active_count
+      FROM numbered
+      WHERE grp = 0
+    ` as any[];
+    const activeCount = (countResult[0] as any)?.active_count ?? 0;
+
     const segments = await sql`
       SELECT s.*, p.display_title as prize_display_title, p.type as prize_type
       FROM segments s
       LEFT JOIN prizes p ON p.id = s.prize_id
-      WHERE s.wheel_id = ${id}
+      WHERE s.wheel_id = ${id} AND s.position < ${activeCount}
       ORDER BY s.position ASC
     ` as any[];
     return okResponse({ segments });
