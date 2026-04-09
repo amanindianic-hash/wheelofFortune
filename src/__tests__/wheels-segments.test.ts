@@ -22,7 +22,7 @@ const MOCK_USER   = { id: 'user-1', client_id: 'client-1', role: 'owner' };
 const MOCK_EDITOR = { id: 'user-2', client_id: 'client-1', role: 'editor' };
 const MOCK_VIEWER = { id: 'user-3', client_id: 'client-1', role: 'viewer' };
 
-const WHEEL_ROW = { id: 'wheel-1' };
+const WHEEL_ROW = { id: 'wheel-1', active_segment_count: 2 };
 
 const SEG_ROWS = [
   { id: 'seg-1', wheel_id: 'wheel-1', position: 0, label: 'Win',      bg_color: '#ff0000', text_color: '#fff', weight: 1 },
@@ -189,6 +189,7 @@ describe('PUT /api/wheels/[id]/segments', () => {
     mockSql.mockResolvedValueOnce([]);                 // referenced check
     mockSql.mockResolvedValueOnce([]);                 // INSERT seg 1
     mockSql.mockResolvedValueOnce([]);                 // INSERT seg 2
+    mockSql.mockResolvedValueOnce([]);                 // UPDATE wheels set active_segment_count
     mockSql.mockResolvedValueOnce(VALID_SEGMENTS);     // final SELECT
     const segs = [
       { label: 'A', bg_color: 'transparent', text_color: '#fff' },
@@ -212,6 +213,7 @@ describe('PUT /api/wheels/[id]/segments', () => {
     mockSql.mockResolvedValueOnce([]);            // referenced spin_results check
     mockSql.mockResolvedValueOnce([]);            // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);            // UPDATE seg-2
+    mockSql.mockResolvedValueOnce([]);            // UPDATE wheels set active_segment_count
     mockSql.mockResolvedValueOnce(SEG_ROWS);      // final SELECT
     const res = await PUT(makePutRequest({ segments: VALID_SEGMENTS }), { params: PARAMS });
     expect(res.status).toBe(200);
@@ -227,6 +229,7 @@ describe('PUT /api/wheels/[id]/segments', () => {
     mockSql.mockResolvedValueOnce([]);                                       // referenced check
     mockSql.mockResolvedValueOnce([]);                                       // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);                                       // INSERT new seg
+    mockSql.mockResolvedValueOnce([]);                                       // UPDATE wheels set active_segment_count
     const updatedSegs = [...SEG_ROWS, { ...newSeg, id: 'seg-3', position: 2, wheel_id: 'wheel-1' }];
     mockSql.mockResolvedValueOnce(updatedSegs);                              // final SELECT
     const res = await PUT(makePutRequest({ segments: [VALID_SEGMENTS[0], newSeg] }), { params: PARAMS });
@@ -242,6 +245,7 @@ describe('PUT /api/wheels/[id]/segments', () => {
     mockSql.mockResolvedValueOnce([{ segment_id: 'seg-3' }]);    // seg-3 is referenced
     mockSql.mockResolvedValueOnce([]);                            // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);                            // UPDATE seg-2
+    mockSql.mockResolvedValueOnce([]);                            // UPDATE wheels set active_segment_count
     // seg-3 should NOT be deleted — no DELETE call expected
     mockSql.mockResolvedValueOnce(SEG_ROWS);                      // final SELECT (only 2 active)
     const res = await PUT(makePutRequest({ segments: VALID_SEGMENTS }), { params: PARAMS });
@@ -258,11 +262,12 @@ describe('PUT /api/wheels/[id]/segments', () => {
   it('accepts #RRGGBBAA 8-digit hex as valid color', async () => {
     authAs(MOCK_USER);
     mockSql.mockResolvedValueOnce([WHEEL_ROW]);
-    mockSql.mockResolvedValueOnce([]);
-    mockSql.mockResolvedValueOnce([]);
-    mockSql.mockResolvedValueOnce([]);
-    mockSql.mockResolvedValueOnce([]);
-    mockSql.mockResolvedValueOnce(VALID_SEGMENTS);
+    mockSql.mockResolvedValueOnce([]);                    // existing segments
+    mockSql.mockResolvedValueOnce([]);                    // referenced check
+    mockSql.mockResolvedValueOnce([]);                    // INSERT seg-1
+    mockSql.mockResolvedValueOnce([]);                    // INSERT seg-2
+    mockSql.mockResolvedValueOnce([]);                    // UPDATE wheels set active_segment_count
+    mockSql.mockResolvedValueOnce(VALID_SEGMENTS);        // final SELECT
     const segs = [
       { label: 'A', bg_color: '#ff000080', text_color: '#ffffff' },
       { label: 'B', bg_color: '#00ff00ff', text_color: '#000000' },

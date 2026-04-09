@@ -17,7 +17,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   try {
-    const wheelResults = await sql`SELECT id FROM wheels WHERE id = ${id} AND client_id = ${auth.user.client_id} AND deleted_at IS NULL LIMIT 1`;
+    const wheelResults = await sql`SELECT id, active_segment_count FROM wheels WHERE id = ${id} AND client_id = ${auth.user.client_id} AND deleted_at IS NULL LIMIT 1`;
     const wheel = (wheelResults as any)[0];
     if (!wheel) return errorResponse('NOT_FOUND', 'Wheel not found.', 404);
 
@@ -29,12 +29,8 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       ORDER BY s.position ASC
     ` as any[];
 
-    // Filter out orphaned segments (those beyond the highest contiguous position starting from 0)
-    let activeCount = 0;
-    for (const seg of allSegments) {
-      if (seg.position === activeCount) activeCount++;
-      else break;
-    }
+    // Filter to only active segments (based on count stored in wheels table)
+    const activeCount = wheel.active_segment_count ?? 0;
     const segments = allSegments.slice(0, activeCount);
     return okResponse({ segments });
   } catch (err) {
@@ -144,7 +140,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       // If referenced, leave it — it won't appear on the wheel (position > active count) but satisfies FK
     }
 
-    const updated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} AND position < ${segments.length} ORDER BY position ASC` as any[];
+    // Store the active segment count in wheels table
+    await sql`UPDATE wheels SET active_segment_count = ${segments.length} WHERE id = ${id}`;
+
+    const updated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} ORDER BY position ASC` as any[];
 
     await logAuditAction({
       req,
