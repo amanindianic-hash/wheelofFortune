@@ -209,6 +209,7 @@ describe('PUT /api/wheels/[id]/segments', () => {
     authAs(MOCK_USER);
     mockSql.mockResolvedValueOnce([WHEEL_ROW]);   // wheel found
     mockSql.mockResolvedValueOnce(SEG_ROWS);      // existing 2 segments
+    mockSql.mockResolvedValueOnce([]);            // referenced spin_results check
     mockSql.mockResolvedValueOnce([]);            // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);            // UPDATE seg-2
     mockSql.mockResolvedValueOnce(SEG_ROWS);      // final SELECT
@@ -223,6 +224,7 @@ describe('PUT /api/wheels/[id]/segments', () => {
     const newSeg = { label: 'Bonus', bg_color: '#0000ff', text_color: '#fff', weight: 1 };
     mockSql.mockResolvedValueOnce([WHEEL_ROW]);                              // wheel
     mockSql.mockResolvedValueOnce([SEG_ROWS[0]]);                            // existing 1
+    mockSql.mockResolvedValueOnce([]);                                       // referenced check
     mockSql.mockResolvedValueOnce([]);                                       // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);                                       // INSERT new seg
     const updatedSegs = [...SEG_ROWS, { ...newSeg, id: 'seg-3', position: 2, wheel_id: 'wheel-1' }];
@@ -231,16 +233,17 @@ describe('PUT /api/wheels/[id]/segments', () => {
     expect(res.status).toBe(200);
   });
 
-  it('deletes trailing segments even if referenced by spin_results', async () => {
+  it('skips deleting segments referenced by spin_results', async () => {
     authAs(MOCK_USER);
-    // 3 existing, incoming only 2 — seg-3 is referenced but still deleted (historical records)
+    // 3 existing, incoming only 2 — seg-3 is referenced
     const existingThree = [...SEG_ROWS, { id: 'seg-3', position: 2, label: 'Old' }];
     mockSql.mockResolvedValueOnce([WHEEL_ROW]);
     mockSql.mockResolvedValueOnce(existingThree);                 // existing 3
+    mockSql.mockResolvedValueOnce([{ segment_id: 'seg-3' }]);    // seg-3 is referenced
     mockSql.mockResolvedValueOnce([]);                            // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);                            // UPDATE seg-2
-    mockSql.mockResolvedValueOnce([]);                            // DELETE seg-3
-    mockSql.mockResolvedValueOnce(SEG_ROWS);                      // final SELECT (only 2)
+    // seg-3 should NOT be deleted — no DELETE call expected
+    mockSql.mockResolvedValueOnce(SEG_ROWS);                      // final SELECT (only 2 active)
     const res = await PUT(makePutRequest({ segments: VALID_SEGMENTS }), { params: PARAMS });
     expect(res.status).toBe(200);
   });
