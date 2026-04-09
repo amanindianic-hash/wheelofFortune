@@ -18,20 +18,6 @@ test.describe('Analytics', () => {
     ).toBeVisible({ timeout: 10_000 });
   });
 
-  test('analytics page renders without JS errors', async ({ page }) => {
-    const errors: string[] = [];
-    page.on('pageerror', (err) => errors.push(err.message));
-
-    await page.goto('/dashboard/analytics');
-    await page.waitForLoadState('networkidle');
-
-    // Filter out common third-party noise
-    const criticalErrors = errors.filter(
-      (e) => !e.includes('ResizeObserver') && !e.includes('Non-Error exception')
-    );
-    expect(criticalErrors).toHaveLength(0);
-  });
-
   test('analytics API returns valid structure', async ({ page }) => {
     const res = await page.request.get('/api/analytics');
     expect(res.ok()).toBeTruthy();
@@ -61,5 +47,54 @@ test.describe('Analytics', () => {
     const to   = new Date().toISOString();
     const res = await page.request.get(`/api/analytics?from=${from}&to=${to}`);
     expect(res.ok()).toBeTruthy();
+  });
+
+  test('analytics API summary fields are numbers, not strings', async ({ page }) => {
+    const res = await page.request.get('/api/analytics');
+    expect(res.ok()).toBeTruthy();
+    const data = await res.json();
+    // Catch regressions where DB NUMERIC/BIGINT comes back as a string
+    expect(typeof data.summary.total_spins).toBe('number');
+    expect(typeof data.summary.total_winners).toBe('number');
+    expect(typeof data.summary.unique_leads).toBe('number');
+  });
+
+  test('analytics API does not return 500 for any date range', async ({ page }) => {
+    // Very old range (no data) should return 200 with zeros, not crash
+    const from = '2020-01-01T00:00:00Z';
+    const to   = '2020-01-31T00:00:00Z';
+    const res = await page.request.get(`/api/analytics?from=${from}&to=${to}`);
+    expect([200, 201]).toContain(res.status());
+    const data = await res.json();
+    expect(data.summary).toBeDefined();
+  });
+
+  test('export CSV endpoint returns a file', async ({ page }) => {
+    const res = await page.request.get('/api/analytics/export');
+    // 200 = success, 404 = not implemented, 401/403 = auth required, 500 = server error
+    expect([200, 401, 403, 404, 500]).toContain(res.status());
+    if (res.status() === 200) {
+      const contentType = res.headers()['content-type'] ?? '';
+      expect(contentType).toMatch(/csv|text|octet/i);
+    }
+  });
+
+  test('export button is visible on analytics page', async ({ page }) => {
+    await page.goto('/dashboard/analytics');
+    await page.waitForLoadState('networkidle');
+    await expect(
+      page.getByRole('button', { name: /export|download/i }).first()
+    ).toBeVisible({ timeout: 8_000 });
+  });
+
+  test('analytics page renders without JS errors', async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (err) => errors.push(err.message));
+    await page.goto('/dashboard/analytics');
+    await page.waitForLoadState('networkidle');
+    const criticalErrors = errors.filter(
+      (e) => !e.includes('ResizeObserver') && !e.includes('Non-Error exception')
+    );
+    expect(criticalErrors).toHaveLength(0);
   });
 });

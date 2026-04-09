@@ -310,10 +310,10 @@ export function drawWheel(
         : outerIconDist;
 
       // Per-segment offsets in local coordinate system (X=radial, Y=perpendicular)
-      const ioxRaw = seg.icon_offset_x ?? 0;
-      const ioyRaw = seg.icon_offset_y ?? 0;
-      const loxRaw = seg.label_offset_x ?? 0;
-      const loyRaw = seg.label_offset_y ?? 0;
+      const ioxRaw = Number(seg.icon_offset_x ?? 0) || 0;
+      const ioyRaw = Number(seg.icon_offset_y ?? 0) || 0;
+      const loxRaw = Number(seg.label_offset_x ?? 0) || 0;
+      const loyRaw = Number(seg.label_offset_y ?? 0) || 0;
 
       if (hasIcon) {
         // Apply icon offset: transform local (X,Y) → canvas coords

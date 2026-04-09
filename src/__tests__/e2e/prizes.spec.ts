@@ -48,6 +48,64 @@ test.describe('Prize management', () => {
     await expect(page.getByText(/e2e test prize/i).first()).toBeVisible({ timeout: 10_000 });
   });
 
+  test('can update an existing prize via API', async ({ page }) => {
+    // Create a prize to update
+    const createRes = await page.request.post('/api/prizes', {
+      data: {
+        name: `UpdateMe ${Date.now()}`,
+        type: 'message',
+        display_title: 'Original Title',
+      },
+    });
+    expect(createRes.ok()).toBeTruthy();
+    const createData = await createRes.json();
+    const prizeId = createData.prize?.id;
+    if (!prizeId) { test.skip(); return; }
+
+    // Update it
+    const updateRes = await page.request.put(`/api/prizes/${prizeId}`, {
+      data: { display_title: 'Updated Title' },
+    });
+    expect(updateRes.ok()).toBeTruthy();
+    const updateData = await updateRes.json();
+    expect(updateData.prize?.display_title).toBe('Updated Title');
+
+    // Verify GET returns updated value
+    const getRes = await page.request.get(`/api/prizes/${prizeId}`);
+    expect(getRes.ok()).toBeTruthy();
+    const getData = await getRes.json();
+    expect(getData.prize?.display_title).toBe('Updated Title');
+  });
+
+  test('can delete a prize via API', async ({ page }) => {
+    // Create a prize to delete
+    const createRes = await page.request.post('/api/prizes', {
+      data: {
+        name: `DeleteMe ${Date.now()}`,
+        type: 'message',
+        display_title: 'To Be Deleted',
+      },
+    });
+    expect(createRes.ok()).toBeTruthy();
+    const prizeId = (await createRes.json()).prize?.id;
+    if (!prizeId) { test.skip(); return; }
+
+    // Delete it
+    const delRes = await page.request.delete(`/api/prizes/${prizeId}`);
+    expect(delRes.ok()).toBeTruthy();
+
+    // Verify it no longer appears in the list
+    const listRes = await page.request.get('/api/prizes');
+    const listData = await listRes.json();
+    const found = (listData.prizes ?? []).find((p: { id: string }) => p.id === prizeId);
+    expect(found).toBeUndefined();
+  });
+
+  test('prize API returns 404 for unknown id', async ({ page }) => {
+    const res = await page.request.get('/api/prizes/00000000-0000-0000-0000-000000000000');
+    expect(res.status()).toBe(404);
+  });
+
   test('prize can be assigned to a segment via API', async ({ page }) => {
     const wheelId = await getFirstWheelId(page);
     if (!wheelId) { test.skip(); return; }

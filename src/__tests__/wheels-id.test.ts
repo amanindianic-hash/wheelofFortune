@@ -141,9 +141,11 @@ describe('PUT /api/wheels/[id]', () => {
 
   it('updates wheel name for editor', async () => {
     authAs(MOCK_EDITOR);
-    mockSql.mockResolvedValueOnce([WHEEL_ROW]); // SELECT wheel
     const updatedWheel = { ...WHEEL_ROW, name: 'Updated Wheel' };
-    mockSql.mockResolvedValueOnce([updatedWheel]); // UPDATE RETURNING *
+    mockSql
+      .mockResolvedValueOnce([WHEEL_ROW])    // SELECT wheel (ownership check)
+      .mockResolvedValueOnce([])             // UPDATE main fields
+      .mockResolvedValueOnce([updatedWheel]);// SELECT * to return updated row
     const res = await PUT(makePutRequest({ name: 'Updated Wheel' }), { params: PARAMS });
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -152,9 +154,11 @@ describe('PUT /api/wheels/[id]', () => {
 
   it('updates wheel status for owner', async () => {
     authAs(MOCK_USER);
-    mockSql.mockResolvedValueOnce([WHEEL_ROW]);
     const updatedWheel = { ...WHEEL_ROW, status: 'active' };
-    mockSql.mockResolvedValueOnce([updatedWheel]);
+    mockSql
+      .mockResolvedValueOnce([WHEEL_ROW])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([updatedWheel]);
     const res = await PUT(makePutRequest({ status: 'active' }), { params: PARAMS });
     expect(res.status).toBe(200);
     const body = await res.json();

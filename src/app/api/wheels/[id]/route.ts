@@ -52,9 +52,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     if (!wheel) return errorResponse('NOT_FOUND', 'Wheel not found.', 404);
 
     const body = await req.json();
+    // Track which date fields were explicitly provided so we can distinguish
+    // "not sent → keep existing" from "sent as null → clear the field".
+    const hasActiveFrom  = 'active_from'  in body;
+    const hasActiveUntil = 'active_until' in body;
     const { name, config, branding, trigger_rules, frequency_rules, form_config, active_from, active_until, total_spin_cap } = body;
 
-    const updatedResults = await sql`
+    // Update the main (non-date) fields first using COALESCE pattern
+    await sql`
       UPDATE wheels SET
         name            = COALESCE(${name ?? null}, name),
         config          = COALESCE(${config ? JSON.stringify(config) : null}::jsonb, config),
@@ -62,13 +67,31 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         trigger_rules   = COALESCE(${trigger_rules ? JSON.stringify(trigger_rules) : null}::jsonb, trigger_rules),
         frequency_rules = COALESCE(${frequency_rules ? JSON.stringify(frequency_rules) : null}::jsonb, frequency_rules),
         form_config     = COALESCE(${form_config ? JSON.stringify(form_config) : null}::jsonb, form_config),
-        active_from     = COALESCE(${active_from ?? null}::timestamptz, active_from),
-        active_until    = COALESCE(${active_until ?? null}::timestamptz, active_until),
         total_spin_cap  = COALESCE(${total_spin_cap ?? null}, total_spin_cap)
       WHERE id = ${id}
-      RETURNING *
     `;
-    const updated = (updatedResults as any)[0];
+
+    // Separately update date fields only when they were explicitly provided in the
+    // request body — this correctly handles null (clear) vs absent (keep existing).
+    // neon does not reliably bind null as a parameter for timestamptz columns,
+    // so we use the SQL literal NULL when clearing and a parameterized cast when setting.
+    if (hasActiveFrom) {
+      if (active_from == null) {
+        await sql`UPDATE wheels SET active_from = NULL WHERE id = ${id}`;
+      } else {
+        await sql`UPDATE wheels SET active_from = ${active_from}::timestamptz WHERE id = ${id}`;
+      }
+    }
+    if (hasActiveUntil) {
+      if (active_until == null) {
+        await sql`UPDATE wheels SET active_until = NULL WHERE id = ${id}`;
+      } else {
+        await sql`UPDATE wheels SET active_until = ${active_until}::timestamptz WHERE id = ${id}`;
+      }
+    }
+
+    const updatedRow = await sql`SELECT * FROM wheels WHERE id = ${id} LIMIT 1`;
+    const updated = (updatedRow as any)[0];
 
     await logAuditAction({
       req,

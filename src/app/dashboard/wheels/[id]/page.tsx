@@ -22,6 +22,7 @@ import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview'
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
 import { applyTemplateToWheel } from '@/lib/utils/theme-utils';
+import { normalizeSegment } from '@/lib/utils/segment-utils';
 import {
   ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
   Palette, Type, Globe, Users, Code, QrCode,
@@ -64,6 +65,7 @@ function loadGoogleFont(fontValue: string) {
   link.href = `https://fonts.googleapis.com/css2?family=${match.google}:wght@400;600;700;800&display=swap`;
   document.head.appendChild(link);
 }
+
 
 export default function WheelEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -115,7 +117,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     const pData = await pRes.json();
     if (!wRes.ok) { toast.error('Wheel not found'); router.push('/dashboard/wheels'); return; }
     setWheel(wData.wheel);
-    setSegments(wData.segments ?? []);
+    setSegments((wData.segments ?? []).map(normalizeSegment));
     setPrizes(pData.prizes ?? []);
     if (tRes.ok) { const tData = await tRes.json(); setSavedThemes(tData.themes ?? []); }
   }
@@ -194,7 +196,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     try {
       const res = await api.put(`/api/wheels/${id}/segments`, { segments });
       const data = await res.json();
-      if (res.ok) { setSegments(data.segments); toast.success('Segments saved'); }
+      if (res.ok) { setSegments(data.segments.map(normalizeSegment)); toast.success('Segments saved'); }
       else toast.error(data.error?.message ?? 'Save failed');
     } finally {
       setSaving(false);
