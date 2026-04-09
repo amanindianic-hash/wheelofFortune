@@ -209,7 +209,6 @@ describe('PUT /api/wheels/[id]/segments', () => {
     authAs(MOCK_USER);
     mockSql.mockResolvedValueOnce([WHEEL_ROW]);   // wheel found
     mockSql.mockResolvedValueOnce(SEG_ROWS);      // existing 2 segments
-    mockSql.mockResolvedValueOnce([]);            // referenced spin_results check
     mockSql.mockResolvedValueOnce([]);            // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);            // UPDATE seg-2
     mockSql.mockResolvedValueOnce(SEG_ROWS);      // final SELECT
@@ -224,7 +223,6 @@ describe('PUT /api/wheels/[id]/segments', () => {
     const newSeg = { label: 'Bonus', bg_color: '#0000ff', text_color: '#fff', weight: 1 };
     mockSql.mockResolvedValueOnce([WHEEL_ROW]);                              // wheel
     mockSql.mockResolvedValueOnce([SEG_ROWS[0]]);                            // existing 1
-    mockSql.mockResolvedValueOnce([]);                                       // referenced
     mockSql.mockResolvedValueOnce([]);                                       // UPDATE seg-1
     mockSql.mockResolvedValueOnce([]);                                       // INSERT new seg
     const updatedSegs = [...SEG_ROWS, { ...newSeg, id: 'seg-3', position: 2, wheel_id: 'wheel-1' }];
