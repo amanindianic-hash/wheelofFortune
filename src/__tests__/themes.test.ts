@@ -59,7 +59,7 @@ function authUnauthorized() {
 // ─── GET /api/themes ──────────────────────────────────────────────────────────
 
 describe('GET /api/themes', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
@@ -99,7 +99,7 @@ describe('GET /api/themes', () => {
 // ─── POST /api/themes ─────────────────────────────────────────────────────────
 
 describe('POST /api/themes', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();

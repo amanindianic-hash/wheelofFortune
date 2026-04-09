@@ -56,6 +56,7 @@ function makePostRequest(body: Record<string, unknown>) {
 describe('POST /api/auth/login', () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.spyOn(console, 'error').mockImplementation(() => {});
     mockSignAccess.mockResolvedValue('access-token');
     mockSignRefresh.mockResolvedValue('refresh-token');
   });

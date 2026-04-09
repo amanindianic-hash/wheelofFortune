@@ -68,7 +68,7 @@ function authUnauthorized() {
 // ─── GET /api/wheels/[id] ─────────────────────────────────────────────────────
 
 describe('GET /api/wheels/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
@@ -116,7 +116,7 @@ describe('GET /api/wheels/[id]', () => {
 // ─── PUT /api/wheels/[id] ─────────────────────────────────────────────────────
 
 describe('PUT /api/wheels/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
@@ -176,7 +176,7 @@ describe('PUT /api/wheels/[id]', () => {
 // ─── DELETE /api/wheels/[id] ──────────────────────────────────────────────────
 
 describe('DELETE /api/wheels/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();

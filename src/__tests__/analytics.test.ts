@@ -94,7 +94,7 @@ function makeGetRequest(params: Record<string, string> = {}) {
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('GET /api/analytics', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();

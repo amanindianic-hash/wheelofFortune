@@ -61,7 +61,7 @@ function authUnauthorized() {
 // ─── GET /api/wheels/[id]/segments ────────────────────────────────────────────
 
 describe('GET /api/wheels/[id]/segments', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
@@ -110,7 +110,7 @@ describe('GET /api/wheels/[id]/segments', () => {
 // ─── PUT /api/wheels/[id]/segments ────────────────────────────────────────────
 
 describe('PUT /api/wheels/[id]/segments', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();

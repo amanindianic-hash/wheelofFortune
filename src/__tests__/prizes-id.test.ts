@@ -64,7 +64,7 @@ function authUnauthorized() {
 // ─── GET /api/prizes/[id] ─────────────────────────────────────────────────────
 
 describe('GET /api/prizes/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
@@ -109,7 +109,7 @@ describe('GET /api/prizes/[id]', () => {
 // ─── PUT /api/prizes/[id] ─────────────────────────────────────────────────────
 
 describe('PUT /api/prizes/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
@@ -152,7 +152,7 @@ describe('PUT /api/prizes/[id]', () => {
 // ─── DELETE /api/prizes/[id] ──────────────────────────────────────────────────
 
 describe('DELETE /api/prizes/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();

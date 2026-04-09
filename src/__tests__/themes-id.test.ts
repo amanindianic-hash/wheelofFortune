@@ -60,7 +60,7 @@ function authUnauthorized() {
 // ─── PATCH /api/themes/[id] ───────────────────────────────────────────────────
 
 describe('PATCH /api/themes/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
@@ -131,7 +131,7 @@ describe('PATCH /api/themes/[id]', () => {
 // ─── DELETE /api/themes/[id] ──────────────────────────────────────────────────
 
 describe('DELETE /api/themes/[id]', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => { vi.resetAllMocks(); vi.spyOn(console, 'error').mockImplementation(() => {}); });
 
   it('returns 401 when not authenticated', async () => {
     authUnauthorized();
