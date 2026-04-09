@@ -21,21 +21,13 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const wheel = (wheelResults as any)[0];
     if (!wheel) return errorResponse('NOT_FOUND', 'Wheel not found.', 404);
 
-    const allSegments = await sql`
+    const segments = await sql`
       SELECT s.*, p.display_title as prize_display_title, p.type as prize_type
       FROM segments s
       LEFT JOIN prizes p ON p.id = s.prize_id
       WHERE s.wheel_id = ${id}
       ORDER BY s.position ASC
     ` as any[];
-
-    // Filter out orphaned segments (those beyond the highest contiguous position starting from 0)
-    let activeCount = 0;
-    for (const seg of allSegments) {
-      if (seg.position === activeCount) activeCount++;
-      else break;
-    }
-    const segments = allSegments.slice(0, activeCount);
     return okResponse({ segments });
   } catch (err) {
     console.error('Get segments error:', err);
@@ -76,15 +68,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
-    // Fetch existing segments so we know which ones have spin_results references
+    // Fetch existing segments so we know which ones to delete
     const existing = await sql`SELECT id FROM segments WHERE wheel_id = ${id} ORDER BY position ASC` as any[];
     const existingIds = existing.map((r: Record<string, unknown>) => r.id as string);
-
-    // Segments referenced by spin_results cannot be deleted (immutable FK)
-    const referenced = await sql`
-      SELECT DISTINCT segment_id FROM spin_results WHERE segment_id = ANY(${existingIds})
-    ` as any[];
-    const referencedSet = new Set(referenced.map((r: Record<string, unknown>) => r.segment_id as string));
 
     // Upsert each incoming segment
     for (let i = 0; i < segments.length; i++) {
@@ -135,13 +121,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
-    // Delete any trailing existing segments that are no longer needed (only if not referenced)
+    // Delete any trailing segments that are no longer needed
+    // (even if referenced by spin_results — they're just historical records)
     for (let i = segments.length; i < existingIds.length; i++) {
       const oldId = existingIds[i];
-      if (!referencedSet.has(oldId)) {
-        await sql`DELETE FROM segments WHERE id = ${oldId}`;
-      }
-      // If referenced, leave it — it won't appear on the wheel (position > active count) but satisfies FK
+      await sql`DELETE FROM segments WHERE id = ${oldId}`;
     }
 
     const updated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} AND position < ${segments.length} ORDER BY position ASC` as any[];
