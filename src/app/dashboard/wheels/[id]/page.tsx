@@ -67,6 +67,32 @@ function loadGoogleFont(fontValue: string) {
 }
 
 
+function OffsetSlider({ label, value, onChange }: {
+  label: string; value: number | null; onChange: (v: number | null) => void;
+}) {
+  const v = value ?? 0;
+  const pct = ((v + 100) / 200) * 100;
+  return (
+    <div className="space-y-0.5">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
+        <div className="flex items-center gap-0.5">
+          <button type="button" onClick={() => onChange(Math.max(-100, v - 1))}
+            className="w-4 h-4 text-[10px] rounded border border-border/50 flex items-center justify-center hover:bg-accent">−</button>
+          <span className="text-[10px] font-mono w-7 text-center tabular-nums">{v}</span>
+          <button type="button" onClick={() => onChange(Math.min(100, v + 1))}
+            className="w-4 h-4 text-[10px] rounded border border-border/50 flex items-center justify-center hover:bg-accent">+</button>
+        </div>
+      </div>
+      <input type="range" min={-100} max={100} step={1} value={v}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full h-1 rounded-full appearance-none cursor-pointer accent-violet-500"
+        style={{ background: `linear-gradient(to right, oklch(0.55 0.22 264) ${pct}%, oklch(1 0 0 / 10%) ${pct}%)` }}
+      />
+    </div>
+  );
+}
+
 export default function WheelEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -210,16 +236,33 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   function addSegment() {
     if (segments.length >= 24) { toast.error('Maximum 24 segments allowed'); return; }
     const color = PLAN_COLORS[segments.length % PLAN_COLORS.length];
+    const firstSeg = segments[0];
     setSegments((prev) => [...prev, {
       id: `new-${Date.now()}`, wheel_id: id, position: prev.length,
       label: `Segment ${prev.length + 1}`, bg_color: color, text_color: '#FFFFFF',
       weight: 1.0, is_no_prize: true, wins_today: 0, wins_total: 0,
+      label_offset_x: firstSeg?.label_offset_x ?? null,
+      label_offset_y: firstSeg?.label_offset_y ?? null,
+      icon_offset_x:  firstSeg?.icon_offset_x  ?? null,
+      icon_offset_y:  firstSeg?.icon_offset_y  ?? null,
     }]);
   }
 
   function removeSegment(idx: number) {
     if (segments.length <= 2) { toast.error('Minimum 2 segments required'); return; }
     setSegments((prev) => prev.filter((_, i) => i !== idx));
+  }
+
+  function applyOffsetsToAll(idx: number) {
+    const src = segments[idx];
+    setSegments(prev => prev.map(s => ({
+      ...s,
+      label_offset_x: src.label_offset_x ?? null,
+      label_offset_y: src.label_offset_y ?? null,
+      icon_offset_x:  src.icon_offset_x  ?? null,
+      icon_offset_y:  src.icon_offset_y  ?? null,
+    })));
+    toast.success('Offsets applied to all segments');
   }
 
   const embedCode = wheel ? `<div data-spin-wheel data-token="${wheel.embed_token}"></div>\n<script src="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/widget.js" async></script>` : '';
@@ -348,42 +391,32 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                         />
                       </div>
 
-                      {/* Per-segment position overrides */}
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="space-y-1">
-                          <Label className="text-xs text-muted-foreground">Label offset  X (radial) / Y (perp)</Label>
-                          <div className="flex gap-1">
-                            <Input
-                              type="number" step="1" placeholder="X"
-                              value={seg.label_offset_x ?? ''}
-                              onChange={(e) => updateSegment(idx, 'label_offset_x', e.target.value === '' ? null : parseFloat(e.target.value))}
-                              className="h-7 text-xs text-center"
-                            />
-                            <Input
-                              type="number" step="1" placeholder="Y"
-                              value={seg.label_offset_y ?? ''}
-                              onChange={(e) => updateSegment(idx, 'label_offset_y', e.target.value === '' ? null : parseFloat(e.target.value))}
-                              className="h-7 text-xs text-center"
-                            />
-                          </div>
+                      {/* Position Controls */}
+                      <div className="rounded-md border border-border/40 bg-muted/20 p-2.5 space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+                            Position Controls
+                          </span>
+                          <button type="button" onClick={() => applyOffsetsToAll(idx)}
+                            className="text-[10px] text-violet-400 hover:text-violet-300 px-1.5 py-0.5 rounded border border-violet-500/30 hover:border-violet-400/50 transition-colors"
+                            title="Copy this segment's offsets to all other segments">
+                            Apply to all ↓
+                          </button>
+                        </div>
+                        <div className="space-y-1.5">
+                          <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Label</span>
+                          <OffsetSlider label="X  (radial — outward)" value={seg.label_offset_x ?? null}
+                            onChange={(v) => updateSegment(idx, 'label_offset_x', v)} />
+                          <OffsetSlider label="Y  (perpendicular)" value={seg.label_offset_y ?? null}
+                            onChange={(v) => updateSegment(idx, 'label_offset_y', v)} />
                         </div>
                         {seg.icon_url && (
-                          <div className="space-y-1">
-                            <Label className="text-xs text-muted-foreground">Icon offset  X (radial) / Y (perp)</Label>
-                            <div className="flex gap-1">
-                              <Input
-                                type="number" step="1" placeholder="X"
-                                value={seg.icon_offset_x ?? ''}
-                                onChange={(e) => updateSegment(idx, 'icon_offset_x', e.target.value === '' ? null : parseFloat(e.target.value))}
-                                className="h-7 text-xs text-center"
-                              />
-                              <Input
-                                type="number" step="1" placeholder="Y"
-                                value={seg.icon_offset_y ?? ''}
-                                onChange={(e) => updateSegment(idx, 'icon_offset_y', e.target.value === '' ? null : parseFloat(e.target.value))}
-                                className="h-7 text-xs text-center"
-                              />
-                            </div>
+                          <div className="space-y-1.5">
+                            <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Icon</span>
+                            <OffsetSlider label="X  (radial — outward)" value={seg.icon_offset_x ?? null}
+                              onChange={(v) => updateSegment(idx, 'icon_offset_x', v)} />
+                            <OffsetSlider label="Y  (perpendicular)" value={seg.icon_offset_y ?? null}
+                              onChange={(v) => updateSegment(idx, 'icon_offset_y', v)} />
                           </div>
                         )}
                       </div>
