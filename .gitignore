@@ -68,6 +68,11 @@ GEMINI.md
 coverage/
 .nyc_output/
 
+# Playwright artifacts
+playwright-report/
+test-results/
+e2e-auth.json
+
 # Misc
 *.pem
 .cache/
