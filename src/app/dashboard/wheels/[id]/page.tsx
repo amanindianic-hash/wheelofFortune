@@ -27,8 +27,9 @@ import {
   ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
   Palette, Type, Globe, Users, Code, QrCode,
   Share2, Monitor, Link, Camera, Search, CreditCard,
-  Dices, Circle as CircleIcon, Play, Pause, ImageIcon, X,
+  Dices, Circle as CircleIcon, Play, Pause, ImageIcon, X, BookMarked,
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
 const PLAN_COLORS = ['#E74C3C', '#3498DB', '#2ECC71', '#F39C12', '#9B59B6', '#1ABC9C', '#E67E22', '#2980B9'];
 
@@ -110,6 +111,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     branding: Record<string, unknown>; config: Record<string, unknown>;
     segment_palette: Array<{ bg_color: string; text_color: string }>;
   }>>([]);
+
+  // ── Save-as-theme dialog ───────────────────────────────────────────────────
+  const [saveThemeDialog, setSaveThemeDialog] = useState(false);
+  const [saveThemeName, setSaveThemeName] = useState('');
+  const [saveThemeEmoji, setSaveThemeEmoji] = useState('🎨');
+  const [savingTheme, setSavingTheme] = useState(false);
 
   // ── Currently applied theme (persisted in localStorage) ───────────────────
   const [appliedTheme, setAppliedTheme] = useState<{
@@ -193,6 +200,32 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   }, [wheel, savedThemes, id]);
 
   useEffect(() => { load(); }, [id]);
+
+  async function reloadThemes() {
+    const tRes = await api.get('/api/themes');
+    if (tRes.ok) { const tData = await tRes.json(); setSavedThemes(tData.themes ?? []); }
+  }
+
+  async function saveCurrentAsTheme() {
+    if (!wheel || !saveThemeName.trim()) { toast.error('Enter a theme name'); return; }
+    setSavingTheme(true);
+    try {
+      const gameType = wheel.config.game_type ?? 'wheel';
+      const res = await api.post('/api/themes', {
+        name: saveThemeName.trim(),
+        emoji: saveThemeEmoji,
+        branding: wheel.branding,
+        config: { ...wheel.config, game_type: gameType },
+        segment_palette: segments.map((s) => ({ bg_color: s.bg_color, text_color: s.text_color })),
+      });
+      if (!res.ok) { toast.error('Failed to save theme'); return; }
+      toast.success(`Theme "${saveThemeName.trim()}" saved`);
+      setSaveThemeDialog(false);
+      setSaveThemeName('');
+      setSaveThemeEmoji('🎨');
+      await reloadThemes();
+    } finally { setSavingTheme(false); }
+  }
 
   // Auto-load Google Font whenever the branding font changes
   useEffect(() => {
@@ -490,7 +523,10 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     <Label>Game Type</Label>
                     <Select
                       value={wheel.config.game_type ?? 'wheel'}
-                      onValueChange={(v) => setWheel({ ...wheel, config: { ...wheel.config, game_type: v as 'wheel' | 'scratch_card' | 'slot_machine' | 'roulette' } })}
+                      onValueChange={(v) => {
+                        setWheel({ ...wheel, config: { ...wheel.config, game_type: v as 'wheel' | 'scratch_card' | 'slot_machine' | 'roulette' } });
+                        setAppliedTheme(null);
+                      }}
                     >
                       <SelectTrigger><SelectValue /></SelectTrigger>
                       <SelectContent>
@@ -1455,9 +1491,60 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
             {/* TEMPLATES TAB */}
             <TabsContent value="templates" className="space-y-5 mt-0">
-              <p className="text-sm text-muted-foreground">
-                Apply a template to instantly change colours, style, and branding. Your segment labels and prizes are kept.
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-sm text-muted-foreground">
+                  Apply a template to instantly change colours, style, and branding. Your segment labels and prizes are kept.
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="shrink-0 border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
+                  onClick={() => { setSaveThemeName(''); setSaveThemeEmoji('🎨'); setSaveThemeDialog(true); }}
+                >
+                  <BookMarked className="w-3.5 h-3.5 mr-1.5" />
+                  Save as Theme
+                </Button>
+              </div>
+
+              {/* ── Save as Theme Dialog ── */}
+              <Dialog open={saveThemeDialog} onOpenChange={setSaveThemeDialog}>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Save Current as Theme</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-2">
+                    <p className="text-sm text-muted-foreground">
+                      Saves the current branding, colours, and segment palette as a reusable theme for <strong>{wheel.config.game_type ?? 'wheel'}</strong> game type.
+                    </p>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Emoji"
+                        value={saveThemeEmoji}
+                        onChange={(e) => setSaveThemeEmoji(e.target.value)}
+                        className="w-16 text-center"
+                        maxLength={2}
+                      />
+                      <Input
+                        placeholder="Theme name"
+                        value={saveThemeName}
+                        onChange={(e) => setSaveThemeName(e.target.value)}
+                        className="flex-1"
+                        onKeyDown={(e) => { if (e.key === 'Enter') saveCurrentAsTheme(); }}
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="ghost" onClick={() => setSaveThemeDialog(false)}>Cancel</Button>
+                    <Button
+                      onClick={saveCurrentAsTheme}
+                      disabled={savingTheme || !saveThemeName.trim()}
+                      className="bg-amber-500 text-black hover:bg-amber-400"
+                    >
+                      {savingTheme ? 'Saving…' : 'Save Theme'}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
 
               {/* ── Currently applied theme indicator ── */}
               {appliedTheme && (
@@ -1478,14 +1565,17 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
               )}
 
               {/* ── Saved custom themes ── */}
-              {savedThemes.length > 0 && (
+              {(() => {
+                const currentGameType = wheel.config.game_type ?? 'wheel';
+                const filteredThemes = savedThemes.filter((t) => (t.config?.game_type ?? 'wheel') === currentGameType);
+                return filteredThemes.length > 0 ? (
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-semibold text-amber-400 uppercase tracking-wider">Your Saved Themes</p>
                     <div className="flex-1 h-px bg-amber-500/20" />
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    {savedThemes.map((theme) => (
+                    {filteredThemes.map((theme) => (
                       <Card key={theme.id} className="overflow-hidden hover:border-amber-400/60 transition-colors cursor-pointer group border-amber-500/20">
                         <CardContent className="p-4 space-y-3">
                           <div className="flex items-start gap-3">
@@ -1544,11 +1634,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     ))}
                   </div>
                 </div>
-              )}
+                ) : null;
+              })()}
 
               {/* ── Built-in templates ── */}
               <div className="space-y-2">
-                {savedThemes.length > 0 && (
+                {savedThemes.some((t) => (t.config?.game_type ?? 'wheel') === (wheel.config.game_type ?? 'wheel')) && (
                   <div className="flex items-center gap-2">
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Built-in Templates</p>
                     <div className="flex-1 h-px bg-white/5" />
