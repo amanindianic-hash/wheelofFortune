@@ -94,6 +94,32 @@ function OffsetSlider({ label, value, onChange }: {
   );
 }
 
+function AngleSlider({ label, value, onChange }: {
+  label: string; value: number | null; onChange: (v: number | null) => void;
+}) {
+  const v = value ?? 0;
+  const pct = ((v + 180) / 360) * 100;
+  return (
+    <div className="space-y-0.5">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
+        <div className="flex items-center gap-0.5">
+          <button type="button" onClick={() => onChange(Math.max(-180, v - 1))}
+            className="w-4 h-4 text-[10px] rounded border border-border/50 flex items-center justify-center hover:bg-accent">−</button>
+          <span className="text-[10px] font-mono w-8 text-center tabular-nums">{v}°</span>
+          <button type="button" onClick={() => onChange(Math.min(180, v + 1))}
+            className="w-4 h-4 text-[10px] rounded border border-border/50 flex items-center justify-center hover:bg-accent">+</button>
+        </div>
+      </div>
+      <input type="range" min={-180} max={180} step={1} value={v}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full h-1 rounded-full appearance-none cursor-pointer accent-orange-500"
+        style={{ background: `linear-gradient(to right, oklch(0.65 0.18 55) ${pct}%, oklch(1 0 0 / 10%) ${pct}%)` }}
+      />
+    </div>
+  );
+}
+
 export default function WheelEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
@@ -290,12 +316,14 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     const src = segments[idx];
     setSegments(prev => prev.map(s => ({
       ...s,
-      label_offset_x: src.label_offset_x ?? null,
-      label_offset_y: src.label_offset_y ?? null,
-      icon_offset_x:  src.icon_offset_x  ?? null,
-      icon_offset_y:  src.icon_offset_y  ?? null,
+      label_offset_x:       src.label_offset_x       ?? null,
+      label_offset_y:       src.label_offset_y       ?? null,
+      icon_offset_x:        src.icon_offset_x        ?? null,
+      icon_offset_y:        src.icon_offset_y        ?? null,
+      label_rotation_angle: src.label_rotation_angle ?? null,
+      icon_rotation_angle:  src.icon_rotation_angle  ?? null,
     })));
-    toast.success('Offsets applied to all segments');
+    toast.success('Offsets & rotations applied to all segments');
   }
 
   const embedCode = wheel ? `<div data-spin-wheel data-token="${wheel.embed_token}"></div>\n<script src="${process.env.NEXT_PUBLIC_APP_URL ?? ''}/widget.js" async></script>` : '';
@@ -442,6 +470,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                             onChange={(v) => updateSegment(idx, 'label_offset_x', v)} />
                           <OffsetSlider label="Y  (perpendicular)" value={seg.label_offset_y ?? null}
                             onChange={(v) => updateSegment(idx, 'label_offset_y', v)} />
+                          <AngleSlider label="Rotation" value={seg.label_rotation_angle ?? null}
+                            onChange={(v) => updateSegment(idx, 'label_rotation_angle', v)} />
                         </div>
                         {seg.icon_url && (
                           <div className="space-y-1.5">
@@ -450,6 +480,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                               onChange={(v) => updateSegment(idx, 'icon_offset_x', v)} />
                             <OffsetSlider label="Y  (perpendicular)" value={seg.icon_offset_y ?? null}
                               onChange={(v) => updateSegment(idx, 'icon_offset_y', v)} />
+                            <AngleSlider label="Rotation" value={seg.icon_rotation_angle ?? null}
+                              onChange={(v) => updateSegment(idx, 'icon_rotation_angle', v)} />
                           </div>
                         )}
                       </div>

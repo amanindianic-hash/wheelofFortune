@@ -101,7 +101,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             label_offset_x       = ${seg.label_offset_x ?? null},
             label_offset_y       = ${seg.label_offset_y ?? null},
             icon_offset_x        = ${seg.icon_offset_x ?? null},
-            icon_offset_y        = ${seg.icon_offset_y ?? null}
+            icon_offset_y        = ${seg.icon_offset_y ?? null},
+            label_rotation_angle = ${seg.label_rotation_angle ?? null},
+            icon_rotation_angle  = ${seg.icon_rotation_angle ?? null}
           WHERE id = ${existingId}
         `;
       } else {
@@ -110,14 +112,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
           INSERT INTO segments (
             wheel_id, position, label, bg_color, text_color, icon_url,
             weight, prize_id, is_no_prize, consolation_message, win_cap_daily, win_cap_total,
-            label_offset_x, label_offset_y, icon_offset_x, icon_offset_y
+            label_offset_x, label_offset_y, icon_offset_x, icon_offset_y,
+            label_rotation_angle, icon_rotation_angle
           ) VALUES (
             ${id}, ${i}, ${seg.label}, ${seg.bg_color ?? '#cccccc'}, ${seg.text_color ?? '#FFFFFF'},
             ${seg.icon_url ?? null}, ${seg.weight ?? 1.0},
             ${seg.prize_id ?? null}, ${seg.is_no_prize ?? !seg.prize_id},
             ${seg.consolation_message ?? null}, ${seg.win_cap_daily ?? null}, ${seg.win_cap_total ?? null},
             ${seg.label_offset_x ?? null}, ${seg.label_offset_y ?? null},
-            ${seg.icon_offset_x ?? null}, ${seg.icon_offset_y ?? null}
+            ${seg.icon_offset_x ?? null}, ${seg.icon_offset_y ?? null},
+            ${seg.label_rotation_angle ?? null}, ${seg.icon_rotation_angle ?? null}
           )
         `;
       }

@@ -184,10 +184,13 @@ export interface Segment {
   wins_today: number;
   wins_total: number;
   // Per-segment position overrides (local coordinate system: X = radial outward, Y = perpendicular clockwise)
-  label_offset_x?: number | null;   // px offset along radial axis
-  label_offset_y?: number | null;   // px offset perpendicular to radial axis
-  icon_offset_x?: number | null;    // px offset along radial axis
-  icon_offset_y?: number | null;    // px offset perpendicular to radial axis
+  label_offset_x?: number | null;       // px offset along radial axis
+  label_offset_y?: number | null;       // px offset perpendicular to radial axis
+  icon_offset_x?: number | null;        // px offset along radial axis
+  icon_offset_y?: number | null;        // px offset perpendicular to radial axis
+  // Per-segment rotation overrides (degrees, applied on top of the radial rotation)
+  label_rotation_angle?: number | null; // degrees: 180 = flip, 90 = sideways
+  icon_rotation_angle?: number | null;  // degrees: rotates image inside its circle
 }
 
 export interface Prize {

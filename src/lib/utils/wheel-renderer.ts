@@ -24,6 +24,9 @@ export interface WheelSegment {
   label_offset_y?: number | null;
   icon_offset_x?: number | null;
   icon_offset_y?: number | null;
+  // Per-segment rotation overrides (degrees)
+  label_rotation_angle?: number | null;
+  icon_rotation_angle?: number | null;
 }
 
 export interface WheelConfig {
@@ -330,18 +333,31 @@ export function drawWheel(
         ctx.fill();
         ctx.restore();
 
-        // Clipped image
+        // Clipped image (with optional per-segment icon rotation)
         ctx.save();
         ctx.beginPath();
         ctx.arc(iconX, iconY, iconRadius, 0, 2 * Math.PI);
         ctx.clip();
-        ctx.drawImage(
-          imageCache!.get(seg.icon_url!)!,
-          iconX - iconRadius,
-          iconY - iconRadius,
-          iconRadius * 2,
-          iconRadius * 2,
-        );
+        const iRotRad = ((seg.icon_rotation_angle ?? 0) || 0) * Math.PI / 180;
+        if (iRotRad !== 0) {
+          ctx.translate(iconX, iconY);
+          ctx.rotate(iRotRad);
+          ctx.drawImage(
+            imageCache!.get(seg.icon_url!)!,
+            -iconRadius,
+            -iconRadius,
+            iconRadius * 2,
+            iconRadius * 2,
+          );
+        } else {
+          ctx.drawImage(
+            imageCache!.get(seg.icon_url!)!,
+            iconX - iconRadius,
+            iconY - iconRadius,
+            iconRadius * 2,
+            iconRadius * 2,
+          );
+        }
         ctx.restore();
 
         // Subtle icon circle border
@@ -404,16 +420,26 @@ export function drawWheel(
           const effDist = labelDist + loxRaw;
           const textX = cx + Math.cos(midAngle) * effDist - Math.sin(midAngle) * loyRaw;
           const textY = cy + Math.sin(midAngle) * effDist + Math.cos(midAngle) * loyRaw;
+          const lRotRad = ((seg.label_rotation_angle ?? 0) || 0) * Math.PI / 180;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(displayLabel, textX, textY);
+          if (lRotRad !== 0) {
+            ctx.translate(textX, textY);
+            ctx.rotate(lRotRad);
+            ctx.fillText(displayLabel, 0, 0);
+          } else {
+            ctx.fillText(displayLabel, textX, textY);
+          }
         } else {
           // ── Radial: text rotates with segment, offset in local coords ──────────
           ctx.translate(cx, cy);
           ctx.rotate(midAngle);
+          // Extra per-segment rotation around the label's own centre
+          ctx.translate(labelDist + loxRaw, fontSize * 0.35 + loyRaw);
+          ctx.rotate(((seg.label_rotation_angle ?? 0) || 0) * Math.PI / 180);
           ctx.textAlign = 'center';
           ctx.textBaseline = 'alphabetic';
-          ctx.fillText(displayLabel, labelDist + loxRaw, fontSize * 0.35 + loyRaw);
+          ctx.fillText(displayLabel, 0, 0);
         }
         ctx.restore();
       }
