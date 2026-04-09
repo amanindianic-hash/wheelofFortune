@@ -54,8 +54,8 @@ describe('WHEEL_TEMPLATES — uniqueness', () => {
 // ─── Counts per game type ─────────────────────────────────────────────────────
 
 describe('WHEEL_TEMPLATES — counts', () => {
-  it('has 9 wheel templates', () => {
-    expect(WHEEL_TEMPLATES.filter((t) => t.gameType === 'wheel').length).toBe(9);
+  it('has 8 wheel templates', () => {
+    expect(WHEEL_TEMPLATES.filter((t) => t.gameType === 'wheel').length).toBe(8);
   });
 
   it('has 6 scratch_card templates', () => {

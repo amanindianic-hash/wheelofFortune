@@ -185,34 +185,6 @@ describe('WHEEL_TEMPLATES — catalogue integrity', () => {
     expect(rouletteTemplates.length).toBeGreaterThan(0);
   });
 
-  it('premium templates are detectable via premium_face_url branding key', () => {
-    const premiumTemplates = WHEEL_TEMPLATES.filter(
-      (t) => !!(t.branding as Record<string, unknown>).premium_face_url,
-    );
-    expect(premiumTemplates.length).toBeGreaterThan(0);
-    premiumTemplates.forEach((t) => {
-      expect((t.branding as Record<string, unknown>).premium_face_url).toBeTruthy();
-    });
-  });
-
-  it('can look up freepik-gold-test by ID', () => {
-    const t = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test');
-    expect(t).toBeDefined();
-    expect(t!.gameType).toBe('wheel');
-  });
-
-  it('freepik-gold-test has both premium_face_url and premium_stand_url', () => {
-    const t = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
-    const b = t.branding as Record<string, unknown>;
-    expect(b.premium_face_url).toBe('/assets/premium-wheels/Wheel.png');
-    expect(b.premium_stand_url).toBe('/assets/premium-wheels/Stand.png');
-  });
-
-  it('freepik-gold-test has show_segment_labels=false in config', () => {
-    const t = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
-    expect(t.config.show_segment_labels).toBe(false);
-  });
-
   it('all wheel templates with outer_ring_width set have a numeric value', () => {
     WHEEL_TEMPLATES
       .filter((t) => t.gameType === 'wheel')
@@ -282,25 +254,6 @@ describe('Live preview state simulation', () => {
     expect(config.confetti_enabled).toBe(false);
   });
 
-  it('applying a premium theme sets premium_face_url in preview branding', () => {
-    const t = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
-    const { branding } = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, t);
-    expect(branding.premium_face_url).toBe('/assets/premium-wheels/Wheel.png');
-    expect(branding.premium_stand_url).toBe('/assets/premium-wheels/Stand.png');
-  });
-
-  it('applying a premium theme sets show_segment_labels=false in preview config', () => {
-    const t = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
-    const { config } = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, t);
-    expect(config.show_segment_labels).toBe(false);
-  });
-
-  it('premium theme sets all segment bg_colors to transparent', () => {
-    const t = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
-    const { segments } = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, t);
-    segments.forEach((s) => expect(s.bg_color).toBe('transparent'));
-  });
-
   it('applying a second theme overwrites the first (last-write-wins)', () => {
     const first = WHEEL_TEMPLATES.find((t) => t.id === 'neon-night')!;
     const second = WHEEL_TEMPLATES.find((t) => t.id === 'luxury-gold')!;
@@ -311,40 +264,6 @@ describe('Live preview state simulation', () => {
     // luxury-gold primary_color wins over neon-night primary_color
     expect(afterSecond.branding.primary_color).toBe('#B8860B');
     expect(afterSecond.branding.primary_color).not.toBe(first.branding.primary_color);
-  });
-
-  /**
-   * REGRESSION TEST — the bug reported in the screenshot:
-   * Applying a premium theme then switching to any non-premium theme must clear
-   * premium_face_url and premium_stand_url so the gold overlay disappears.
-   */
-  it('REGRESSION: switching from premium to non-premium clears premium_face_url and premium_stand_url', () => {
-    const premium = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
-    const nonPremium = WHEEL_TEMPLATES.find((t) => t.id === 'tropical')!;
-
-    // Step 1 — apply premium theme (simulates user picking "Freepik Gold Test")
-    const afterPremium = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, premium);
-    expect(afterPremium.branding.premium_face_url).toBe('/assets/premium-wheels/Wheel.png');
-
-    // Step 2 — apply non-premium theme (simulates user picking "Tropical")
-    const afterSwitch = simulateLivePreview(afterPremium.config, afterPremium.branding, afterPremium.segments, nonPremium);
-
-    // premium URLs must be null — NOT the old '/assets/premium-wheels/Wheel.png'
-    expect(afterSwitch.branding.premium_face_url).toBeNull();
-    expect(afterSwitch.branding.premium_stand_url).toBeNull();
-  });
-
-  it('REGRESSION: switching from premium to non-premium restores visible segment colors', () => {
-    const premium = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test')!;
-    const nonPremium = WHEEL_TEMPLATES.find((t) => t.id === 'neon-night')!;
-
-    const afterPremium = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, premium);
-    // After premium all segments are transparent
-    afterPremium.segments.forEach((s) => expect(s.bg_color).toBe('transparent'));
-
-    const afterSwitch = simulateLivePreview(afterPremium.config, afterPremium.branding, afterPremium.segments, nonPremium);
-    // After switching to neon-night, segments should have real colors again
-    afterSwitch.segments.forEach((s) => expect(s.bg_color).not.toBe('transparent'));
   });
 
   it('segment label content is preserved through live preview apply', () => {

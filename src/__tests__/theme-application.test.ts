@@ -31,23 +31,6 @@ describe('Theme Application Utility', () => {
     });
   });
 
-  it('PREMIUM: correctly applies a premium custom image wheel template', () => {
-    // Pick a premium custom theme like 'freepik-gold-test'
-    const premiumTheme = WHEEL_TEMPLATES.find((t) => t.id === 'freepik-gold-test');
-    expect(premiumTheme).toBeDefined();
-
-    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(premiumTheme!, dummySegments);
-
-    // Premium specific settings applied accurately
-    expect(newConfig.show_segment_labels).toBe(false); // as defined in premium config
-    expect(newBranding.premium_face_url).toBe('/assets/premium-wheels/Wheel.png');
-    expect(newBranding.premium_stand_url).toBe('/assets/premium-wheels/Stand.png');
-    expect(newBranding.premium_content_scale).toBe(0.75);
-
-    // Segments mapping works
-    expect(newSegments[0].bg_color).toBe('transparent');
-  });
-
   it('CUSTOM: correctly handles an ad-hoc custom theme without image overlays', () => {
     // Simulate a custom theme a user defines manually via the same interface
     const customTheme = {
