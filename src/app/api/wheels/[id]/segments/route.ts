@@ -143,7 +143,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     // Store the active segment count in wheels table
     await sql`UPDATE wheels SET active_segment_count = ${segments.length} WHERE id = ${id}`;
 
-    const updated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} ORDER BY position ASC` as any[];
+    const allUpdated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} ORDER BY position ASC` as any[];
+
+    // Return only active segments (filter by position < active_segment_count)
+    const updated = allUpdated.slice(0, segments.length);
 
     await logAuditAction({
       req,
