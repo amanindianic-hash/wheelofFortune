@@ -34,29 +34,45 @@ export function RoulettePreview({ segments, branding, config }: RoulettePreviewP
   const tableGreen   = pocketStyle === 'neon' ? '#0A0A14' : '#065c20';
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4 bg-muted/30 rounded-xl p-8 border border-dashed border-muted-foreground/20">
       <div
-        className="rounded-2xl p-4 flex flex-col items-center gap-4 w-full"
+        className="rounded-2xl p-6 flex flex-col items-center gap-4 w-full shadow-2xl"
         style={{
           backgroundColor: tableGreen,
-          border: pocketStyle === 'neon' ? `2px solid ${primaryColor}44` : '2px solid rgba(255,255,255,0.15)',
+          border: pocketStyle === 'neon' ? `3px solid ${primaryColor}` : '3px solid #C8A050',
+          boxShadow: pocketStyle === 'neon' ? `0 0 24px ${primaryColor}aa, 0 20px 40px rgba(0,0,0,0.4)` : '0 20px 40px rgba(0,0,0,0.3)',
         }}
       >
         <p className="text-white/80 text-xs font-semibold uppercase tracking-widest">🎰 Roulette Preview</p>
 
         <div className="relative">
-          <div className="absolute -top-2 left-1/2 -translate-x-1/2 z-10">
-            <div
-              className="w-0 h-0 border-l-[8px] border-r-[8px] border-t-[16px] border-l-transparent border-r-transparent"
-              style={{ borderTopColor: pocketStyle === 'neon' ? primaryColor : '#C8A050' }}
-            />
+          {/* Premium 3D Pointer */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+            {/* Base Mount */}
+            <div className="w-6 h-3 bg-gradient-to-b from-[#f8f9fa] to-[#d1d5db] rounded-t-md shadow-sm border border-b-0 border-black/10 relative z-10" />
+            {/* Arrow */}
+            <div className="relative -mt-0.5 drop-shadow-lg filter">
+              <svg width="24" height="32" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 38L2 14V2C2 2 12 4 16 4C20 4 30 2 30 2V14L16 38Z" fill={pocketStyle === 'neon' ? primaryColor : '#C8A050'} stroke="rgba(255,255,255,0.5)" strokeWidth="2" />
+                <path d="M16 34L4 15V5C7 6.5 11 7.5 16 7.5C21 7.5 25 6.5 28 5V15L16 34Z" fill="url(#roulette-arrow-grad)" />
+                <defs>
+                  <linearGradient id="roulette-arrow-grad" x1="16" y1="5" x2="16" y2="34" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="white" stopOpacity="0.4" />
+                    <stop offset="1" stopColor="black" stopOpacity="0.3" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
           </div>
           <canvas
             ref={canvasRef}
             width={260}
             height={260}
-            className="rounded-full"
-            style={{ border: `2px solid ${pocketStyle === 'neon' ? primaryColor : '#C8A050'}` }}
+            className="rounded-full shadow-2xl"
+            style={{
+              border: `3px solid ${pocketStyle === 'neon' ? primaryColor : '#C8A050'}`,
+              boxShadow: `0 0 20px rgba(0,0,0,0.5), 0 10px 30px rgba(0,0,0,0.3)`,
+            }}
           />
         </div>
 

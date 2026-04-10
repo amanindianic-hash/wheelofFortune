@@ -76,9 +76,9 @@ export function ScratchPreview({ segments, branding, config }: ScratchPreviewPro
   const threshold = Math.round((config.scratch_reveal_threshold ?? 0.6) * 100);
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 bg-muted/30 rounded-xl p-6 border border-dashed border-muted-foreground/20">
+    <div className="flex flex-col items-center justify-center gap-4 bg-muted/30 rounded-xl p-8 border border-dashed border-muted-foreground/20">
       {/* Card */}
-      <div className="relative overflow-hidden shadow-lg" style={{ width: w, height: h, borderRadius, border: `3px solid ${borderColor}` }}>
+      <div className="relative overflow-hidden shadow-2xl" style={{ width: w, height: h, borderRadius, border: `4px solid ${borderColor}`, boxShadow: `0 20px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)` }}>
         <PrizeCells layout={layout} segments={segments} primaryColor={primaryColor} />
 
         {/* Scratch overlay with partial reveal (right 40% pre-scratched) */}
@@ -96,8 +96,8 @@ export function ScratchPreview({ segments, branding, config }: ScratchPreviewPro
       </div>
 
       {/* Meta */}
-      <div className="w-full max-w-[320px] space-y-1 text-xs text-muted-foreground text-center">
-        <p className="font-medium uppercase tracking-wider">Live Preview · Scratch Card</p>
+      <div className="w-full space-y-1 text-xs text-muted-foreground text-center">
+        <p className="font-semibold uppercase tracking-wider">✦ Live Preview · Scratch Card ✦</p>
         <p className="text-[10px] opacity-70">
           {layout === 'grid_2x2' ? '2×2 Grid' : layout === 'row_3x1' ? '3×1 Row' : 'Single Prize'} · {sizeKey} · Reveal at {threshold}%
         </p>

@@ -12,11 +12,29 @@ interface SlotPreviewProps {
 function getCabinetStyles(style: WheelConfig['slot_cabinet_style'], primaryColor: string): React.CSSProperties {
   switch (style) {
     case 'classic':
-      return { background: 'linear-gradient(160deg,#c0392b,#8e1c12)', border: '3px solid #f39c12', borderRadius: 20, padding: 12 };
+      return {
+        background: 'linear-gradient(160deg,#c0392b,#8e1c12)',
+        border: '4px solid #f39c12',
+        borderRadius: 20,
+        padding: 16,
+        boxShadow: '0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15)',
+      };
     case 'neon':
-      return { background: '#0A0A14', border: `3px solid ${primaryColor}`, borderRadius: 18, padding: 12, boxShadow: `0 0 16px ${primaryColor}88` };
+      return {
+        background: '#0A0A14',
+        border: `4px solid ${primaryColor}`,
+        borderRadius: 18,
+        padding: 16,
+        boxShadow: `0 0 24px ${primaryColor}cc, 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)`
+      };
     default:
-      return { background: `linear-gradient(135deg,${primaryColor}22,${primaryColor}44)`, border: `3px solid ${primaryColor}`, borderRadius: 20, padding: 12 };
+      return {
+        background: `linear-gradient(135deg,${primaryColor}22,${primaryColor}44)`,
+        border: `4px solid ${primaryColor}`,
+        borderRadius: 20,
+        padding: 16,
+        boxShadow: `0 20px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)`,
+      };
   }
 }
 
@@ -38,7 +56,7 @@ export function SlotPreview({ segments, branding, config }: SlotPreviewProps) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4 bg-muted/30 rounded-xl p-6 border border-dashed border-muted-foreground/20">
+    <div className="flex flex-col items-center justify-center gap-4 bg-muted/30 rounded-xl p-8 border border-dashed border-muted-foreground/20">
       <div style={cabinetCSS}>
         {/* Reel window */}
         <div className="flex gap-1.5 rounded-xl p-1.5"
@@ -77,8 +95,8 @@ export function SlotPreview({ segments, branding, config }: SlotPreviewProps) {
       </div>
 
       <div className="text-center space-y-0.5">
-        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Live Preview · Slot Machine</p>
-        <p className="text-[10px] text-muted-foreground/60">
+        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">🎰 Live Preview · Slot Machine 🎰</p>
+        <p className="text-[10px] text-muted-foreground/70">
           {reelCount} reels · {visRows} row{visRows !== 1 ? 's' : ''} · {symbolMode} · {cabinetStyle}
         </p>
       </div>
