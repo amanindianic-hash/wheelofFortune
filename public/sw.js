@@ -21,8 +21,15 @@ self.addEventListener('activate', e => {
 // Fetch — network-first for API, cache-first for static assets
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+
+  // Skip service worker for critical widget API endpoints (let browser handle them)
+  const criticalApiPaths = ['/api/spin/session', '/api/spin/execute', '/api/spin/streak'];
+  if (criticalApiPaths.some(path => url.pathname === path)) {
+    return; // Let browser handle the request directly
+  }
+
   if (url.pathname.startsWith('/api/')) {
-    // Network-first for API routes
+    // Network-first for other API routes
     e.respondWith(
       fetch(e.request).catch(() => new Response(JSON.stringify({ error: { code: 'OFFLINE', message: 'You are offline.' } }), {
         status: 503, headers: { 'Content-Type': 'application/json' }
