@@ -17,17 +17,21 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const { id } = await params;
   try {
-    const wheelResults = await sql`SELECT id FROM wheels WHERE id = ${id} AND client_id = ${auth.user.client_id} AND deleted_at IS NULL LIMIT 1`;
+    const wheelResults = await sql`SELECT id, active_segment_count FROM wheels WHERE id = ${id} AND client_id = ${auth.user.client_id} AND deleted_at IS NULL LIMIT 1`;
     const wheel = (wheelResults as any)[0];
     if (!wheel) return errorResponse('NOT_FOUND', 'Wheel not found.', 404);
 
-    const segments = await sql`
+    const allSegments = await sql`
       SELECT s.*, p.display_title as prize_display_title, p.type as prize_type
       FROM segments s
       LEFT JOIN prizes p ON p.id = s.prize_id
       WHERE s.wheel_id = ${id}
       ORDER BY s.position ASC
     ` as any[];
+
+    // Filter to only active segments
+    const activeCount = wheel.active_segment_count ?? 0;
+    const segments = allSegments.slice(0, activeCount);
     return okResponse({ segments });
   } catch (err) {
     console.error('Get segments error:', err);
@@ -127,19 +131,22 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     }
 
-    // Delete any trailing segments that are no longer needed
-    // First, clear segment_id references in spin_results to allow deletion
+    // Delete any trailing segments that are no longer needed (only if not referenced by spin_results)
     for (let i = segments.length; i < existingIds.length; i++) {
       const oldId = existingIds[i];
-      if (referencedSet.has(oldId)) {
-        // Clear the segment_id (set to NULL) so we can delete the segment
-        await sql`UPDATE spin_results SET segment_id = NULL WHERE segment_id = ${oldId}`;
+      if (!referencedSet.has(oldId)) {
+        await sql`DELETE FROM segments WHERE id = ${oldId}`;
       }
-      // Now delete the segment (no FK constraint violation)
-      await sql`DELETE FROM segments WHERE id = ${oldId}`;
+      // If referenced by spin_results, leave it — it won't appear on wheel (active_segment_count) but satisfies immutable FK
     }
 
-    const updated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} ORDER BY position ASC` as any[];
+    // Store the active segment count in wheels table for filtering
+    await sql`UPDATE wheels SET active_segment_count = ${segments.length} WHERE id = ${id}`;
+
+    const allUpdated = await sql`SELECT * FROM segments WHERE wheel_id = ${id} ORDER BY position ASC` as any[];
+
+    // Return only active segments
+    const updated = allUpdated.slice(0, segments.length);
 
     await logAuditAction({
       req,
