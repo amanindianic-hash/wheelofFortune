@@ -1,6 +1,6 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { sql } from '@/lib/db';
-import { okResponse, errorResponse } from '@/lib/middleware-utils';
+import { errorResponse } from '@/lib/middleware-utils';
 
 // Disable caching — always fetch fresh game_type from database
 export const revalidate = 0;
@@ -23,7 +23,10 @@ export async function GET(req: NextRequest) {
     if (!wheel) return errorResponse('NOT_FOUND', 'Wheel not found', 404);
 
     const gameType: string = (wheel.config as Record<string, unknown>)?.game_type as string ?? 'wheel';
-    return okResponse({ game_type: gameType });
+    const response = NextResponse.json({ game_type: gameType });
+    // Prevent browser and CDN from caching this response
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+    return response;
   } catch {
     return errorResponse('INTERNAL', 'Server error', 500);
   }
