@@ -17,7 +17,10 @@ export default async function WidgetPage({
   // Server-side game type lookup so the client receives the right component with no extra round-trip.
   let gameType = 'wheel';
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+    // Use VERCEL_URL for production (auto-set by Vercel), fallback to localhost for local dev
+    const baseUrl = process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : 'http://localhost:3000';
     const res = await fetch(`${baseUrl}/api/spin/game-type?token=${token}`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
