@@ -3,7 +3,8 @@ import { ScratchWidget } from '@/components/widget/scratch-widget';
 import { SlotWidget } from '@/components/widget/slot-widget';
 import { RouletteWidget } from '@/components/widget/roulette-widget';
 
-// Disable caching — always fetch fresh data from database
+// Force dynamic rendering — never cache this page
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function WidgetPage({
