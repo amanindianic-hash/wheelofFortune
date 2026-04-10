@@ -3,6 +3,9 @@ import { ScratchWidget } from '@/components/widget/scratch-widget';
 import { SlotWidget } from '@/components/widget/slot-widget';
 import { RouletteWidget } from '@/components/widget/roulette-widget';
 
+// Disable caching — always fetch fresh data from database
+export const revalidate = 0;
+
 export default async function WidgetPage({
   params,
   searchParams,
