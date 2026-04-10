@@ -1,0 +1,212 @@
+[
+  {
+    "id": "gaming-neon-dark",
+    "name": "Gaming Neon Dark",
+    "category": "gaming",
+    "description": "High-energy neon colors on dark background for immersive gaming experience",
+    "colorPaletteId": "color-12",
+    "colorPalette": {
+      "id": "color-12",
+      "productType": "Gaming",
+      "colors": {
+        "primary": "#7C3AED",
+        "onPrimary": "#FFFFFF",
+        "secondary": "#A78BFA",
+        "onSecondary": "#0F172A",
+        "accent": "#F43F5E",
+        "onAccent": "#FFFFFF",
+        "background": "#0F0F23",
+        "foreground": "#E2E8F0",
+        "card": "#1E1C35",
+        "cardForeground": "#E2E8F0",
+        "muted": "#27273B",
+        "mutedForeground": "#94A3B8",
+        "border": "#4C1D95",
+        "destructive": "#EF4444",
+        "onDestructive": "#FFFFFF",
+        "ring": "#7C3AED"
+      },
+      "notes": "Neon purple + rose action"
+    },
+    "typographyId": "typography-22",
+    "typography": {
+      "headingFont": "Space Grotesk",
+      "bodyFont": "DM Sans",
+      "cssImport": "@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=DM+Sans:wght@400;500;700&display=swap');",
+      "tailwindConfig": "fontFamily: { heading: ['Space Grotesk', 'sans-serif'], body: ['DM Sans', 'sans-serif'] }"
+    },
+    "styleId": "style-retro-futurism",
+    "style": "Retro-Futurism",
+    "moodKeywords": [
+      "vibrant",
+      "neon",
+      "immersive",
+      "energetic",
+      "futuristic"
+    ],
+    "bestFor": [
+      "Gaming",
+      "Entertainment",
+      "Esports",
+      "Interactive experiences"
+    ],
+    "darkMode": true,
+    "mobileOptimized": true
+  },
+  {
+    "id": "gaming-dark-minimal",
+    "name": "Gaming Dark Minimal",
+    "category": "gaming",
+    "description": "Clean dark interface with accent colors for focus on gameplay",
+    "colorPalette": {
+      "primary": "#0F172A",
+      "secondary": "#1E293B",
+      "accent": "#3B82F6",
+      "background": "#020617",
+      "foreground": "#F1F5F9",
+      "card": "#1E293B",
+      "cardForeground": "#F1F5F9",
+      "destructive": "#EF4444",
+      "border": "#334155"
+    },
+    "typography": {
+      "headingFont": "Inter",
+      "bodyFont": "Inter",
+      "cssImport": "@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');",
+      "tailwindConfig": "fontFamily: { sans: ['Inter', 'sans-serif'] }"
+    },
+    "style": "Minimalism & Swiss Style",
+    "moodKeywords": [
+      "clean",
+      "minimal",
+      "professional",
+      "focused",
+      "high-contrast"
+    ],
+    "bestFor": [
+      "Strategy games",
+      "Competitive gaming",
+      "Dashboards",
+      "Mobile games"
+    ],
+    "darkMode": true,
+    "mobileOptimized": true
+  },
+  {
+    "id": "gaming-retro-arcade",
+    "name": "Gaming Retro Arcade",
+    "category": "gaming",
+    "description": "Vintage arcade aesthetic with bold fonts and nostalgic colors",
+    "colorPalette": {
+      "primary": "#FF006E",
+      "secondary": "#8338EC",
+      "accent": "#FFBE0B",
+      "background": "#0A0E27",
+      "foreground": "#FFFFFF",
+      "card": "#1A1F3A",
+      "cardForeground": "#FFFFFF",
+      "destructive": "#FF4757",
+      "border": "#8338EC"
+    },
+    "typography": {
+      "headingFont": "Space Mono",
+      "bodyFont": "Space Mono",
+      "cssImport": "@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');",
+      "tailwindConfig": "fontFamily: { mono: ['Space Mono', 'monospace'] }"
+    },
+    "style": "Retro-Futurism",
+    "moodKeywords": [
+      "retro",
+      "arcade",
+      "nostalgic",
+      "bold",
+      "vibrant"
+    ],
+    "bestFor": [
+      "Retro games",
+      "Casual games",
+      "Indie games",
+      "Web3 gaming"
+    ],
+    "darkMode": true,
+    "mobileOptimized": true
+  },
+  {
+    "id": "entertainment-dark-streaming",
+    "name": "Streaming Platform Dark",
+    "category": "entertainment",
+    "description": "OLED-optimized dark mode for media streaming platforms",
+    "colorPalette": {
+      "primary": "#121212",
+      "secondary": "#282828",
+      "accent": "#1DB954",
+      "background": "#0F0F0F",
+      "foreground": "#FFFFFF",
+      "card": "#282828",
+      "cardForeground": "#FFFFFF",
+      "destructive": "#E22134",
+      "border": "#404040"
+    },
+    "typography": {
+      "headingFont": "Poppins",
+      "bodyFont": "Inter",
+      "cssImport": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Inter:wght@400;500&display=swap');",
+      "tailwindConfig": "fontFamily: { heading: ['Poppins', 'sans-serif'], body: ['Inter', 'sans-serif'] }"
+    },
+    "style": "Dark Mode (OLED)",
+    "moodKeywords": [
+      "dark",
+      "media",
+      "entertainment",
+      "streaming",
+      "modern"
+    ],
+    "bestFor": [
+      "Streaming platforms",
+      "Video players",
+      "Music apps",
+      "Content discovery"
+    ],
+    "darkMode": true,
+    "mobileOptimized": true
+  },
+  {
+    "id": "entertainment-vibrant-social",
+    "name": "Social Media Vibrant",
+    "category": "entertainment",
+    "description": "Vibrant colors for engagement-driven social platforms",
+    "colorPalette": {
+      "primary": "#FF006E",
+      "secondary": "#FB5607",
+      "accent": "#FFBE0B",
+      "background": "#FFFFFF",
+      "foreground": "#0F172A",
+      "card": "#F8FAFC",
+      "cardForeground": "#0F172A",
+      "destructive": "#DC2626",
+      "border": "#E2E8F0"
+    },
+    "typography": {
+      "headingFont": "Poppins",
+      "bodyFont": "Open Sans",
+      "cssImport": "@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Open+Sans:wght@400;500&display=swap');",
+      "tailwindConfig": "fontFamily: { heading: ['Poppins', 'sans-serif'], body: ['Open Sans', 'sans-serif'] }"
+    },
+    "style": "Vibrant & Block-based",
+    "moodKeywords": [
+      "vibrant",
+      "social",
+      "engaging",
+      "colorful",
+      "playful"
+    ],
+    "bestFor": [
+      "Social media",
+      "Community platforms",
+      "Content sharing",
+      "User engagement"
+    ],
+    "darkMode": false,
+    "mobileOptimized": true
+  }
+]

@@ -1,0 +1,3091 @@
+[
+  {
+    "id": "product-1",
+    "productType": "SaaS (General)",
+    "keywords": [
+      "app",
+      "b2b",
+      "cloud",
+      "general",
+      "saas",
+      "software",
+      "subscription"
+    ],
+    "primaryStyleRecommendation": "Glassmorphism + Flat Design",
+    "secondaryStyles": "Soft UI Evolution, Minimalism",
+    "landingPagePattern": "Hero + Features + CTA",
+    "dashboardStyle": "Data-Dense + Real-Time Monitoring",
+    "colorPaletteFocus": "Trust blue + accent contrast",
+    "keyConsiderations": "Balance modern feel with clarity. Focus on CTAs."
+  },
+  {
+    "id": "product-2",
+    "productType": "Micro SaaS",
+    "keywords": [
+      "app",
+      "b2b",
+      "cloud",
+      "indie",
+      "micro",
+      "micro-saas",
+      "niche",
+      "saas",
+      "small",
+      "software",
+      "solo",
+      "subscription"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Vibrant & Block",
+    "secondaryStyles": "Motion-Driven, Micro-interactions",
+    "landingPagePattern": "Minimal & Direct + Demo",
+    "dashboardStyle": "Executive Dashboard",
+    "colorPaletteFocus": "Vibrant primary + white space",
+    "keyConsiderations": "Keep simple, show product quickly. Speed is key."
+  },
+  {
+    "id": "product-3",
+    "productType": "E-commerce",
+    "keywords": [
+      "buy",
+      "commerce",
+      "e",
+      "ecommerce",
+      "products",
+      "retail",
+      "sell",
+      "shop",
+      "store"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based",
+    "secondaryStyles": "Aurora UI, Motion-Driven",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "Sales Intelligence Dashboard",
+    "colorPaletteFocus": "Brand primary + success green",
+    "keyConsiderations": "Engagement & conversions. High visual hierarchy."
+  },
+  {
+    "id": "product-4",
+    "productType": "E-commerce Luxury",
+    "keywords": [
+      "buy",
+      "commerce",
+      "e",
+      "ecommerce",
+      "elegant",
+      "exclusive",
+      "high-end",
+      "luxury",
+      "premium",
+      "products",
+      "retail",
+      "sell",
+      "shop",
+      "store"
+    ],
+    "primaryStyleRecommendation": "Liquid Glass + Glassmorphism",
+    "secondaryStyles": "3D & Hyperrealism, Aurora UI",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "Sales Intelligence Dashboard",
+    "colorPaletteFocus": "Premium colors + minimal accent",
+    "keyConsiderations": "Elegance & sophistication. Premium materials."
+  },
+  {
+    "id": "product-5",
+    "productType": "B2B Service",
+    "keywords": [
+      "appointment",
+      "b",
+      "b2b",
+      "booking",
+      "business",
+      "consultation",
+      "corporate",
+      "enterprise",
+      "service"
+    ],
+    "primaryStyleRecommendation": "Trust & Authority + Minimal",
+    "secondaryStyles": "Feature-Rich, Conversion-Optimized",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "Sales Intelligence Dashboard",
+    "colorPaletteFocus": "Professional blue + neutral grey",
+    "keyConsiderations": "Credibility essential. Clear ROI messaging."
+  },
+  {
+    "id": "product-6",
+    "productType": "Financial Dashboard",
+    "keywords": [
+      "admin",
+      "analytics",
+      "dashboard",
+      "data",
+      "financial",
+      "panel"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Data-Dense",
+    "secondaryStyles": "Minimalism, Accessible & Ethical",
+    "landingPagePattern": "N/A - Dashboard focused",
+    "dashboardStyle": "Financial Dashboard",
+    "colorPaletteFocus": "Dark bg + red/green alerts + trust blue",
+    "keyConsiderations": "High contrast, real-time updates, accuracy paramount."
+  },
+  {
+    "id": "product-7",
+    "productType": "Analytics Dashboard",
+    "keywords": [
+      "admin",
+      "analytics",
+      "dashboard",
+      "data",
+      "panel"
+    ],
+    "primaryStyleRecommendation": "Data-Dense + Heat Map & Heatmap",
+    "secondaryStyles": "Minimalism, Dark Mode (OLED)",
+    "landingPagePattern": "N/A - Analytics focused",
+    "dashboardStyle": "Drill-Down Analytics + Comparative",
+    "colorPaletteFocus": "Cool\u2192Hot gradients + neutral grey",
+    "keyConsiderations": "Clarity > aesthetics. Color-coded data priority."
+  },
+  {
+    "id": "product-8",
+    "productType": "Healthcare App",
+    "keywords": [
+      "app",
+      "clinic",
+      "health",
+      "healthcare",
+      "medical",
+      "patient"
+    ],
+    "primaryStyleRecommendation": "Neumorphism + Accessible & Ethical",
+    "secondaryStyles": "Soft UI Evolution, Claymorphism (for patients)",
+    "landingPagePattern": "Social Proof-Focused",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Calm blue + health green + trust",
+    "keyConsiderations": "Accessibility mandatory. Calming aesthetic."
+  },
+  {
+    "id": "product-9",
+    "productType": "Educational App",
+    "keywords": [
+      "app",
+      "course",
+      "education",
+      "educational",
+      "learning",
+      "school",
+      "training"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Micro-interactions",
+    "secondaryStyles": "Vibrant & Block-based, Flat Design",
+    "landingPagePattern": "Storytelling-Driven",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Playful colors + clear hierarchy",
+    "keyConsiderations": "Engagement & ease of use. Age-appropriate design."
+  },
+  {
+    "id": "product-10",
+    "productType": "Creative Agency",
+    "keywords": [
+      "agency",
+      "creative",
+      "design",
+      "marketing",
+      "studio"
+    ],
+    "primaryStyleRecommendation": "Brutalism + Motion-Driven",
+    "secondaryStyles": "Retro-Futurism, Storytelling-Driven",
+    "landingPagePattern": "Storytelling-Driven",
+    "dashboardStyle": "N/A - Portfolio focused",
+    "colorPaletteFocus": "Bold primaries + artistic freedom",
+    "keyConsiderations": "Differentiation key. Wow-factor necessary."
+  },
+  {
+    "id": "product-11",
+    "productType": "Portfolio/Personal",
+    "keywords": [
+      "creative",
+      "personal",
+      "portfolio",
+      "projects",
+      "showcase",
+      "work"
+    ],
+    "primaryStyleRecommendation": "Motion-Driven + Minimalism",
+    "secondaryStyles": "Brutalism, Aurora UI",
+    "landingPagePattern": "Storytelling-Driven",
+    "dashboardStyle": "N/A - Personal branding",
+    "colorPaletteFocus": "Brand primary + artistic interpretation",
+    "keyConsiderations": "Showcase work. Personality shine through."
+  },
+  {
+    "id": "product-12",
+    "productType": "Gaming",
+    "keywords": [
+      "entertainment",
+      "esports",
+      "game",
+      "gaming",
+      "play"
+    ],
+    "primaryStyleRecommendation": "3D & Hyperrealism + Retro-Futurism",
+    "secondaryStyles": "Motion-Driven, Vibrant & Block",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "N/A - Game focused",
+    "colorPaletteFocus": "Vibrant + neon + immersive colors",
+    "keyConsiderations": "Immersion priority. Performance critical."
+  },
+  {
+    "id": "product-13",
+    "productType": "Government/Public Service",
+    "keywords": [
+      "appointment",
+      "booking",
+      "consultation",
+      "government",
+      "public",
+      "service"
+    ],
+    "primaryStyleRecommendation": "Accessible & Ethical + Minimalism",
+    "secondaryStyles": "Flat Design, Inclusive Design",
+    "landingPagePattern": "Minimal & Direct",
+    "dashboardStyle": "Executive Dashboard",
+    "colorPaletteFocus": "Professional blue + high contrast",
+    "keyConsiderations": "WCAG AAA mandatory. Trust paramount."
+  },
+  {
+    "id": "product-14",
+    "productType": "Fintech/Crypto",
+    "keywords": [
+      "banking",
+      "blockchain",
+      "crypto",
+      "defi",
+      "finance",
+      "fintech",
+      "money",
+      "nft",
+      "payment",
+      "web3"
+    ],
+    "primaryStyleRecommendation": "Glassmorphism + Dark Mode (OLED)",
+    "secondaryStyles": "Retro-Futurism, Motion-Driven",
+    "landingPagePattern": "Conversion-Optimized",
+    "dashboardStyle": "Real-Time Monitoring + Predictive",
+    "colorPaletteFocus": "Dark tech colors + trust + vibrant accents",
+    "keyConsiderations": "Security perception. Real-time data critical."
+  },
+  {
+    "id": "product-15",
+    "productType": "Social Media App",
+    "keywords": [
+      "app",
+      "community",
+      "content",
+      "entertainment",
+      "media",
+      "network",
+      "sharing",
+      "social",
+      "streaming",
+      "users",
+      "video"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Aurora UI, Micro-interactions",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Vibrant + engagement colors",
+    "keyConsiderations": "Engagement & retention. Addictive design ethics."
+  },
+  {
+    "id": "product-16",
+    "productType": "Productivity Tool",
+    "keywords": [
+      "collaboration",
+      "productivity",
+      "project",
+      "task",
+      "tool",
+      "workflow"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Micro-interactions",
+    "secondaryStyles": "Minimalism, Soft UI Evolution",
+    "landingPagePattern": "Interactive Product Demo",
+    "dashboardStyle": "Drill-Down Analytics",
+    "colorPaletteFocus": "Clear hierarchy + functional colors",
+    "keyConsiderations": "Ease of use. Speed & efficiency focus."
+  },
+  {
+    "id": "product-17",
+    "productType": "Design System/Component Library",
+    "keywords": [
+      "component",
+      "design",
+      "library",
+      "system"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Accessible & Ethical",
+    "secondaryStyles": "Flat Design, Zero Interface",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "N/A - Dev focused",
+    "colorPaletteFocus": "Clear hierarchy + code-like structure",
+    "keyConsiderations": "Consistency. Developer-first approach."
+  },
+  {
+    "id": "product-18",
+    "productType": "AI/Chatbot Platform",
+    "keywords": [
+      "ai",
+      "artificial-intelligence",
+      "automation",
+      "chatbot",
+      "machine-learning",
+      "ml",
+      "platform"
+    ],
+    "primaryStyleRecommendation": "AI-Native UI + Minimalism",
+    "secondaryStyles": "Zero Interface, Glassmorphism",
+    "landingPagePattern": "Interactive Product Demo",
+    "dashboardStyle": "AI/ML Analytics Dashboard",
+    "colorPaletteFocus": "Neutral + AI Purple (#6366F1)",
+    "keyConsiderations": "Conversational UI. Streaming text. Context awareness. Minimal chrome."
+  },
+  {
+    "id": "product-19",
+    "productType": "NFT/Web3 Platform",
+    "keywords": [
+      "nft",
+      "platform",
+      "web"
+    ],
+    "primaryStyleRecommendation": "Cyberpunk UI + Glassmorphism",
+    "secondaryStyles": "Aurora UI, 3D & Hyperrealism",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "Crypto/Blockchain Dashboard",
+    "colorPaletteFocus": "Dark + Neon + Gold (#FFD700)",
+    "keyConsiderations": "Wallet integration. Transaction feedback. Gas fees display. Dark mode essential."
+  },
+  {
+    "id": "product-20",
+    "productType": "Creator Economy Platform",
+    "keywords": [
+      "creator",
+      "economy",
+      "platform"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Bento Box Grid",
+    "secondaryStyles": "Motion-Driven, Aurora UI",
+    "landingPagePattern": "Social Proof-Focused",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Vibrant + Brand colors",
+    "keyConsiderations": "Creator profiles. Monetization display. Engagement metrics. Social proof."
+  },
+  {
+    "id": "product-21",
+    "productType": "Remote Work/Collaboration Tool",
+    "keywords": [
+      "collaboration",
+      "remote",
+      "tool",
+      "work"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Minimalism",
+    "secondaryStyles": "Glassmorphism, Micro-interactions",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "Drill-Down Analytics",
+    "colorPaletteFocus": "Calm Blue + Neutral grey",
+    "keyConsiderations": "Real-time collaboration. Status indicators. Video integration. Notification management."
+  },
+  {
+    "id": "product-22",
+    "productType": "Mental Health App",
+    "keywords": [
+      "app",
+      "health",
+      "mental"
+    ],
+    "primaryStyleRecommendation": "Neumorphism + Accessible & Ethical",
+    "secondaryStyles": "Claymorphism, Soft UI Evolution",
+    "landingPagePattern": "Social Proof-Focused",
+    "dashboardStyle": "Healthcare Analytics",
+    "colorPaletteFocus": "Calm Pastels + Trust colors",
+    "keyConsiderations": "Calming aesthetics. Privacy-first. Crisis resources. Progress tracking. Accessibility mandatory."
+  },
+  {
+    "id": "product-23",
+    "productType": "Pet Tech App",
+    "keywords": [
+      "app",
+      "pet",
+      "tech"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Micro-interactions, Flat Design",
+    "landingPagePattern": "Storytelling-Driven",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Playful + Warm colors",
+    "keyConsiderations": "Pet profiles. Health tracking. Playful UI. Photo galleries. Vet integration."
+  },
+  {
+    "id": "product-24",
+    "productType": "Smart Home/IoT Dashboard",
+    "keywords": [
+      "admin",
+      "analytics",
+      "dashboard",
+      "data",
+      "home",
+      "iot",
+      "panel",
+      "smart"
+    ],
+    "primaryStyleRecommendation": "Glassmorphism + Dark Mode (OLED)",
+    "secondaryStyles": "Minimalism, AI-Native UI",
+    "landingPagePattern": "Interactive Product Demo",
+    "dashboardStyle": "Real-Time Monitoring",
+    "colorPaletteFocus": "Dark + Status indicator colors",
+    "keyConsiderations": "Device status. Real-time controls. Energy monitoring. Automation rules. Quick actions."
+  },
+  {
+    "id": "product-25",
+    "productType": "EV/Charging Ecosystem",
+    "keywords": [
+      "charging",
+      "ecosystem",
+      "ev"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Aurora UI",
+    "secondaryStyles": "Glassmorphism, Organic Biophilic",
+    "landingPagePattern": "Hero-Centric Design",
+    "dashboardStyle": "Energy/Utilities Dashboard",
+    "colorPaletteFocus": "Electric Blue (#009CD1) + Green",
+    "keyConsiderations": "Charging station maps. Range estimation. Cost calculation. Environmental impact."
+  },
+  {
+    "id": "product-26",
+    "productType": "Subscription Box Service",
+    "keywords": [
+      "appointment",
+      "booking",
+      "box",
+      "consultation",
+      "membership",
+      "plan",
+      "recurring",
+      "service",
+      "subscription"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Claymorphism, Aurora UI",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "E-commerce Analytics",
+    "colorPaletteFocus": "Brand + Excitement colors",
+    "keyConsiderations": "Unboxing experience. Personalization quiz. Subscription management. Product reveals."
+  },
+  {
+    "id": "product-27",
+    "productType": "Podcast Platform",
+    "keywords": [
+      "platform",
+      "podcast"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Minimalism",
+    "secondaryStyles": "Motion-Driven, Vibrant & Block-based",
+    "landingPagePattern": "Storytelling-Driven",
+    "dashboardStyle": "Media/Entertainment Dashboard",
+    "colorPaletteFocus": "Dark + Audio waveform accents",
+    "keyConsiderations": "Audio player UX. Episode discovery. Creator tools. Analytics for podcasters."
+  },
+  {
+    "id": "product-28",
+    "productType": "Dating App",
+    "keywords": [
+      "app",
+      "dating"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Aurora UI, Glassmorphism",
+    "landingPagePattern": "Social Proof-Focused",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Warm + Romantic (Pink/Red gradients)",
+    "keyConsiderations": "Profile cards. Swipe interactions. Match animations. Safety features. Video chat."
+  },
+  {
+    "id": "product-29",
+    "productType": "Micro-Credentials/Badges Platform",
+    "keywords": [
+      "badges",
+      "credentials",
+      "micro",
+      "platform"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Accessible & Ethical, Swiss Modernism 2.0",
+    "landingPagePattern": "Trust & Authority",
+    "dashboardStyle": "Education Dashboard",
+    "colorPaletteFocus": "Trust Blue + Gold (#FFD700)",
+    "keyConsiderations": "Credential verification. Badge display. Progress tracking. Issuer trust. LinkedIn integration."
+  },
+  {
+    "id": "product-30",
+    "productType": "Knowledge Base/Documentation",
+    "keywords": [
+      "base",
+      "documentation",
+      "knowledge"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Accessible & Ethical",
+    "secondaryStyles": "Swiss Modernism 2.0, Flat Design",
+    "landingPagePattern": "FAQ/Documentation",
+    "dashboardStyle": "N/A - Documentation focused",
+    "colorPaletteFocus": "Clean hierarchy + minimal color",
+    "keyConsiderations": "Search-first. Clear navigation. Code highlighting. Version switching. Feedback system."
+  },
+  {
+    "id": "product-31",
+    "productType": "Hyperlocal Services",
+    "keywords": [
+      "appointment",
+      "booking",
+      "consultation",
+      "hyperlocal",
+      "service",
+      "services"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Vibrant & Block-based",
+    "secondaryStyles": "Micro-interactions, Flat Design",
+    "landingPagePattern": "Conversion-Optimized",
+    "dashboardStyle": "Drill-Down Analytics + Map",
+    "colorPaletteFocus": "Location markers + Trust colors",
+    "keyConsiderations": "Map integration. Service categories. Provider profiles. Booking system. Reviews."
+  },
+  {
+    "id": "product-32",
+    "productType": "Beauty/Spa/Wellness Service",
+    "keywords": [
+      "appointment",
+      "beauty",
+      "booking",
+      "consultation",
+      "service",
+      "spa",
+      "wellness"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Neumorphism",
+    "secondaryStyles": "Glassmorphism, Minimalism",
+    "landingPagePattern": "Hero-Centric Design + Social Proof",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Soft pastels (Pink #FFB6C1 Sage #90EE90) + Cream + Gold accents",
+    "keyConsiderations": "Calming aesthetic. Booking system. Service menu. Before/after gallery. Testimonials. Relaxing imagery."
+  },
+  {
+    "id": "product-33",
+    "productType": "Luxury/Premium Brand",
+    "keywords": [
+      "brand",
+      "elegant",
+      "exclusive",
+      "high-end",
+      "luxury",
+      "premium"
+    ],
+    "primaryStyleRecommendation": "Liquid Glass + Glassmorphism",
+    "secondaryStyles": "Minimalism, 3D & Hyperrealism",
+    "landingPagePattern": "Storytelling-Driven + Feature-Rich",
+    "dashboardStyle": "Sales Intelligence Dashboard",
+    "colorPaletteFocus": "Black + Gold (#FFD700) + White + Minimal accent",
+    "keyConsiderations": "Elegance paramount. Premium imagery. Storytelling. High-quality visuals. Exclusive feel."
+  },
+  {
+    "id": "product-34",
+    "productType": "Restaurant/Food Service",
+    "keywords": [
+      "appointment",
+      "booking",
+      "consultation",
+      "delivery",
+      "food",
+      "menu",
+      "order",
+      "restaurant",
+      "service"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Claymorphism, Flat Design",
+    "landingPagePattern": "Hero-Centric Design + Conversion",
+    "dashboardStyle": "N/A - Booking focused",
+    "colorPaletteFocus": "Warm colors (Orange Red Brown) + appetizing imagery",
+    "keyConsiderations": "Menu display. Online ordering. Reservation system. Food photography. Location/hours prominent."
+  },
+  {
+    "id": "product-35",
+    "productType": "Fitness/Gym App",
+    "keywords": [
+      "app",
+      "exercise",
+      "fitness",
+      "gym",
+      "health",
+      "workout"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Dark Mode (OLED)",
+    "secondaryStyles": "Motion-Driven, Neumorphism",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Energetic (Orange #FF6B35 Electric Blue) + Dark bg",
+    "keyConsiderations": "Progress tracking. Workout plans. Community features. Achievements. Motivational design."
+  },
+  {
+    "id": "product-36",
+    "productType": "Real Estate/Property",
+    "keywords": [
+      "buy",
+      "estate",
+      "housing",
+      "property",
+      "real",
+      "real-estate",
+      "rent"
+    ],
+    "primaryStyleRecommendation": "Glassmorphism + Minimalism",
+    "secondaryStyles": "Motion-Driven, 3D & Hyperrealism",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Sales Intelligence Dashboard",
+    "colorPaletteFocus": "Trust Blue (#0077B6) + Gold accents + White",
+    "keyConsiderations": "Property listings. Virtual tours. Map integration. Agent profiles. Mortgage calculator. High-quality imagery."
+  },
+  {
+    "id": "product-37",
+    "productType": "Travel/Tourism Agency",
+    "keywords": [
+      "agency",
+      "booking",
+      "creative",
+      "design",
+      "flight",
+      "hotel",
+      "marketing",
+      "studio",
+      "tourism",
+      "travel",
+      "vacation"
+    ],
+    "primaryStyleRecommendation": "Aurora UI + Motion-Driven",
+    "secondaryStyles": "Vibrant & Block-based, Glassmorphism",
+    "landingPagePattern": "Storytelling-Driven + Hero-Centric",
+    "dashboardStyle": "Booking Analytics",
+    "colorPaletteFocus": "Vibrant destination colors + Sky Blue + Warm accents",
+    "keyConsiderations": "Destination showcase. Booking system. Itinerary builder. Reviews. Inspiration galleries. Mobile-first."
+  },
+  {
+    "id": "product-38",
+    "productType": "Hotel/Hospitality",
+    "keywords": [
+      "hospitality",
+      "hotel"
+    ],
+    "primaryStyleRecommendation": "Liquid Glass + Minimalism",
+    "secondaryStyles": "Glassmorphism, Soft UI Evolution",
+    "landingPagePattern": "Hero-Centric Design + Social Proof",
+    "dashboardStyle": "Revenue Management Dashboard",
+    "colorPaletteFocus": "Warm neutrals + Gold (#D4AF37) + Brand accent",
+    "keyConsiderations": "Room booking. Amenities showcase. Location maps. Guest reviews. Seasonal pricing. Luxury imagery."
+  },
+  {
+    "id": "product-39",
+    "productType": "Wedding/Event Planning",
+    "keywords": [
+      "conference",
+      "event",
+      "meetup",
+      "planning",
+      "registration",
+      "ticket",
+      "wedding"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Aurora UI",
+    "secondaryStyles": "Glassmorphism, Motion-Driven",
+    "landingPagePattern": "Storytelling-Driven + Social Proof",
+    "dashboardStyle": "N/A - Planning focused",
+    "colorPaletteFocus": "Soft Pink (#FFD6E0) + Gold + Cream + Sage",
+    "keyConsiderations": "Portfolio gallery. Vendor directory. Planning tools. Timeline. Budget tracker. Romantic aesthetic."
+  },
+  {
+    "id": "product-40",
+    "productType": "Legal Services",
+    "keywords": [
+      "appointment",
+      "attorney",
+      "booking",
+      "compliance",
+      "consultation",
+      "contract",
+      "law",
+      "legal",
+      "service",
+      "services"
+    ],
+    "primaryStyleRecommendation": "Trust & Authority + Minimalism",
+    "secondaryStyles": "Accessible & Ethical, Swiss Modernism 2.0",
+    "landingPagePattern": "Trust & Authority + Minimal",
+    "dashboardStyle": "Case Management Dashboard",
+    "colorPaletteFocus": "Navy Blue (#1E3A5F) + Gold + White",
+    "keyConsiderations": "Credibility paramount. Practice areas. Attorney profiles. Case results. Contact forms. Professional imagery."
+  },
+  {
+    "id": "product-41",
+    "productType": "Insurance Platform",
+    "keywords": [
+      "insurance",
+      "platform"
+    ],
+    "primaryStyleRecommendation": "Trust & Authority + Flat Design",
+    "secondaryStyles": "Accessible & Ethical, Minimalism",
+    "landingPagePattern": "Conversion-Optimized + Trust",
+    "dashboardStyle": "Claims Analytics Dashboard",
+    "colorPaletteFocus": "Trust Blue (#0066CC) + Green (security) + Neutral",
+    "keyConsiderations": "Quote calculator. Policy comparison. Claims process. Trust signals. Clear pricing. Security badges."
+  },
+  {
+    "id": "product-42",
+    "productType": "Banking/Traditional Finance",
+    "keywords": [
+      "banking",
+      "finance",
+      "traditional"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Accessible & Ethical",
+    "secondaryStyles": "Trust & Authority, Dark Mode (OLED)",
+    "landingPagePattern": "Trust & Authority + Feature-Rich",
+    "dashboardStyle": "Financial Dashboard",
+    "colorPaletteFocus": "Navy (#0A1628) + Trust Blue + Gold accents",
+    "keyConsiderations": "Security-first. Account overview. Transaction history. Mobile banking. Accessibility critical. Trust paramount."
+  },
+  {
+    "id": "product-43",
+    "productType": "Online Course/E-learning",
+    "keywords": [
+      "course",
+      "e",
+      "learning",
+      "online"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Motion-Driven, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Education Dashboard",
+    "colorPaletteFocus": "Vibrant learning colors + Progress green",
+    "keyConsiderations": "Course catalog. Progress tracking. Video player. Quizzes. Certificates. Community forums. Gamification."
+  },
+  {
+    "id": "product-44",
+    "productType": "Non-profit/Charity",
+    "keywords": [
+      "charity",
+      "non",
+      "profit"
+    ],
+    "primaryStyleRecommendation": "Accessible & Ethical + Organic Biophilic",
+    "secondaryStyles": "Minimalism, Storytelling-Driven",
+    "landingPagePattern": "Storytelling-Driven + Trust",
+    "dashboardStyle": "Donation Analytics Dashboard",
+    "colorPaletteFocus": "Cause-related colors + Trust + Warm",
+    "keyConsiderations": "Impact stories. Donation flow. Transparency reports. Volunteer signup. Event calendar. Emotional connection."
+  },
+  {
+    "id": "product-45",
+    "productType": "Music Streaming",
+    "keywords": [
+      "music",
+      "streaming"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Vibrant & Block-based",
+    "secondaryStyles": "Motion-Driven, Aurora UI",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "Media/Entertainment Dashboard",
+    "colorPaletteFocus": "Dark (#121212) + Vibrant accents + Album art colors",
+    "keyConsiderations": "Audio player. Playlist management. Artist pages. Personalization. Social features. Waveform visualizations."
+  },
+  {
+    "id": "product-46",
+    "productType": "Video Streaming/OTT",
+    "keywords": [
+      "ott",
+      "streaming",
+      "video"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Motion-Driven",
+    "secondaryStyles": "Glassmorphism, Vibrant & Block-based",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Media/Entertainment Dashboard",
+    "colorPaletteFocus": "Dark bg + Content poster colors + Brand accent",
+    "keyConsiderations": "Video player. Content discovery. Watchlist. Continue watching. Personalized recommendations. Thumbnail-heavy."
+  },
+  {
+    "id": "product-47",
+    "productType": "Job Board/Recruitment",
+    "keywords": [
+      "board",
+      "job",
+      "recruitment"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Minimalism",
+    "secondaryStyles": "Vibrant & Block-based, Accessible & Ethical",
+    "landingPagePattern": "Conversion-Optimized + Feature-Rich",
+    "dashboardStyle": "HR Analytics Dashboard",
+    "colorPaletteFocus": "Professional Blue + Success Green + Neutral",
+    "keyConsiderations": "Job listings. Search/filter. Company profiles. Application tracking. Resume upload. Salary insights."
+  },
+  {
+    "id": "product-48",
+    "productType": "Marketplace (P2P)",
+    "keywords": [
+      "buyers",
+      "listings",
+      "marketplace",
+      "p",
+      "platform",
+      "sellers"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Flat Design",
+    "secondaryStyles": "Micro-interactions, Trust & Authority",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "E-commerce Analytics",
+    "colorPaletteFocus": "Trust colors + Category colors + Success green",
+    "keyConsiderations": "Seller/buyer profiles. Listings. Reviews/ratings. Secure payment. Messaging. Search/filter. Trust badges."
+  },
+  {
+    "id": "product-49",
+    "productType": "Logistics/Delivery",
+    "keywords": [
+      "delivery",
+      "logistics"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Dark Mode (OLED), Micro-interactions",
+    "landingPagePattern": "Feature-Rich Showcase + Conversion",
+    "dashboardStyle": "Real-Time Monitoring + Route Analytics",
+    "colorPaletteFocus": "Blue (#2563EB) + Orange (tracking) + Green (delivered)",
+    "keyConsiderations": "Real-time tracking. Delivery scheduling. Route optimization. Driver management. Status updates. Map integration."
+  },
+  {
+    "id": "product-50",
+    "productType": "Agriculture/Farm Tech",
+    "keywords": [
+      "agriculture",
+      "farm",
+      "tech"
+    ],
+    "primaryStyleRecommendation": "Organic Biophilic + Flat Design",
+    "secondaryStyles": "Minimalism, Accessible & Ethical",
+    "landingPagePattern": "Feature-Rich Showcase + Trust",
+    "dashboardStyle": "IoT Sensor Dashboard",
+    "colorPaletteFocus": "Earth Green (#4A7C23) + Brown + Sky Blue",
+    "keyConsiderations": "Crop monitoring. Weather data. IoT sensors. Yield tracking. Market prices. Sustainable imagery."
+  },
+  {
+    "id": "product-51",
+    "productType": "Construction/Architecture",
+    "keywords": [
+      "architecture",
+      "construction"
+    ],
+    "primaryStyleRecommendation": "Minimalism + 3D & Hyperrealism",
+    "secondaryStyles": "Brutalism, Swiss Modernism 2.0",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Project Management Dashboard",
+    "colorPaletteFocus": "Grey (#4A4A4A) + Orange (safety) + Blueprint Blue",
+    "keyConsiderations": "Project portfolio. 3D renders. Timeline. Material specs. Team collaboration. Blueprint aesthetic."
+  },
+  {
+    "id": "product-52",
+    "productType": "Automotive/Car Dealership",
+    "keywords": [
+      "automotive",
+      "car",
+      "dealership"
+    ],
+    "primaryStyleRecommendation": "Motion-Driven + 3D & Hyperrealism",
+    "secondaryStyles": "Dark Mode (OLED), Glassmorphism",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Sales Intelligence Dashboard",
+    "colorPaletteFocus": "Brand colors + Metallic accents + Dark/Light",
+    "keyConsiderations": "Vehicle showcase. 360\u00b0 views. Comparison tools. Financing calculator. Test drive booking. High-quality imagery."
+  },
+  {
+    "id": "product-53",
+    "productType": "Photography Studio",
+    "keywords": [
+      "photography",
+      "studio"
+    ],
+    "primaryStyleRecommendation": "Motion-Driven + Minimalism",
+    "secondaryStyles": "Aurora UI, Glassmorphism",
+    "landingPagePattern": "Storytelling-Driven + Hero-Centric",
+    "dashboardStyle": "N/A - Portfolio focused",
+    "colorPaletteFocus": "Black + White + Minimal accent",
+    "keyConsiderations": "Portfolio gallery. Before/after. Service packages. Booking system. Client galleries. Full-bleed imagery."
+  },
+  {
+    "id": "product-54",
+    "productType": "Coworking Space",
+    "keywords": [
+      "coworking",
+      "space"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Glassmorphism",
+    "secondaryStyles": "Minimalism, Motion-Driven",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Occupancy Dashboard",
+    "colorPaletteFocus": "Energetic colors + Wood tones + Brand accent",
+    "keyConsiderations": "Space tour. Membership plans. Booking system. Amenities. Community events. Virtual tour."
+  },
+  {
+    "id": "product-55",
+    "productType": "Home Services (Plumber/Electrician)",
+    "keywords": [
+      "appointment",
+      "booking",
+      "consultation",
+      "electrician",
+      "home",
+      "plumber",
+      "service",
+      "services"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Trust & Authority",
+    "secondaryStyles": "Minimalism, Accessible & Ethical",
+    "landingPagePattern": "Conversion-Optimized + Trust",
+    "dashboardStyle": "Service Analytics",
+    "colorPaletteFocus": "Trust Blue + Safety Orange + Professional grey",
+    "keyConsiderations": "Service list. Emergency contact. Booking. Price transparency. Certifications. Local trust signals."
+  },
+  {
+    "id": "product-56",
+    "productType": "Childcare/Daycare",
+    "keywords": [
+      "childcare",
+      "daycare"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Soft UI Evolution, Accessible & Ethical",
+    "landingPagePattern": "Social Proof-Focused + Trust",
+    "dashboardStyle": "Parent Dashboard",
+    "colorPaletteFocus": "Playful pastels + Safe colors + Warm accents",
+    "keyConsiderations": "Programs. Staff profiles. Safety certifications. Parent portal. Activity updates. Cheerful imagery."
+  },
+  {
+    "id": "product-57",
+    "productType": "Senior Care/Elderly",
+    "keywords": [
+      "care",
+      "elderly",
+      "senior"
+    ],
+    "primaryStyleRecommendation": "Accessible & Ethical + Soft UI Evolution",
+    "secondaryStyles": "Minimalism, Neumorphism",
+    "landingPagePattern": "Trust & Authority + Social Proof",
+    "dashboardStyle": "Healthcare Analytics",
+    "colorPaletteFocus": "Calm Blue + Warm neutrals + Large text",
+    "keyConsiderations": "Care services. Staff qualifications. Facility tour. Family portal. Large touch targets. High contrast. Accessibility-first."
+  },
+  {
+    "id": "product-58",
+    "productType": "Medical Clinic",
+    "keywords": [
+      "clinic",
+      "medical"
+    ],
+    "primaryStyleRecommendation": "Accessible & Ethical + Minimalism",
+    "secondaryStyles": "Neumorphism, Trust & Authority",
+    "landingPagePattern": "Trust & Authority + Conversion",
+    "dashboardStyle": "Healthcare Analytics",
+    "colorPaletteFocus": "Medical Blue (#0077B6) + Trust White + Calm Green",
+    "keyConsiderations": "Services. Doctor profiles. Online booking. Patient portal. Insurance info. HIPAA compliant. Trust signals."
+  },
+  {
+    "id": "product-59",
+    "productType": "Pharmacy/Drug Store",
+    "keywords": [
+      "drug",
+      "pharmacy",
+      "store"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Accessible & Ethical",
+    "secondaryStyles": "Minimalism, Trust & Authority",
+    "landingPagePattern": "Conversion-Optimized + Trust",
+    "dashboardStyle": "Inventory Dashboard",
+    "colorPaletteFocus": "Pharmacy Green + Trust Blue + Clean White",
+    "keyConsiderations": "Product catalog. Prescription upload. Refill reminders. Health info. Store locator. Safety certifications."
+  },
+  {
+    "id": "product-60",
+    "productType": "Dental Practice",
+    "keywords": [
+      "dental",
+      "practice"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Minimalism",
+    "secondaryStyles": "Accessible & Ethical, Trust & Authority",
+    "landingPagePattern": "Social Proof-Focused + Conversion",
+    "dashboardStyle": "Patient Analytics",
+    "colorPaletteFocus": "Fresh Blue + White + Smile Yellow accent",
+    "keyConsiderations": "Services. Dentist profiles. Before/after. Online booking. Insurance. Patient testimonials. Friendly imagery."
+  },
+  {
+    "id": "product-61",
+    "productType": "Veterinary Clinic",
+    "keywords": [
+      "clinic",
+      "veterinary"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Accessible & Ethical",
+    "secondaryStyles": "Soft UI Evolution, Flat Design",
+    "landingPagePattern": "Social Proof-Focused + Trust",
+    "dashboardStyle": "Pet Health Dashboard",
+    "colorPaletteFocus": "Caring Blue + Pet-friendly colors + Warm accents",
+    "keyConsiderations": "Pet services. Vet profiles. Online booking. Pet portal. Emergency info. Friendly animal imagery."
+  },
+  {
+    "id": "product-62",
+    "productType": "Florist/Plant Shop",
+    "keywords": [
+      "florist",
+      "plant",
+      "shop"
+    ],
+    "primaryStyleRecommendation": "Organic Biophilic + Vibrant & Block-based",
+    "secondaryStyles": "Aurora UI, Motion-Driven",
+    "landingPagePattern": "Hero-Centric Design + Conversion",
+    "dashboardStyle": "E-commerce Analytics",
+    "colorPaletteFocus": "Natural Green + Floral pinks/purples + Earth tones",
+    "keyConsiderations": "Product catalog. Occasion categories. Delivery scheduling. Care guides. Seasonal collections. Beautiful imagery."
+  },
+  {
+    "id": "product-63",
+    "productType": "Bakery/Cafe",
+    "keywords": [
+      "bakery",
+      "cafe"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Soft UI Evolution",
+    "secondaryStyles": "Claymorphism, Motion-Driven",
+    "landingPagePattern": "Hero-Centric Design + Conversion",
+    "dashboardStyle": "N/A - Order focused",
+    "colorPaletteFocus": "Warm Brown + Cream + Appetizing accents",
+    "keyConsiderations": "Menu display. Online ordering. Location/hours. Catering. Seasonal specials. Appetizing photography."
+  },
+  {
+    "id": "product-64",
+    "productType": "Brewery/Winery",
+    "keywords": [
+      "brewery",
+      "winery"
+    ],
+    "primaryStyleRecommendation": "Motion-Driven + Storytelling-Driven",
+    "secondaryStyles": "Dark Mode (OLED), Organic Biophilic",
+    "landingPagePattern": "Storytelling-Driven + Hero-Centric",
+    "dashboardStyle": "N/A - E-commerce focused",
+    "colorPaletteFocus": "Deep amber/burgundy + Gold + Craft aesthetic",
+    "keyConsiderations": "Product showcase. Story/heritage. Tasting notes. Events. Club membership. Artisanal imagery."
+  },
+  {
+    "id": "product-65",
+    "productType": "Airline",
+    "keywords": [
+      "airline",
+      "aviation",
+      "flight",
+      "travel",
+      "booking",
+      "airport",
+      "flying"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Glassmorphism",
+    "secondaryStyles": "Motion-Driven, Accessible & Ethical",
+    "landingPagePattern": "Conversion-Optimized + Feature-Rich",
+    "dashboardStyle": "Operations Dashboard",
+    "colorPaletteFocus": "Sky Blue + Brand colors + Trust accents",
+    "keyConsiderations": "Flight search. Booking. Check-in. Boarding pass. Loyalty program. Route maps. Mobile-first."
+  },
+  {
+    "id": "product-66",
+    "productType": "News/Media Platform",
+    "keywords": [
+      "content",
+      "entertainment",
+      "media",
+      "news",
+      "platform",
+      "streaming",
+      "video"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Dark Mode (OLED), Accessible & Ethical",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Media Analytics Dashboard",
+    "colorPaletteFocus": "Brand colors + High contrast + Category colors",
+    "keyConsiderations": "Article layout. Breaking news. Categories. Search. Subscription. Mobile reading. Fast loading."
+  },
+  {
+    "id": "product-67",
+    "productType": "Magazine/Blog",
+    "keywords": [
+      "articles",
+      "blog",
+      "content",
+      "magazine",
+      "posts",
+      "writing"
+    ],
+    "primaryStyleRecommendation": "Swiss Modernism 2.0 + Motion-Driven",
+    "secondaryStyles": "Minimalism, Aurora UI",
+    "landingPagePattern": "Storytelling-Driven + Hero-Centric",
+    "dashboardStyle": "Content Analytics",
+    "colorPaletteFocus": "Editorial colors + Brand primary + Clean white",
+    "keyConsiderations": "Article showcase. Category navigation. Author profiles. Newsletter signup. Related content. Typography-focused."
+  },
+  {
+    "id": "product-68",
+    "productType": "Freelancer Platform",
+    "keywords": [
+      "freelancer",
+      "platform"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Minimalism",
+    "secondaryStyles": "Vibrant & Block-based, Micro-interactions",
+    "landingPagePattern": "Feature-Rich Showcase + Conversion",
+    "dashboardStyle": "Marketplace Analytics",
+    "colorPaletteFocus": "Professional Blue + Success Green + Neutral",
+    "keyConsiderations": "Profile creation. Portfolio. Skill matching. Messaging. Payment. Reviews. Project management."
+  },
+  {
+    "id": "product-69",
+    "productType": "Marketing Agency",
+    "keywords": [
+      "agency",
+      "creative",
+      "design",
+      "marketing",
+      "studio"
+    ],
+    "primaryStyleRecommendation": "Brutalism + Motion-Driven",
+    "secondaryStyles": "Vibrant & Block-based, Aurora UI",
+    "landingPagePattern": "Storytelling-Driven + Feature-Rich",
+    "dashboardStyle": "Campaign Analytics",
+    "colorPaletteFocus": "Bold brand colors + Creative freedom",
+    "keyConsiderations": "Portfolio. Case studies. Services. Team. Creative showcase. Results-focused. Bold aesthetic."
+  },
+  {
+    "id": "product-70",
+    "productType": "Event Management",
+    "keywords": [
+      "conference",
+      "event",
+      "management",
+      "meetup",
+      "registration",
+      "ticket"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Glassmorphism, Aurora UI",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Event Analytics",
+    "colorPaletteFocus": "Event theme colors + Excitement accents",
+    "keyConsiderations": "Event showcase. Registration. Agenda. Speakers. Sponsors. Ticket sales. Countdown timer."
+  },
+  {
+    "id": "product-71",
+    "productType": "Membership/Community",
+    "keywords": [
+      "community",
+      "membership"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Soft UI Evolution",
+    "secondaryStyles": "Bento Box Grid, Micro-interactions",
+    "landingPagePattern": "Social Proof-Focused + Conversion",
+    "dashboardStyle": "Community Analytics",
+    "colorPaletteFocus": "Community brand colors + Engagement accents",
+    "keyConsiderations": "Member benefits. Pricing tiers. Community showcase. Events. Member directory. Exclusive content."
+  },
+  {
+    "id": "product-72",
+    "productType": "Newsletter Platform",
+    "keywords": [
+      "newsletter",
+      "platform"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Swiss Modernism 2.0, Accessible & Ethical",
+    "landingPagePattern": "Minimal & Direct + Conversion",
+    "dashboardStyle": "Email Analytics",
+    "colorPaletteFocus": "Brand primary + Clean white + CTA accent",
+    "keyConsiderations": "Subscribe form. Archive. About. Social proof. Sample content. Simple conversion."
+  },
+  {
+    "id": "product-73",
+    "productType": "Digital Products/Downloads",
+    "keywords": [
+      "digital",
+      "downloads",
+      "products"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Glassmorphism, Bento Box Grid",
+    "landingPagePattern": "Feature-Rich Showcase + Conversion",
+    "dashboardStyle": "E-commerce Analytics",
+    "colorPaletteFocus": "Product category colors + Brand + Success green",
+    "keyConsiderations": "Product showcase. Preview. Pricing. Instant delivery. License management. Customer reviews."
+  },
+  {
+    "id": "product-74",
+    "productType": "Church/Religious Organization",
+    "keywords": [
+      "church",
+      "organization",
+      "religious"
+    ],
+    "primaryStyleRecommendation": "Accessible & Ethical + Soft UI Evolution",
+    "secondaryStyles": "Minimalism, Trust & Authority",
+    "landingPagePattern": "Hero-Centric Design + Social Proof",
+    "dashboardStyle": "N/A - Community focused",
+    "colorPaletteFocus": "Warm Gold + Deep Purple/Blue + White",
+    "keyConsiderations": "Service times. Events. Sermons. Community. Giving. Location. Welcoming imagery."
+  },
+  {
+    "id": "product-75",
+    "productType": "Sports Team/Club",
+    "keywords": [
+      "club",
+      "sports",
+      "team"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Dark Mode (OLED), 3D & Hyperrealism",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Performance Analytics",
+    "colorPaletteFocus": "Team colors + Energetic accents",
+    "keyConsiderations": "Schedule. Roster. News. Tickets. Merchandise. Fan engagement. Action imagery."
+  },
+  {
+    "id": "product-76",
+    "productType": "Museum/Gallery",
+    "keywords": [
+      "gallery",
+      "museum"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Motion-Driven",
+    "secondaryStyles": "Swiss Modernism 2.0, 3D & Hyperrealism",
+    "landingPagePattern": "Storytelling-Driven + Feature-Rich",
+    "dashboardStyle": "Visitor Analytics",
+    "colorPaletteFocus": "Art-appropriate neutrals + Exhibition accents",
+    "keyConsiderations": "Exhibitions. Collections. Tickets. Events. Virtual tours. Educational content. Art-focused design."
+  },
+  {
+    "id": "product-77",
+    "productType": "Theater/Cinema",
+    "keywords": [
+      "cinema",
+      "theater"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Motion-Driven",
+    "secondaryStyles": "Vibrant & Block-based, Glassmorphism",
+    "landingPagePattern": "Hero-Centric Design + Conversion",
+    "dashboardStyle": "Booking Analytics",
+    "colorPaletteFocus": "Dark + Spotlight accents + Gold",
+    "keyConsiderations": "Showtimes. Seat selection. Trailers. Coming soon. Membership. Dramatic imagery."
+  },
+  {
+    "id": "product-78",
+    "productType": "Language Learning App",
+    "keywords": [
+      "app",
+      "language",
+      "learning"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Micro-interactions, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Learning Analytics",
+    "colorPaletteFocus": "Playful colors + Progress indicators + Country flags",
+    "keyConsiderations": "Lesson structure. Progress tracking. Gamification. Speaking practice. Community. Achievement badges."
+  },
+  {
+    "id": "product-79",
+    "productType": "Coding Bootcamp",
+    "keywords": [
+      "bootcamp",
+      "coding"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Minimalism",
+    "secondaryStyles": "Cyberpunk UI, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Student Analytics",
+    "colorPaletteFocus": "Code editor colors + Brand + Success green",
+    "keyConsiderations": "Curriculum. Projects. Career outcomes. Alumni. Pricing. Application. Terminal aesthetic."
+  },
+  {
+    "id": "product-80",
+    "productType": "Cybersecurity Platform",
+    "keywords": [
+      "cyber",
+      "security",
+      "platform"
+    ],
+    "primaryStyleRecommendation": "Cyberpunk UI + Dark Mode (OLED)",
+    "secondaryStyles": "Neubrutalism, Minimal & Direct",
+    "landingPagePattern": "Trust & Authority + Real-Time",
+    "dashboardStyle": "Real-Time Monitoring + Heat Map",
+    "colorPaletteFocus": "Matrix Green + Deep Black + Terminal feel",
+    "keyConsiderations": "Data density. Threat visualization. Dark mode default."
+  },
+  {
+    "id": "product-81",
+    "productType": "Developer Tool / IDE",
+    "keywords": [
+      "dev",
+      "developer",
+      "tool",
+      "ide"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Minimalism",
+    "secondaryStyles": "Flat Design, Bento Box Grid",
+    "landingPagePattern": "Minimal & Direct + Documentation",
+    "dashboardStyle": "Real-Time Monitor + Terminal",
+    "colorPaletteFocus": "Dark syntax theme colors + Blue focus",
+    "keyConsiderations": "Keyboard shortcuts. Syntax highlighting. Fast performance."
+  },
+  {
+    "id": "product-82",
+    "productType": "Biotech / Life Sciences",
+    "keywords": [
+      "biotech",
+      "biology",
+      "science"
+    ],
+    "primaryStyleRecommendation": "Glassmorphism + Clean Science",
+    "secondaryStyles": "Minimalism, Organic Biophilic",
+    "landingPagePattern": "Storytelling-Driven + Research",
+    "dashboardStyle": "Data-Dense + Predictive",
+    "colorPaletteFocus": "Sterile White + DNA Blue + Life Green",
+    "keyConsiderations": "Data accuracy. Cleanliness. Complex data viz."
+  },
+  {
+    "id": "product-83",
+    "productType": "Space Tech / Aerospace",
+    "keywords": [
+      "aerospace",
+      "space",
+      "tech"
+    ],
+    "primaryStyleRecommendation": "Holographic / HUD + Dark Mode",
+    "secondaryStyles": "Glassmorphism, 3D & Hyperrealism",
+    "landingPagePattern": "Immersive Experience + Hero",
+    "dashboardStyle": "Real-Time Monitoring + 3D",
+    "colorPaletteFocus": "Deep Space Black + Star White + Metallic",
+    "keyConsiderations": "High-tech feel. Precision. Telemetry data."
+  },
+  {
+    "id": "product-84",
+    "productType": "Architecture / Interior",
+    "keywords": [
+      "architecture",
+      "design",
+      "interior"
+    ],
+    "primaryStyleRecommendation": "Exaggerated Minimalism + High Imagery",
+    "secondaryStyles": "Swiss Modernism 2.0, Parallax",
+    "landingPagePattern": "Portfolio Grid + Visuals",
+    "dashboardStyle": "Project Management + Gallery",
+    "colorPaletteFocus": "Monochrome + Gold Accent + High Imagery",
+    "keyConsiderations": "High-res images. Typography. Space."
+  },
+  {
+    "id": "product-85",
+    "productType": "Quantum Computing Interface",
+    "keywords": [
+      "quantum",
+      "computing",
+      "physics",
+      "qubit",
+      "future",
+      "science"
+    ],
+    "primaryStyleRecommendation": "Holographic / HUD + Dark Mode",
+    "secondaryStyles": "Glassmorphism, Spatial UI",
+    "landingPagePattern": "Immersive/Interactive Experience",
+    "dashboardStyle": "3D Spatial Data + Real-Time Monitor",
+    "colorPaletteFocus": "Quantum Blue #00FFFF + Deep Black + Interference patterns",
+    "keyConsiderations": "Visualize complexity. Qubit states. Probability clouds. High-tech trust."
+  },
+  {
+    "id": "product-86",
+    "productType": "Biohacking / Longevity App",
+    "keywords": [
+      "biohacking",
+      "health",
+      "longevity",
+      "tracking",
+      "wellness",
+      "science"
+    ],
+    "primaryStyleRecommendation": "Biomimetic / Organic 2.0",
+    "secondaryStyles": "Minimalism, Dark Mode (OLED)",
+    "landingPagePattern": "Data-Dense + Storytelling",
+    "dashboardStyle": "Real-Time Monitor + Biological Data",
+    "colorPaletteFocus": "Cellular Pink/Red + DNA Blue + Clean White",
+    "keyConsiderations": "Personal data privacy. Scientific credibility. Biological visualizations."
+  },
+  {
+    "id": "product-87",
+    "productType": "Autonomous Drone Fleet Manager",
+    "keywords": [
+      "drone",
+      "autonomous",
+      "fleet",
+      "aerial",
+      "logistics",
+      "robotics"
+    ],
+    "primaryStyleRecommendation": "HUD / Sci-Fi FUI",
+    "secondaryStyles": "Real-Time Monitor, Spatial UI",
+    "landingPagePattern": "Real-Time Monitor",
+    "dashboardStyle": "Geographic + Real-Time",
+    "colorPaletteFocus": "Tactical Green #00FF00 + Alert Red + Map Dark",
+    "keyConsiderations": "Real-time telemetry. 3D spatial awareness. Latency indicators. Safety alerts."
+  },
+  {
+    "id": "product-88",
+    "productType": "Generative Art Platform",
+    "keywords": [
+      "art",
+      "generative",
+      "ai",
+      "creative",
+      "platform",
+      "gallery"
+    ],
+    "primaryStyleRecommendation": "Minimalism (Frame) + Gen Z Chaos",
+    "secondaryStyles": "Masonry Grid, Dark Mode",
+    "landingPagePattern": "Bento Grid Showcase",
+    "dashboardStyle": "Gallery / Portfolio",
+    "colorPaletteFocus": "Neutral #F5F5F5 (Canvas) + User Content",
+    "keyConsiderations": "Content is king. Fast loading. Creator attribution. Minting flow."
+  },
+  {
+    "id": "product-89",
+    "productType": "Spatial Computing OS / App",
+    "keywords": [
+      "spatial",
+      "vr",
+      "ar",
+      "vision",
+      "os",
+      "immersive",
+      "mixed-reality"
+    ],
+    "primaryStyleRecommendation": "Spatial UI (VisionOS)",
+    "secondaryStyles": "Glassmorphism, 3D & Hyperrealism",
+    "landingPagePattern": "Immersive/Interactive Experience",
+    "dashboardStyle": "Spatial Dashboard",
+    "colorPaletteFocus": "Frosted Glass + System Colors + Depth",
+    "keyConsiderations": "Gaze/Pinch interaction. Depth hierarchy. Environment awareness."
+  },
+  {
+    "id": "product-90",
+    "productType": "Sustainable Energy / Climate Tech",
+    "keywords": [
+      "climate",
+      "energy",
+      "sustainable",
+      "green",
+      "tech",
+      "carbon"
+    ],
+    "primaryStyleRecommendation": "Organic Biophilic + E-Ink / Paper",
+    "secondaryStyles": "Data-Dense, Swiss Modernism",
+    "landingPagePattern": "Interactive Demo + Data",
+    "dashboardStyle": "Energy/Utilities Dashboard",
+    "colorPaletteFocus": "Earth Green + Sky Blue + Solar Yellow",
+    "keyConsiderations": "Data transparency. Impact visualization. Low-carbon web design."
+  },
+  {
+    "id": "product-91",
+    "productType": "Personal Finance Tracker",
+    "keywords": [
+      "budget",
+      "expense",
+      "money",
+      "finance",
+      "spending",
+      "savings",
+      "tracker",
+      "personal",
+      "wallet"
+    ],
+    "primaryStyleRecommendation": "Glassmorphism + Dark Mode (OLED)",
+    "secondaryStyles": "Minimalism, Flat Design",
+    "landingPagePattern": "Interactive Product Demo",
+    "dashboardStyle": "Financial Dashboard",
+    "colorPaletteFocus": "Calm blue + success green + alert red + chart accents",
+    "keyConsiderations": "Category pie/donut charts. Monthly trend lines. Budget progress bars. Transaction list with swipe actions. Receipt camera. Currency formatting. Recurring entries."
+  },
+  {
+    "id": "product-92",
+    "productType": "Chat & Messaging App",
+    "keywords": [
+      "chat",
+      "message",
+      "messenger",
+      "im",
+      "realtime",
+      "conversation",
+      "inbox",
+      "dm",
+      "whatsapp",
+      "telegram"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Micro-interactions",
+    "secondaryStyles": "Glassmorphism, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Demo",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Brand primary + bubble contrast (sender/receiver) + typing grey",
+    "keyConsiderations": "Bubble UI (left/right alignment). Typing indicators. Read receipts (\u2713\u2713). Image/file preview. Emoji reactions. Group avatars. Online status dots. Swipe-to-reply."
+  },
+  {
+    "id": "product-93",
+    "productType": "Notes & Writing App",
+    "keywords": [
+      "notes",
+      "memo",
+      "writing",
+      "editor",
+      "notebook",
+      "markdown",
+      "journal",
+      "notion",
+      "obsidian"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Swiss Modernism 2.0, Soft UI Evolution",
+    "landingPagePattern": "Minimal & Direct",
+    "dashboardStyle": "N/A - Editor focused",
+    "colorPaletteFocus": "Clean white/cream + minimal accent + editor syntax colors",
+    "keyConsiderations": "WYSIWYG or Markdown toggle. Folder/tag organization. Full-text search. Cloud sync. Typography-first. Distraction-free zen mode. Slash-command palette."
+  },
+  {
+    "id": "product-94",
+    "productType": "Habit Tracker",
+    "keywords": [
+      "habit",
+      "streak",
+      "routine",
+      "daily",
+      "tracker",
+      "goals",
+      "consistency",
+      "discipline"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Micro-interactions, Flat Design",
+    "landingPagePattern": "Social Proof-Focused + Demo",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Streak warm (amber/orange) + progress green + motivational accents",
+    "keyConsiderations": "Streak calendar heatmap. Daily check-in interaction. Gamification (badges/levels/fire). Reminder push. Progress ring charts. Weekly/monthly stats. Motivational micro-copy."
+  },
+  {
+    "id": "product-95",
+    "productType": "Food Delivery / On-Demand",
+    "keywords": [
+      "delivery",
+      "food",
+      "order",
+      "uber-eats",
+      "doordash",
+      "takeout",
+      "on-demand",
+      "courier"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Glassmorphism, Flat Design",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Real-Time Monitoring + Map",
+    "colorPaletteFocus": "Appetizing warm (orange/red) + trust blue + map accent",
+    "keyConsiderations": "Restaurant cards with ratings. Menu category horizontal scroll. Cart bottom sheet. Real-time map tracking + driver ETA. Order status stepper. Rating post-delivery."
+  },
+  {
+    "id": "product-96",
+    "productType": "Ride Hailing / Transportation",
+    "keywords": [
+      "ride",
+      "taxi",
+      "uber",
+      "lyft",
+      "transport",
+      "carpool",
+      "driver",
+      "trip",
+      "fare"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Glassmorphism",
+    "secondaryStyles": "Dark Mode (OLED), Motion-Driven",
+    "landingPagePattern": "Conversion-Optimized + Demo",
+    "dashboardStyle": "Real-Time Monitoring + Map",
+    "colorPaletteFocus": "Brand primary + map neutral + status indicator colors",
+    "keyConsiderations": "Map-centric full-screen UI. Pickup/dropoff pins + route polyline. Driver card (photo/rating/vehicle). Fare estimate. Trip timer. Safety SOS button. Payment sheet."
+  },
+  {
+    "id": "product-97",
+    "productType": "Recipe & Cooking App",
+    "keywords": [
+      "recipe",
+      "cooking",
+      "food",
+      "kitchen",
+      "cookbook",
+      "meal",
+      "ingredient",
+      "chef"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Soft UI Evolution, Organic Biophilic",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "N/A - Content focused",
+    "colorPaletteFocus": "Warm food tones (terracotta/sage/cream) + appetizing imagery",
+    "keyConsiderations": "Step-by-step with checkable instructions. Ingredient list with serving adjuster. Built-in timer per step. Cooking mode (screen-awake + large text). Save/bookmark. Share."
+  },
+  {
+    "id": "product-98",
+    "productType": "Meditation & Mindfulness",
+    "keywords": [
+      "meditation",
+      "mindfulness",
+      "calm",
+      "breathe",
+      "wellness",
+      "relaxation",
+      "sleep",
+      "headspace"
+    ],
+    "primaryStyleRecommendation": "Neumorphism + Soft UI Evolution",
+    "secondaryStyles": "Aurora UI, Glassmorphism",
+    "landingPagePattern": "Storytelling-Driven + Social Proof",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Ultra-calm pastels (lavender/sage/sky) + breathing animation gradient",
+    "keyConsiderations": "Breathing circle animation. Session duration picker. Ambient sound mixer. Streak/consistency tracking. Guided audio player. Sleep timer. Minimal chrome. Slow easing transitions only."
+  },
+  {
+    "id": "product-99",
+    "productType": "Weather App",
+    "keywords": [
+      "weather",
+      "forecast",
+      "temperature",
+      "climate",
+      "rain",
+      "sun",
+      "location",
+      "humidity"
+    ],
+    "primaryStyleRecommendation": "Glassmorphism + Aurora UI",
+    "secondaryStyles": "Motion-Driven, Minimalism",
+    "landingPagePattern": "Hero-Centric Design",
+    "dashboardStyle": "N/A - Utility focused",
+    "colorPaletteFocus": "Atmospheric gradients (sky blue \u2192 sunset \u2192 storm grey) + temp scale",
+    "keyConsiderations": "Location auto-detect. Hourly horizontal scroll + daily/weekly list. Animated weather icons. Air quality index. UV/wind/humidity chips. Radar map overlay. Widget-friendly layout."
+  },
+  {
+    "id": "product-100",
+    "productType": "Diary & Journal App",
+    "keywords": [
+      "diary",
+      "journal",
+      "personal",
+      "daily",
+      "reflection",
+      "mood",
+      "gratitude",
+      "writing"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Minimalism",
+    "secondaryStyles": "Neumorphism, Sketch Hand-Drawn",
+    "landingPagePattern": "Storytelling-Driven",
+    "dashboardStyle": "N/A - Personal focused",
+    "colorPaletteFocus": "Warm paper tones (cream/linen) + muted ink + mood-coded accents",
+    "keyConsiderations": "Calendar month-view entry. Mood tag selector (emoji/color). Photo/voice attachment. Writing prompts. Privacy lock (FaceID/PIN). Search across entries. Export to PDF."
+  },
+  {
+    "id": "product-101",
+    "productType": "CRM & Client Management",
+    "keywords": [
+      "crm",
+      "client",
+      "customer",
+      "sales",
+      "pipeline",
+      "contact",
+      "lead",
+      "deal",
+      "hubspot"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Minimalism",
+    "secondaryStyles": "Soft UI Evolution, Micro-interactions",
+    "landingPagePattern": "Feature-Rich Showcase + Demo",
+    "dashboardStyle": "Sales Intelligence Dashboard",
+    "colorPaletteFocus": "Professional blue + pipeline stage colors + closed-won green",
+    "keyConsiderations": "Contact card list with avatar. Pipeline kanban board. Activity timeline. Quick-log (call/email/meeting). Deal amount + probability. Tag/segment filter. Mobile quick-actions."
+  },
+  {
+    "id": "product-102",
+    "productType": "Inventory & Stock Management",
+    "keywords": [
+      "inventory",
+      "stock",
+      "warehouse",
+      "product",
+      "barcode",
+      "supply",
+      "sku",
+      "management"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Minimalism",
+    "secondaryStyles": "Dark Mode (OLED), Accessible & Ethical",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "Real-Time Monitoring + Data-Dense",
+    "colorPaletteFocus": "Functional neutral + status traffic-light (green/amber/red) + scanner accent",
+    "keyConsiderations": "Product list/grid with thumbnails. Barcode/QR scanner. Stock level badges. Low-stock alert banner. Category/location filter. Batch edit. Reorder trigger. Audit log."
+  },
+  {
+    "id": "product-103",
+    "productType": "Flashcard & Study Tool",
+    "keywords": [
+      "flashcard",
+      "quiz",
+      "study",
+      "spaced-repetition",
+      "anki",
+      "learn",
+      "memory",
+      "exam"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Micro-interactions",
+    "secondaryStyles": "Vibrant & Block-based, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Demo",
+    "dashboardStyle": "Learning Analytics",
+    "colorPaletteFocus": "Playful primary + correct green + incorrect red + progress blue",
+    "keyConsiderations": "3D card flip animation. Spaced repetition algorithm. Deck browser. Session progress bar. Streak tracking. Timed quiz mode. Share/import decks. Rich text + image cards."
+  },
+  {
+    "id": "product-104",
+    "productType": "Booking & Appointment App",
+    "keywords": [
+      "booking",
+      "appointment",
+      "schedule",
+      "calendar",
+      "reservation",
+      "slot",
+      "service"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Flat Design",
+    "secondaryStyles": "Minimalism, Micro-interactions",
+    "landingPagePattern": "Conversion-Optimized",
+    "dashboardStyle": "Drill-Down Analytics",
+    "colorPaletteFocus": "Trust blue + available green + booked grey + confirm accent",
+    "keyConsiderations": "Calendar strip or month picker. Available time-slot grid. Service + staff selector. Confirmation summary. Reminder push. Reschedule/cancel flow. Two-sided (provider \u2194 client)."
+  },
+  {
+    "id": "product-105",
+    "productType": "Invoice & Billing Tool",
+    "keywords": [
+      "invoice",
+      "billing",
+      "payment",
+      "receipt",
+      "freelance",
+      "estimate",
+      "quote",
+      "accounting"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Swiss Modernism 2.0, Accessible & Ethical",
+    "landingPagePattern": "Conversion-Optimized + Trust",
+    "dashboardStyle": "Financial Dashboard",
+    "colorPaletteFocus": "Professional navy + paid green + overdue red + neutral grey",
+    "keyConsiderations": "Invoice template with line items. Tax/discount calculation. Status badges (Draft/Sent/Paid/Overdue). PDF export + share. Payment link generation. Client address book. Recurring invoices."
+  },
+  {
+    "id": "product-106",
+    "productType": "Grocery & Shopping List",
+    "keywords": [
+      "grocery",
+      "shopping",
+      "list",
+      "supermarket",
+      "checklist",
+      "pantry",
+      "meal-plan",
+      "buy"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Vibrant & Block-based",
+    "secondaryStyles": "Claymorphism, Micro-interactions",
+    "landingPagePattern": "Minimal & Direct + Demo",
+    "dashboardStyle": "N/A - List focused",
+    "colorPaletteFocus": "Fresh green + food-category colors + checkmark accent",
+    "keyConsiderations": "Category-grouped list. Tap-to-check interaction (with strikethrough). Quantity stepper. Share list with family. Store aisle sorting. Barcode scan to add. Frequently bought suggestions."
+  },
+  {
+    "id": "product-107",
+    "productType": "Timer & Pomodoro",
+    "keywords": [
+      "timer",
+      "pomodoro",
+      "countdown",
+      "stopwatch",
+      "focus",
+      "clock",
+      "productivity",
+      "interval"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Neumorphism",
+    "secondaryStyles": "Dark Mode (OLED), Micro-interactions",
+    "landingPagePattern": "Minimal & Direct",
+    "dashboardStyle": "N/A - Utility focused",
+    "colorPaletteFocus": "High-contrast on dark + focus red/amber + break green",
+    "keyConsiderations": "Large centered countdown digits. Circular progress ring. Session/break auto-switch. Session history log. Custom interval settings. Sound + haptic alerts. Focus stats chart."
+  },
+  {
+    "id": "product-108",
+    "productType": "Parenting & Baby Tracker",
+    "keywords": [
+      "baby",
+      "parenting",
+      "child",
+      "feeding",
+      "sleep",
+      "diaper",
+      "milestone",
+      "family",
+      "newborn"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Soft UI Evolution",
+    "secondaryStyles": "Vibrant & Block-based, Accessible & Ethical",
+    "landingPagePattern": "Social Proof-Focused + Trust",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Soft pastels (baby pink/sky blue/mint/peach) + warm accents",
+    "keyConsiderations": "Feed/sleep/diaper quick-log buttons. Growth percentile chart. Milestone timeline with photos. Multiple child profiles. Partner invite + shared access. Pediatric reference. One-handed operation."
+  },
+  {
+    "id": "product-109",
+    "productType": "Scanner & Document Manager",
+    "keywords": [
+      "scanner",
+      "document",
+      "ocr",
+      "pdf",
+      "scan",
+      "camera",
+      "file",
+      "archive",
+      "digitize"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Dark Mode (OLED), Accessible & Ethical",
+    "landingPagePattern": "Feature-Rich Showcase + Demo",
+    "dashboardStyle": "N/A - Tool focused",
+    "colorPaletteFocus": "Clean white + camera viewfinder accent + file-type color coding",
+    "keyConsiderations": "Camera capture with auto-edge detection. Crop/rotate/enhance. OCR text extraction overlay. PDF multi-page creation. Folder tree organization. Cloud sync. Share/export. Batch scan mode."
+  },
+  {
+    "id": "product-110",
+    "productType": "Calendar & Scheduling App",
+    "keywords": [
+      "calendar",
+      "scheduling",
+      "planner",
+      "agenda",
+      "events",
+      "reminder",
+      "appointment",
+      "organize",
+      "date",
+      "sync"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Micro-interactions",
+    "secondaryStyles": "Minimalism, Soft UI Evolution",
+    "landingPagePattern": "Feature-Rich Showcase + Demo",
+    "dashboardStyle": "N/A - Calendar focused",
+    "colorPaletteFocus": "Clean blue + event category accent colors + success green",
+    "keyConsiderations": "Event color coding. Week/month/day views. Recurring events. Conflict detection. Multi-calendar sync."
+  },
+  {
+    "id": "product-111",
+    "productType": "Password Manager",
+    "keywords": [
+      "password",
+      "security",
+      "vault",
+      "credentials",
+      "login",
+      "secure",
+      "encrypt",
+      "keychain",
+      "2fa",
+      "biometric"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Accessible & Ethical",
+    "secondaryStyles": "Dark Mode (OLED), Trust & Authority",
+    "landingPagePattern": "Trust & Authority + Feature-Rich",
+    "dashboardStyle": "N/A - Vault focused",
+    "colorPaletteFocus": "Trust blue + security green + dark neutral",
+    "keyConsiderations": "Security-first. Zero-knowledge architecture. Biometric unlock. Breach alert dashboard. Password generator."
+  },
+  {
+    "id": "product-112",
+    "productType": "Expense Splitter / Bill Split",
+    "keywords": [
+      "split",
+      "expense",
+      "bill",
+      "aa",
+      "share",
+      "friends",
+      "group",
+      "settle",
+      "debt",
+      "payment",
+      "owe"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Vibrant & Block-based",
+    "secondaryStyles": "Minimalism, Micro-interactions",
+    "landingPagePattern": "Minimal & Direct + Demo",
+    "dashboardStyle": "N/A - Balance focused",
+    "colorPaletteFocus": "Success green + alert red + neutral grey + avatar accent colors",
+    "keyConsiderations": "Group expense tracking. Debt simplification algorithm. Payment reminders. Multi-currency. Receipt photo import."
+  },
+  {
+    "id": "product-113",
+    "productType": "Voice Recorder & Memo",
+    "keywords": [
+      "voice",
+      "recorder",
+      "memo",
+      "audio",
+      "transcription",
+      "dictate",
+      "recording",
+      "microphone",
+      "note",
+      "otter"
+    ],
+    "primaryStyleRecommendation": "Minimalism + AI-Native UI",
+    "secondaryStyles": "Flat Design, Dark Mode (OLED)",
+    "landingPagePattern": "Interactive Product Demo + Minimal",
+    "dashboardStyle": "N/A - Recording focused",
+    "colorPaletteFocus": "Clean white + recording red + waveform accent",
+    "keyConsiderations": "Waveform display. Background recording. Auto-transcription (AI). Tag/organize. Cloud sync."
+  },
+  {
+    "id": "product-114",
+    "productType": "Bookmark & Read-Later",
+    "keywords": [
+      "bookmark",
+      "read-later",
+      "save",
+      "article",
+      "pocket",
+      "link",
+      "reading",
+      "archive",
+      "collection",
+      "raindrop"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Editorial Grid, Swiss Modernism 2.0",
+    "landingPagePattern": "Minimal & Direct + Demo",
+    "dashboardStyle": "N/A - List focused",
+    "colorPaletteFocus": "Paper warm white + ink neutral + minimal accent + tag colors",
+    "keyConsiderations": "Fast save via share sheet. Article distraction-free view. Tags and collections. Offline sync. Reading progress."
+  },
+  {
+    "id": "product-115",
+    "productType": "Translator App",
+    "keywords": [
+      "translate",
+      "language",
+      "text",
+      "voice",
+      "ocr",
+      "dictionary",
+      "multilingual",
+      "real-time",
+      "detect",
+      "deepl"
+    ],
+    "primaryStyleRecommendation": "Flat Design + AI-Native UI",
+    "secondaryStyles": "Minimalism, Micro-interactions",
+    "landingPagePattern": "Feature-Rich Showcase + Interactive Demo",
+    "dashboardStyle": "N/A - Utility focused",
+    "colorPaletteFocus": "Global blue + neutral grey + language flag accent",
+    "keyConsiderations": "Real-time camera translation (OCR). Voice input and output. Offline mode. Conversation mode. Phrasebook."
+  },
+  {
+    "id": "product-116",
+    "productType": "Calculator & Unit Converter",
+    "keywords": [
+      "calculator",
+      "converter",
+      "unit",
+      "math",
+      "currency",
+      "measurement",
+      "scientific",
+      "formula",
+      "percentage"
+    ],
+    "primaryStyleRecommendation": "Neumorphism + Minimalism",
+    "secondaryStyles": "Flat Design, Dark Mode (OLED)",
+    "landingPagePattern": "Minimal & Direct",
+    "dashboardStyle": "N/A - Utility focused",
+    "colorPaletteFocus": "Dark functional + orange operation keys + clear button hierarchy",
+    "keyConsiderations": "Scientific mode toggle. Live currency rates. Calculation history. Widget support. Gesture input."
+  },
+  {
+    "id": "product-117",
+    "productType": "Alarm & World Clock",
+    "keywords": [
+      "alarm",
+      "clock",
+      "world",
+      "timezone",
+      "timer",
+      "wake",
+      "sleep",
+      "schedule",
+      "reminder",
+      "bedtime"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Minimalism",
+    "secondaryStyles": "Neumorphism, Flat Design",
+    "landingPagePattern": "Minimal & Direct",
+    "dashboardStyle": "N/A - Utility focused",
+    "colorPaletteFocus": "Deep dark + ambient glow accent + timezone gradient",
+    "keyConsiderations": "Gentle wake (gradual volume). Timezone visualizer. Sleep tracking integration. Smart alarm skip. Bedtime mode."
+  },
+  {
+    "id": "product-118",
+    "productType": "File Manager & Transfer",
+    "keywords": [
+      "file",
+      "manager",
+      "transfer",
+      "folder",
+      "document",
+      "storage",
+      "cloud",
+      "share",
+      "organize",
+      "compress"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Minimalism",
+    "secondaryStyles": "Accessible & Ethical, Dark Mode (OLED)",
+    "landingPagePattern": "Feature-Rich Showcase + Demo",
+    "dashboardStyle": "N/A - File tree focused",
+    "colorPaletteFocus": "Functional neutral + file type color coding (PDF orange, doc blue, image purple)",
+    "keyConsiderations": "Folder tree navigation. File type preview. Wireless P2P transfer. Cloud integration. Compress and extract."
+  },
+  {
+    "id": "product-119",
+    "productType": "Email Client",
+    "keywords": [
+      "email",
+      "mail",
+      "inbox",
+      "compose",
+      "thread",
+      "newsletter",
+      "filter",
+      "reply",
+      "gmail",
+      "spark",
+      "superhuman"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Minimalism",
+    "secondaryStyles": "Micro-interactions, Soft UI Evolution",
+    "landingPagePattern": "Feature-Rich Showcase + Demo",
+    "dashboardStyle": "N/A - Inbox focused",
+    "colorPaletteFocus": "Clean white + brand primary + priority red + snooze amber",
+    "keyConsiderations": "Unified inbox. Swipe actions (archive/delete/snooze). Priority sorting. Smart reply. Unsubscribe tool."
+  },
+  {
+    "id": "product-120",
+    "productType": "Casual Puzzle Game",
+    "keywords": [
+      "puzzle",
+      "casual",
+      "match",
+      "brain",
+      "game",
+      "relaxing",
+      "level",
+      "tiles",
+      "logic",
+      "block",
+      "three"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Micro-interactions, Motion-Driven",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "N/A - Game focused",
+    "colorPaletteFocus": "Cheerful pastels + progression gradient + reward gold + bright accent",
+    "keyConsiderations": "Satisfying match/clear animations. Progressive difficulty. Daily challenges. No-skip tutorials. Offline play."
+  },
+  {
+    "id": "product-121",
+    "productType": "Trivia & Quiz Game",
+    "keywords": [
+      "trivia",
+      "quiz",
+      "knowledge",
+      "question",
+      "answer",
+      "challenge",
+      "leaderboard",
+      "fact",
+      "brain",
+      "compete"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Micro-interactions",
+    "secondaryStyles": "Claymorphism, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Leaderboard Analytics",
+    "colorPaletteFocus": "Energetic blue + correct green + incorrect red + leaderboard gold",
+    "keyConsiderations": "Timer pressure UX. Category selection. Streak system. Real-time multiplayer. Daily quiz mode."
+  },
+  {
+    "id": "product-122",
+    "productType": "Card & Board Game",
+    "keywords": [
+      "card",
+      "board",
+      "chess",
+      "checkers",
+      "poker",
+      "strategy",
+      "turn-based",
+      "multiplayer",
+      "classic",
+      "tabletop"
+    ],
+    "primaryStyleRecommendation": "3D & Hyperrealism + Flat Design",
+    "secondaryStyles": "Motion-Driven, Dark Mode (OLED)",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "N/A - Game focused",
+    "colorPaletteFocus": "Game-theme felt green + dark wood + card back patterns",
+    "keyConsiderations": "Real-time or async multiplayer. Game state sync. Tutorial mode. Match history. ELO rating system."
+  },
+  {
+    "id": "product-123",
+    "productType": "Idle & Clicker Game",
+    "keywords": [
+      "idle",
+      "clicker",
+      "incremental",
+      "passive",
+      "cookie",
+      "adventure",
+      "progress",
+      "offline",
+      "collect",
+      "prestige"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Claymorphism, 3D & Hyperrealism",
+    "landingPagePattern": "Feature-Rich Showcase",
+    "dashboardStyle": "N/A - Progress focused",
+    "colorPaletteFocus": "Coin gold + upgrade blue + prestige purple + progress green",
+    "keyConsiderations": "Offline progress calculation. Satisfying number animations. Upgrade tree clarity. Prestige system. Optional ads."
+  },
+  {
+    "id": "product-124",
+    "productType": "Word & Crossword Game",
+    "keywords": [
+      "word",
+      "crossword",
+      "wordle",
+      "spelling",
+      "vocabulary",
+      "letters",
+      "grid",
+      "puzzle",
+      "dictionary",
+      "daily"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Flat Design",
+    "secondaryStyles": "Swiss Modernism 2.0, Micro-interactions",
+    "landingPagePattern": "Minimal & Direct + Demo",
+    "dashboardStyle": "N/A - Game focused",
+    "colorPaletteFocus": "Clean white + warm letter tiles + success green + shake red",
+    "keyConsiderations": "Daily challenge with shareable results. Physical keyboard feel. Difficulty levels. Dictionary hints. Streak stats."
+  },
+  {
+    "id": "product-125",
+    "productType": "Arcade & Retro Game",
+    "keywords": [
+      "arcade",
+      "retro",
+      "8bit",
+      "action",
+      "shoot",
+      "runner",
+      "tap",
+      "reflex",
+      "endless",
+      "pixel",
+      "classic",
+      "score"
+    ],
+    "primaryStyleRecommendation": "Pixel Art + Retro-Futurism",
+    "secondaryStyles": "Vibrant & Block-based, Motion-Driven",
+    "landingPagePattern": "Feature-Rich Showcase + Hero-Centric",
+    "dashboardStyle": "N/A - Score focused",
+    "colorPaletteFocus": "Neon on black + pixel palette + score gold + danger red",
+    "keyConsiderations": "Instant play with no login. Game Center leaderboards. Haptic feedback on collision. Offline. Controller support."
+  },
+  {
+    "id": "product-126",
+    "productType": "Photo Editor & Filters",
+    "keywords": [
+      "photo",
+      "edit",
+      "filter",
+      "vsco",
+      "snapseed",
+      "enhance",
+      "crop",
+      "retouch",
+      "adjust",
+      "luts",
+      "preset",
+      "adjust"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Dark Mode (OLED)",
+    "secondaryStyles": "Motion-Driven, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Interactive Demo",
+    "dashboardStyle": "N/A - Editor focused",
+    "colorPaletteFocus": "Dark editor background + vibrant filter preview strip + tool icon accent",
+    "keyConsiderations": "Non-destructive editing. Filter preview carousel. Histogram. RAW support. Batch export. Social share direct."
+  },
+  {
+    "id": "product-127",
+    "productType": "Short Video Editor",
+    "keywords": [
+      "video",
+      "edit",
+      "capcut",
+      "inshot",
+      "clip",
+      "reel",
+      "tiktok",
+      "trim",
+      "effects",
+      "transitions",
+      "music",
+      "timeline"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Motion-Driven",
+    "secondaryStyles": "Vibrant & Block-based, Glassmorphism",
+    "landingPagePattern": "Feature-Rich Showcase + Hero-Centric",
+    "dashboardStyle": "N/A - Timeline editor focused",
+    "colorPaletteFocus": "Dark background + timeline track accent colors + effect preview vivid",
+    "keyConsiderations": "Multi-track timeline. Licensed music library. Text overlays. Auto-captions. Export 9:16 / 16:9 / 1:1."
+  },
+  {
+    "id": "product-128",
+    "productType": "Drawing & Sketching Canvas",
+    "keywords": [
+      "drawing",
+      "sketch",
+      "procreate",
+      "canvas",
+      "paint",
+      "illustration",
+      "digital",
+      "brush",
+      "layers",
+      "art",
+      "stylus"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Dark Mode (OLED)",
+    "secondaryStyles": "Anti-Polish Raw, Motion-Driven",
+    "landingPagePattern": "Interactive Product Demo + Storytelling",
+    "dashboardStyle": "N/A - Canvas focused",
+    "colorPaletteFocus": "Neutral canvas + full-spectrum color picker + tool panel dark",
+    "keyConsiderations": "Pressure sensitivity. Infinite canvas (pan/zoom). Layer management. Undo history. Export PNG/PSD/SVG."
+  },
+  {
+    "id": "product-129",
+    "productType": "Music Creation & Beat Maker",
+    "keywords": [
+      "music",
+      "beat",
+      "daw",
+      "garageband",
+      "create",
+      "loop",
+      "sample",
+      "instrument",
+      "track",
+      "compose",
+      "record",
+      "midi"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Motion-Driven",
+    "secondaryStyles": "Cyberpunk UI, Glassmorphism",
+    "landingPagePattern": "Interactive Product Demo + Storytelling",
+    "dashboardStyle": "N/A - DAW focused",
+    "colorPaletteFocus": "Dark studio background + track colors rainbow + waveform accent + BPM pulse",
+    "keyConsiderations": "Touch piano and drum pad. Loop browser. MIDI support. Export MP3/WAV. Low-latency audio engine."
+  },
+  {
+    "id": "product-130",
+    "productType": "Meme & Sticker Maker",
+    "keywords": [
+      "meme",
+      "sticker",
+      "maker",
+      "funny",
+      "caption",
+      "template",
+      "edit",
+      "share",
+      "viral",
+      "emoji",
+      "creator",
+      "reaction"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Flat Design",
+    "secondaryStyles": "Gen Z Chaos, Claymorphism",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "N/A - Creator focused",
+    "colorPaletteFocus": "Bold primary + comedic yellow + viral red + high saturation accent",
+    "keyConsiderations": "Template library. Caption text overlay. Font variety. Reaction sticker packs. Share to all platforms. Fast creation."
+  },
+  {
+    "id": "product-131",
+    "productType": "AI Photo & Avatar Generator",
+    "keywords": [
+      "ai",
+      "photo",
+      "avatar",
+      "lensa",
+      "portrait",
+      "generate",
+      "selfie",
+      "style",
+      "filter",
+      "prisma",
+      "art"
+    ],
+    "primaryStyleRecommendation": "AI-Native UI + Aurora UI",
+    "secondaryStyles": "Glassmorphism, Minimalism",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "N/A - Generation focused",
+    "colorPaletteFocus": "AI purple + aurora gradients + before/after neutral",
+    "keyConsiderations": "Style selection. Multiple output variations. Privacy policy prominent. Fast generation. Credits/subscription system."
+  },
+  {
+    "id": "product-132",
+    "productType": "Link-in-Bio Page Builder",
+    "keywords": [
+      "bio",
+      "link",
+      "linktree",
+      "personal",
+      "page",
+      "creator",
+      "social",
+      "portfolio",
+      "profile",
+      "landing",
+      "custom"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Bento Box Grid",
+    "secondaryStyles": "Minimalism, Glassmorphism",
+    "landingPagePattern": "Conversion-Optimized + Social Proof",
+    "dashboardStyle": "Analytics (click tracking)",
+    "colorPaletteFocus": "Brand-customizable + accent link color + clean white canvas",
+    "keyConsiderations": "Drag-drop builder. Theme templates. Click analytics. Custom domain. Social icon integration. QR code export."
+  },
+  {
+    "id": "product-133",
+    "productType": "Wardrobe & Outfit Planner",
+    "keywords": [
+      "wardrobe",
+      "outfit",
+      "fashion",
+      "clothes",
+      "closet",
+      "style",
+      "wear",
+      "plan",
+      "capsule",
+      "ootd",
+      "lookbook"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Motion-Driven",
+    "secondaryStyles": "Aurora UI, Soft UI Evolution",
+    "landingPagePattern": "Storytelling-Driven + Feature-Rich",
+    "dashboardStyle": "N/A - Wardrobe focused",
+    "colorPaletteFocus": "Clean fashion neutral + full clothes color palette + accent",
+    "keyConsiderations": "Photo catalog of clothes. AI outfit suggestions. Calendar integration. Capsule wardrobe. Season filtering."
+  },
+  {
+    "id": "product-134",
+    "productType": "Plant Care Tracker",
+    "keywords": [
+      "plant",
+      "care",
+      "water",
+      "garden",
+      "tracker",
+      "reminder",
+      "species",
+      "photo",
+      "grow",
+      "health",
+      "planta"
+    ],
+    "primaryStyleRecommendation": "Organic Biophilic + Soft UI Evolution",
+    "secondaryStyles": "Claymorphism, Flat Design",
+    "landingPagePattern": "Storytelling-Driven + Social Proof",
+    "dashboardStyle": "N/A - Plant collection focused",
+    "colorPaletteFocus": "Nature greens + earth brown + sunny yellow reminder + water blue",
+    "keyConsiderations": "Plant database with care guides. Watering reminders. Growth photo timeline. AI health diagnosis. Collection sharing."
+  },
+  {
+    "id": "product-135",
+    "productType": "Book & Reading Tracker",
+    "keywords": [
+      "book",
+      "reading",
+      "tracker",
+      "goodreads",
+      "library",
+      "shelf",
+      "progress",
+      "review",
+      "notes",
+      "goal",
+      "literature"
+    ],
+    "primaryStyleRecommendation": "Swiss Modernism 2.0 + Minimalism",
+    "secondaryStyles": "E-Ink Paper, Soft UI Evolution",
+    "landingPagePattern": "Social Proof-Focused + Feature-Rich",
+    "dashboardStyle": "N/A - Library focused",
+    "colorPaletteFocus": "Warm paper white + ink brown + reading progress green + book cover colors",
+    "keyConsiderations": "Barcode scan to add. Progress percentage. Annual reading goal. Notes and quotes. Friends activity. Genre stats."
+  },
+  {
+    "id": "product-136",
+    "productType": "Couple & Relationship App",
+    "keywords": [
+      "couple",
+      "relationship",
+      "partner",
+      "love",
+      "date",
+      "anniversary",
+      "memory",
+      "shared",
+      "intimate",
+      "between"
+    ],
+    "primaryStyleRecommendation": "Aurora UI + Soft UI Evolution",
+    "secondaryStyles": "Claymorphism, Glassmorphism",
+    "landingPagePattern": "Storytelling-Driven + Social Proof",
+    "dashboardStyle": "N/A - Couple focused",
+    "colorPaletteFocus": "Warm romantic pink/rose + soft gradient + memory photo tones",
+    "keyConsiderations": "Shared timeline. Anniversary countdowns. Secret chat. Photo albums. Love language quiz. Date night ideas."
+  },
+  {
+    "id": "product-137",
+    "productType": "Family Calendar & Chores",
+    "keywords": [
+      "family",
+      "calendar",
+      "chores",
+      "tasks",
+      "household",
+      "shared",
+      "kids",
+      "schedule",
+      "cozi",
+      "organize",
+      "member"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Claymorphism",
+    "secondaryStyles": "Accessible & Ethical, Vibrant & Block-based",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "N/A - Family hub focused",
+    "colorPaletteFocus": "Warm playful + member color coding + chore completion green",
+    "keyConsiderations": "Member color coding. Chore assignment rotation. Recurring events. Shared shopping list. Allowance tracking."
+  },
+  {
+    "id": "product-138",
+    "productType": "Mood Tracker",
+    "keywords": [
+      "mood",
+      "emotion",
+      "feeling",
+      "mental",
+      "daily",
+      "journal",
+      "wellbeing",
+      "check-in",
+      "log",
+      "track",
+      "daylio"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Minimalism",
+    "secondaryStyles": "Aurora UI, Neumorphism",
+    "landingPagePattern": "Storytelling-Driven + Social Proof",
+    "dashboardStyle": "N/A - Mood chart focused",
+    "colorPaletteFocus": "Emotion gradient (blue sad to yellow happy) + pastel per mood + insight accent",
+    "keyConsiderations": "One-tap daily check-in. Emotion wheel selector. Mood calendar heatmap. Pattern insights. Export and share."
+  },
+  {
+    "id": "product-139",
+    "productType": "Gift & Wishlist",
+    "keywords": [
+      "gift",
+      "wishlist",
+      "present",
+      "birthday",
+      "occasion",
+      "registry",
+      "idea",
+      "shop",
+      "list",
+      "share",
+      "surprise"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Soft UI Evolution",
+    "secondaryStyles": "Claymorphism, Flat Design",
+    "landingPagePattern": "Minimal & Direct + Conversion",
+    "dashboardStyle": "N/A - List focused",
+    "colorPaletteFocus": "Celebration warm pink/gold/red + category colors + surprise accent",
+    "keyConsiderations": "Add from any URL. Price range filter. Reserved-by-others system. Occasion calendar. Collaborative list. Surprise mode."
+  },
+  {
+    "id": "product-140",
+    "productType": "Running & Cycling GPS",
+    "keywords": [
+      "running",
+      "cycling",
+      "gps",
+      "strava",
+      "track",
+      "route",
+      "speed",
+      "distance",
+      "cadence",
+      "pace",
+      "workout",
+      "sport"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Vibrant & Block-based",
+    "secondaryStyles": "Motion-Driven, Glassmorphism",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Performance Analytics",
+    "colorPaletteFocus": "Energetic orange + map accent + pace zones (green/yellow/red)",
+    "keyConsiderations": "Live GPS tracking. Route map. Auto-pause detection. Segment leaderboards. Training zones. Social feed. Garmin sync."
+  },
+  {
+    "id": "product-141",
+    "productType": "Yoga & Stretching Guide",
+    "keywords": [
+      "yoga",
+      "stretch",
+      "flexibility",
+      "pose",
+      "asana",
+      "guided",
+      "session",
+      "calm",
+      "routine",
+      "wellness",
+      "down-dog"
+    ],
+    "primaryStyleRecommendation": "Organic Biophilic + Soft UI Evolution",
+    "secondaryStyles": "Neumorphism, Minimalism",
+    "landingPagePattern": "Storytelling-Driven + Social Proof",
+    "dashboardStyle": "N/A - Session focused",
+    "colorPaletteFocus": "Earth calming sage/terracotta/cream + breathing gradient + warm accent",
+    "keyConsiderations": "Pose library with illustrations. Guided sessions with audio. Breathing exercises. Progress calendar. Beginner to advanced."
+  },
+  {
+    "id": "product-142",
+    "productType": "Sleep Tracker",
+    "keywords": [
+      "sleep",
+      "tracker",
+      "alarm",
+      "cycle",
+      "quality",
+      "snore",
+      "analysis",
+      "rem",
+      "deep",
+      "smart",
+      "wake",
+      "insomnia"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Neumorphism",
+    "secondaryStyles": "Glassmorphism, Minimalism",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Healthcare Analytics",
+    "colorPaletteFocus": "Deep midnight blue + stars/moon accent + sleep quality gradient (poor red to great green)",
+    "keyConsiderations": "Sleep cycle detection. Smart alarm wakes at light sleep. Snore detection. Weekly trends. Apple Health integration."
+  },
+  {
+    "id": "product-143",
+    "productType": "Calorie & Nutrition Counter",
+    "keywords": [
+      "calorie",
+      "nutrition",
+      "food",
+      "diet",
+      "macro",
+      "protein",
+      "carb",
+      "fat",
+      "log",
+      "fitness",
+      "myfitnesspal"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Vibrant & Block-based",
+    "secondaryStyles": "Minimalism, Claymorphism",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Healthcare Analytics",
+    "colorPaletteFocus": "Healthy green + macro colors (protein blue, carb orange, fat yellow) + progress circle",
+    "keyConsiderations": "Barcode scanner food log. Large database. Macro goals. Restaurant lookup. Recipe builder. AI photo food logging."
+  },
+  {
+    "id": "product-144",
+    "productType": "Period & Cycle Tracker",
+    "keywords": [
+      "period",
+      "cycle",
+      "menstrual",
+      "fertility",
+      "ovulation",
+      "pms",
+      "log",
+      "women",
+      "health",
+      "flo",
+      "clue",
+      "hormone"
+    ],
+    "primaryStyleRecommendation": "Soft UI Evolution + Aurora UI",
+    "secondaryStyles": "Accessible & Ethical, Claymorphism",
+    "landingPagePattern": "Social Proof-Focused + Trust",
+    "dashboardStyle": "Healthcare Analytics",
+    "colorPaletteFocus": "Rose/blush + lavender + fertility green + soft calendar tones",
+    "keyConsiderations": "Cycle prediction. Symptom logging. Fertility window. Personalized insights. Privacy-first. Partner sharing option."
+  },
+  {
+    "id": "product-145",
+    "productType": "Medication & Pill Reminder",
+    "keywords": [
+      "medication",
+      "pill",
+      "reminder",
+      "dose",
+      "schedule",
+      "prescription",
+      "drug",
+      "health",
+      "medisafe",
+      "refill"
+    ],
+    "primaryStyleRecommendation": "Accessible & Ethical + Flat Design",
+    "secondaryStyles": "Minimalism, Trust & Authority",
+    "landingPagePattern": "Trust & Authority + Feature-Rich",
+    "dashboardStyle": "N/A - Schedule focused",
+    "colorPaletteFocus": "Medical trust blue + missed alert red + taken green + clean white",
+    "keyConsiderations": "Multi-medication schedule. Caregiver sharing. Refill reminders. Drug interaction warnings. Large touch targets."
+  },
+  {
+    "id": "product-146",
+    "productType": "Water & Hydration Reminder",
+    "keywords": [
+      "water",
+      "hydration",
+      "drink",
+      "reminder",
+      "daily",
+      "tracker",
+      "glasses",
+      "intake",
+      "health",
+      "cup",
+      "aqua"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Flat Design, Micro-interactions",
+    "landingPagePattern": "Minimal & Direct + Demo",
+    "dashboardStyle": "N/A - Daily goal focused",
+    "colorPaletteFocus": "Refreshing blue + water wave animation + goal progress accent",
+    "keyConsiderations": "Tap to log quickly. Animated fill visualization. Custom reminders. Goal by weight/weather. Streak system. Widget."
+  },
+  {
+    "id": "product-147",
+    "productType": "Fasting & Intermittent Timer",
+    "keywords": [
+      "fasting",
+      "intermittent",
+      "16:8",
+      "timer",
+      "fast",
+      "eating",
+      "window",
+      "keto",
+      "diet",
+      "zero",
+      "weight",
+      "protocol"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Dark Mode (OLED)",
+    "secondaryStyles": "Neumorphism, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "N/A - Timer focused",
+    "colorPaletteFocus": "Fasting deep blue/purple + eating window green + timeline neutral",
+    "keyConsiderations": "Protocol selector (16:8, 18:6, OMAD). Circular countdown timer. Fasting history log. Tips during fast. Electrolytes."
+  },
+  {
+    "id": "product-148",
+    "productType": "Anonymous Community / Confession",
+    "keywords": [
+      "anonymous",
+      "community",
+      "confess",
+      "whisper",
+      "secret",
+      "vent",
+      "share",
+      "safe",
+      "private",
+      "social",
+      "yikyak"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Minimalism",
+    "secondaryStyles": "Glassmorphism, Soft UI Evolution",
+    "landingPagePattern": "Social Proof-Focused + Feature-Rich",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Dark protective + subtle gradient + upvote green + empathy warm accent",
+    "keyConsiderations": "Anonymous posting with moderation. Safety reporting. Reaction system. Trending topics. Mental health resources link."
+  },
+  {
+    "id": "product-149",
+    "productType": "Local Events & Discovery",
+    "keywords": [
+      "local",
+      "events",
+      "discovery",
+      "meetup",
+      "nearby",
+      "social",
+      "city",
+      "activities",
+      "calendar",
+      "community",
+      "explore"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Glassmorphism, Flat Design",
+    "landingPagePattern": "Hero-Centric Design + Feature-Rich",
+    "dashboardStyle": "Event Analytics",
+    "colorPaletteFocus": "City vibrant + event category colors + map accent + date highlight",
+    "keyConsiderations": "Location-based discovery. Category filters. RSVP flow. Map view. Friend attendance. Organizer tools. Reminders."
+  },
+  {
+    "id": "product-150",
+    "productType": "Study Together / Virtual Coworking",
+    "keywords": [
+      "study",
+      "focus",
+      "cowork",
+      "pomodoro",
+      "virtual",
+      "together",
+      "session",
+      "accountability",
+      "live",
+      "stream",
+      "room"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Soft UI Evolution",
+    "secondaryStyles": "Flat Design, Dark Mode (OLED)",
+    "landingPagePattern": "Social Proof-Focused + Feature-Rich",
+    "dashboardStyle": "User Behavior Analytics",
+    "colorPaletteFocus": "Calm focus blue + session progress indicator + ambient warm neutrals",
+    "keyConsiderations": "Live study rooms with video/avatar presence. Shared focus timer. Ambient music. Goals sharing. Streak accountability."
+  },
+  {
+    "id": "product-151",
+    "productType": "Coding Challenge & Practice",
+    "keywords": [
+      "coding",
+      "leetcode",
+      "challenge",
+      "algorithm",
+      "practice",
+      "programming",
+      "competitive",
+      "skill",
+      "interview",
+      "problem"
+    ],
+    "primaryStyleRecommendation": "Dark Mode (OLED) + Cyberpunk UI",
+    "secondaryStyles": "Minimalism, Flat Design",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "Student Analytics",
+    "colorPaletteFocus": "Code editor dark + success green + difficulty gradient (easy green / medium amber / hard red)",
+    "keyConsiderations": "Code editor with syntax highlight. Multiple languages. Hint system. Solution explanation. Company tags. Contest mode."
+  },
+  {
+    "id": "product-152",
+    "productType": "Kids Learning (ABC & Math)",
+    "keywords": [
+      "kids",
+      "children",
+      "learning",
+      "abc",
+      "math",
+      "phonics",
+      "numbers",
+      "education",
+      "games",
+      "preschool",
+      "early"
+    ],
+    "primaryStyleRecommendation": "Claymorphism + Vibrant & Block-based",
+    "secondaryStyles": "Micro-interactions, Flat Design",
+    "landingPagePattern": "Social Proof-Focused + Trust",
+    "dashboardStyle": "Parent Dashboard",
+    "colorPaletteFocus": "Bright primary + child-safe pastels + reward gold + interactive accent",
+    "keyConsiderations": "Age-appropriate UI for 2-8. No ads. No dark patterns. Curriculum aligned. Parent progress reports. Reward system."
+  },
+  {
+    "id": "product-153",
+    "productType": "Music Instrument Learning",
+    "keywords": [
+      "music",
+      "instrument",
+      "piano",
+      "guitar",
+      "learn",
+      "lesson",
+      "tutorial",
+      "notes",
+      "play",
+      "chord",
+      "practice",
+      "simply"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Motion-Driven",
+    "secondaryStyles": "Dark Mode (OLED), Soft UI Evolution",
+    "landingPagePattern": "Interactive Product Demo + Social Proof",
+    "dashboardStyle": "Learning Analytics",
+    "colorPaletteFocus": "Musical warm deep red/brown + note color system + skill progress bar",
+    "keyConsiderations": "Interactive instrument on-screen. Sheet music display. Song library. Slow-tempo practice. Recording and playback. Teacher mode."
+  },
+  {
+    "id": "product-154",
+    "productType": "Parking Finder",
+    "keywords": [
+      "parking",
+      "spot",
+      "finder",
+      "map",
+      "pay",
+      "meter",
+      "garage",
+      "location",
+      "car",
+      "reserve",
+      "spothero"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Glassmorphism",
+    "secondaryStyles": "Flat Design, Micro-interactions",
+    "landingPagePattern": "Conversion-Optimized + Feature-Rich",
+    "dashboardStyle": "Real-Time Monitoring + Map",
+    "colorPaletteFocus": "Trust blue + available green + occupied red + map neutral",
+    "keyConsiderations": "Real-time availability. In-app navigation. Payment integration. Parking timer alert. Favorite spots. Street vs garage."
+  },
+  {
+    "id": "product-155",
+    "productType": "Public Transit Guide",
+    "keywords": [
+      "transit",
+      "bus",
+      "metro",
+      "subway",
+      "train",
+      "route",
+      "schedule",
+      "map",
+      "city",
+      "commute",
+      "trip",
+      "citymapper"
+    ],
+    "primaryStyleRecommendation": "Flat Design + Accessible & Ethical",
+    "secondaryStyles": "Minimalism, Motion-Driven",
+    "landingPagePattern": "Feature-Rich Showcase + Interactive Demo",
+    "dashboardStyle": "Real-Time Monitoring + Map",
+    "colorPaletteFocus": "Transit brand line colors + real-time indicator green/red + map neutral",
+    "keyConsiderations": "Real-time arrivals. Offline maps. Disruption alerts. Multi-modal routing. Fare calculation. Accessibility features."
+  },
+  {
+    "id": "product-156",
+    "productType": "Road Trip Planner",
+    "keywords": [
+      "road",
+      "trip",
+      "drive",
+      "route",
+      "planner",
+      "travel",
+      "stop",
+      "map",
+      "adventure",
+      "scenic",
+      "car",
+      "wanderlog"
+    ],
+    "primaryStyleRecommendation": "Aurora UI + Organic Biophilic",
+    "secondaryStyles": "Motion-Driven, Vibrant & Block-based",
+    "landingPagePattern": "Storytelling-Driven + Hero-Centric",
+    "dashboardStyle": "N/A - Trip focused",
+    "colorPaletteFocus": "Adventure warm sunset orange + map teal + stop markers + road neutral",
+    "keyConsiderations": "Route planning with stops. Point-of-interest discovery. Gas/food/hotel along route. Offline maps. Trip sharing."
+  },
+  {
+    "id": "product-157",
+    "productType": "VPN & Privacy Tool",
+    "keywords": [
+      "vpn",
+      "privacy",
+      "secure",
+      "anonymous",
+      "encrypt",
+      "proxy",
+      "ip",
+      "protect",
+      "shield",
+      "network",
+      "nordvpn"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Dark Mode (OLED)",
+    "secondaryStyles": "Cyberpunk UI, Trust & Authority",
+    "landingPagePattern": "Trust & Authority + Conversion-Optimized",
+    "dashboardStyle": "N/A - Connection focused",
+    "colorPaletteFocus": "Dark shield blue + connected green + disconnected red + trust accent",
+    "keyConsiderations": "One-tap connect. Server selection by country. No-log policy prominent. Speed indicator. Kill switch. Protocol choice."
+  },
+  {
+    "id": "product-158",
+    "productType": "Emergency SOS & Safety",
+    "keywords": [
+      "emergency",
+      "sos",
+      "safety",
+      "alert",
+      "location",
+      "help",
+      "danger",
+      "crisis",
+      "first-aid",
+      "guard",
+      "bsafe"
+    ],
+    "primaryStyleRecommendation": "Accessible & Ethical + Flat Design",
+    "secondaryStyles": "Dark Mode (OLED), Minimalism",
+    "landingPagePattern": "Trust & Authority + Social Proof",
+    "dashboardStyle": "N/A - Safety focused",
+    "colorPaletteFocus": "Alert red + safety blue + location green + high contrast critical",
+    "keyConsiderations": "One-tap SOS. Emergency contacts auto-notify. Live location sharing. Fake call feature. Safe walk mode. Local emergency numbers."
+  },
+  {
+    "id": "product-159",
+    "productType": "Wallpaper & Theme App",
+    "keywords": [
+      "wallpaper",
+      "theme",
+      "background",
+      "customize",
+      "aesthetic",
+      "home-screen",
+      "lock-screen",
+      "widget",
+      "design",
+      "zedge"
+    ],
+    "primaryStyleRecommendation": "Vibrant & Block-based + Aurora UI",
+    "secondaryStyles": "Glassmorphism, Motion-Driven",
+    "landingPagePattern": "Feature-Rich Showcase + Social Proof",
+    "dashboardStyle": "N/A - Gallery focused",
+    "colorPaletteFocus": "Content-driven + trending aesthetic palettes + download accent",
+    "keyConsiderations": "Category browsing. Preview on device. Daily wallpaper auto-set. Widget matching. Creator uploads. Resolution auto-fit."
+  },
+  {
+    "id": "product-160",
+    "productType": "White Noise & Ambient Sound",
+    "keywords": [
+      "white noise",
+      "ambient",
+      "sound",
+      "sleep",
+      "focus",
+      "rain",
+      "nature",
+      "relax",
+      "concentration",
+      "background",
+      "noisli"
+    ],
+    "primaryStyleRecommendation": "Minimalism + Dark Mode (OLED)",
+    "secondaryStyles": "Neumorphism, Organic Biophilic",
+    "landingPagePattern": "Minimal & Direct + Social Proof",
+    "dashboardStyle": "N/A - Player focused",
+    "colorPaletteFocus": "Calming dark + ambient texture visual + subtle sound wave + sleep blue",
+    "keyConsiderations": "Sound mixer with multiple simultaneous layers. Sleep timer with fade. Custom soundscapes. Offline. Background audio."
+  },
+  {
+    "id": "product-161",
+    "productType": "Home Decoration & Interior Design",
+    "keywords": [
+      "home",
+      "interior",
+      "decor",
+      "design",
+      "furniture",
+      "room",
+      "renovation",
+      "ar",
+      "plan",
+      "inspire",
+      "3d",
+      "houzz"
+    ],
+    "primaryStyleRecommendation": "Minimalism + 3D Product Preview",
+    "secondaryStyles": "Organic Biophilic, Aurora UI",
+    "landingPagePattern": "Storytelling-Driven + Feature-Rich",
+    "dashboardStyle": "N/A - Project focused",
+    "colorPaletteFocus": "Neutral interior palette + material texture accent + AR blue",
+    "keyConsiderations": "AR room visualization. Style quiz. Product catalog with purchase links. 3D room planner. Mood board. Before/after."
+  }
+]
