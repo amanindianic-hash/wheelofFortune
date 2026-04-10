@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server';
 import { sql } from '@/lib/db';
 import { okResponse, errorResponse } from '@/lib/middleware-utils';
 
+// Disable caching — always fetch fresh game_type from database
+export const revalidate = 0;
+
 // GET /api/spin/game-type?token=<embed_token>
 // Lightweight lookup — returns only the game_type so the widget page can route correctly.
 export async function GET(req: NextRequest) {
