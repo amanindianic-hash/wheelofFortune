@@ -1864,7 +1864,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                   <div className="flex gap-2">
                     <Input readOnly value={playPageUrl} className="font-mono text-xs" />
                     <Button variant="outline" size="sm" onClick={() => { navigator.clipboard.writeText(playPageUrl); toast.success('Link copied!'); }}>Copy</Button>
-                    <Button size="sm" onClick={() => window.open(playPageUrl, '_blank')}
+                    <Button size="sm" onClick={() => window.open(`${playPageUrl}?_=${Date.now()}`, '_blank')}
                       style={{ backgroundColor: wheel.branding.primary_color ?? '#7C3AED' }} className="text-white">Open ↗</Button>
                   </div>
 
@@ -1961,7 +1961,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                   <p className="text-sm text-muted-foreground mb-3">Minimal iframe/preview URL (no header or branding):</p>
                   <div className="flex gap-2">
                     <Input readOnly value={`${process.env.NEXT_PUBLIC_APP_URL ?? ''}/widget/${wheel.embed_token}`} className="text-xs" />
-                    <Button variant="outline" size="sm" onClick={() => window.open(`/widget/${wheel.embed_token}?preview=1`, '_blank')}>
+                    <Button variant="outline" size="sm" onClick={() => window.open(`/widget/${wheel.embed_token}?preview=1&_=${Date.now()}`, '_blank')}>
                       Open
                     </Button>
                   </div>
