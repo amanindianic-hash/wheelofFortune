@@ -19,6 +19,7 @@ import { WheelPreview } from '@/components/dashboard/wheels/wheel-preview';
 import { ScratchPreview } from '@/components/dashboard/wheels/scratch-preview';
 import { SlotPreview } from '@/components/dashboard/wheels/slot-preview';
 import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview';
+import { ThemeDialog } from '@/components/theme-dialog';
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
 import { applyTemplateToWheel } from '@/lib/utils/theme-utils';
@@ -142,6 +143,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   const [saveThemeDialog, setSaveThemeDialog] = useState(false);
   const [saveThemeName, setSaveThemeName] = useState('');
   const [saveThemeEmoji, setSaveThemeEmoji] = useState('🎨');
+  const [themeDialogOpen, setThemeDialogOpen] = useState(false);
   const [savingTheme, setSavingTheme] = useState(false);
 
   // ── Currently applied theme (persisted in localStorage) ───────────────────
@@ -1531,52 +1533,26 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                   size="sm"
                   variant="outline"
                   className="shrink-0 border-amber-500/40 text-amber-400 hover:bg-amber-500/10"
-                  onClick={() => { setSaveThemeName(''); setSaveThemeEmoji('🎨'); setSaveThemeDialog(true); }}
+                  onClick={() => setThemeDialogOpen(true)}
                 >
                   <BookMarked className="w-3.5 h-3.5 mr-1.5" />
-                  Save as Theme
+                  Theme Manager
                 </Button>
               </div>
 
-              {/* ── Save as Theme Dialog ── */}
-              <Dialog open={saveThemeDialog} onOpenChange={setSaveThemeDialog}>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Save Current as Theme</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-2">
-                    <p className="text-sm text-muted-foreground">
-                      Saves the current branding, colours, and segment palette as a reusable theme for <strong>{wheel.config.game_type ?? 'wheel'}</strong> game type.
-                    </p>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Emoji"
-                        value={saveThemeEmoji}
-                        onChange={(e) => setSaveThemeEmoji(e.target.value)}
-                        className="w-16 text-center"
-                        maxLength={2}
-                      />
-                      <Input
-                        placeholder="Theme name"
-                        value={saveThemeName}
-                        onChange={(e) => setSaveThemeName(e.target.value)}
-                        className="flex-1"
-                        onKeyDown={(e) => { if (e.key === 'Enter') saveCurrentAsTheme(); }}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="ghost" onClick={() => setSaveThemeDialog(false)}>Cancel</Button>
-                    <Button
-                      onClick={saveCurrentAsTheme}
-                      disabled={savingTheme || !saveThemeName.trim()}
-                      className="bg-amber-500 text-black hover:bg-amber-400"
-                    >
-                      {savingTheme ? 'Saving…' : 'Save Theme'}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              {/* ── Theme Manager Dialog (with presets + save) ── */}
+              <ThemeDialog
+                open={themeDialogOpen}
+                onOpenChange={setThemeDialogOpen}
+                gametype={wheel?.config?.game_type ?? 'wheel'}
+                onApplyPreset={(config) => {
+                  if (wheel) {
+                    setWheel({ ...wheel, config: { ...wheel.config, ...config } });
+                  }
+                }}
+                onSaveTheme={saveCurrentAsTheme}
+                saving={savingTheme}
+              />
 
               {/* ── Currently applied theme indicator ── */}
               {appliedTheme && (
