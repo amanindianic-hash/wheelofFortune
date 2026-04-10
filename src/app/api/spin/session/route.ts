@@ -126,10 +126,20 @@ export async function POST(req: NextRequest) {
     const session = (sessionResults as any)[0];
 
     // Fetch segments for the widget (use variant wheel if assigned)
-    const segments = await sql`
+    // Get all segments but filter to active_segment_count
+    const allSegments = await sql`
       SELECT id, position, label, bg_color, text_color, icon_url, weight, is_no_prize
       FROM segments WHERE wheel_id = ${effectiveWheel.id} ORDER BY position ASC
-    `;
+    ` as any[];
+
+    // Get active_segment_count from wheels table to filter orphaned segments
+    const wheelCountResults = await sql`
+      SELECT active_segment_count FROM wheels WHERE id = ${effectiveWheel.id} LIMIT 1
+    ` as any[];
+    const activeCount = (wheelCountResults[0]?.active_segment_count ?? allSegments.length) as number;
+
+    // Return only active segments
+    const segments = allSegments.slice(0, activeCount);
 
     return okResponse({
       session_id: session.id,

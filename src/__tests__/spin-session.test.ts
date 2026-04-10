@@ -124,7 +124,8 @@ describe('POST /api/spin/session', () => {
       .mockResolvedValueOnce([]) // ALTER TABLE device_type
       .mockResolvedValueOnce([]) // ALTER TABLE os
       .mockResolvedValueOnce([SESSION_ROW]) // INSERT session
-      .mockResolvedValueOnce([]); // segments
+      .mockResolvedValueOnce([]) // segments
+      .mockResolvedValueOnce([{ active_segment_count: 0 }]); // active_segment_count
 
     const res = await POST(makeRequest({ embed_token: 'tok' }, { 'x-vercel-ip-country': 'IN' }));
     expect(res.status).toBe(201);
@@ -146,13 +147,14 @@ describe('POST /api/spin/session', () => {
 
   it('creates session and returns 201 with correct shape in preview mode', async () => {
     mockSql
-      .mockResolvedValueOnce([ACTIVE_WHEEL])   // wheel lookup
+      .mockResolvedValueOnce([ACTIVE_WHEEL])   // wheel lookup (preview skips ab_tests check)
       .mockResolvedValueOnce([])               // ALTER TABLE device_type
       .mockResolvedValueOnce([])               // ALTER TABLE os
       .mockResolvedValueOnce([SESSION_ROW])    // INSERT session
       .mockResolvedValueOnce([                 // segments
         { id: 'seg-1', label: '10% Off', bg_color: '#ff0000', text_color: '#fff', weight: 1, is_no_prize: false, position: 0 },
-      ]);
+      ])
+      .mockResolvedValueOnce([{ active_segment_count: 1 }]); // active_segment_count
 
     const res = await POST(makeRequest({ embed_token: 'tok', preview: true }));
     expect(res.status).toBe(201);
