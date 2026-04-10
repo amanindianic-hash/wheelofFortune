@@ -22,8 +22,8 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Skip service worker for critical widget API endpoints (POST requests especially)
-  const criticalApiPaths = ['/api/spin/session', '/api/spin/execute', '/api/spin/streak'];
+  // Skip service worker for critical widget API endpoints
+  const criticalApiPaths = ['/api/spin/session', '/api/spin/execute', '/api/spin/streak', '/api/spin/game-type'];
   if (criticalApiPaths.some(path => url.pathname === path)) {
     // Let browser handle the request directly without service worker interception
     e.respondWith(fetch(e.request));
