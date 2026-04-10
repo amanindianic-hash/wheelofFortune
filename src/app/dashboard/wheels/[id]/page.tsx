@@ -1545,9 +1545,32 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 open={themeDialogOpen}
                 onOpenChange={setThemeDialogOpen}
                 gametype={wheel?.config?.game_type ?? 'wheel'}
-                onApplyPreset={(config) => {
-                  if (wheel) {
-                    setWheel({ ...wheel, config: { ...wheel.config, ...config } });
+                onApplyPreset={(presetConfig) => {
+                  if (wheel && presetConfig?.colorPalette) {
+                    const palette = presetConfig.colorPalette;
+                    // Apply preset colors to wheel segments
+                    const newSegments = segments.map((seg) => ({
+                      ...seg,
+                      bg_color: palette.primary || seg.bg_color,
+                      text_color: palette.foreground || seg.text_color,
+                    }));
+                    setSegments(newSegments);
+                    // Update wheel branding and config
+                    setWheel({
+                      ...wheel,
+                      branding: {
+                        ...wheel.branding,
+                        primary_color: palette.primary,
+                        secondary_color: palette.secondary,
+                        background_type: 'solid',
+                        background_value: palette.background,
+                        outer_ring_color: palette.accent,
+                        border_color: palette.border,
+                      },
+                      config: { ...wheel.config, ...presetConfig },
+                    });
+                    // Close dialog after applying
+                    setThemeDialogOpen(false);
                   }
                 }}
                 onSaveTheme={saveCurrentAsTheme}

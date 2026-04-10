@@ -91,7 +91,7 @@ export function ThemePresetSelector({
 
         {Object.entries(presets).map(([category, categoryPresets]) => (
           <TabsContent key={category} value={category} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
               {categoryPresets.map((preset) => (
                 <Card
                   key={preset.id}
@@ -100,18 +100,18 @@ export function ThemePresetSelector({
                   }`}
                   onClick={() => handleSelectPreset(preset)}
                 >
-                  <CardHeader className="pb-3">
-                    <CardTitle className="flex items-center gap-2">
-                      <span className="text-2xl">{preset.emoji}</span>
-                      <span className="text-lg">{preset.name}</span>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <span className="text-xl">{preset.emoji}</span>
+                      <span>{preset.name}</span>
                     </CardTitle>
-                    <CardDescription>{preset.description}</CardDescription>
+                    <CardDescription className="text-xs line-clamp-2">{preset.description}</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pb-3">
                     {/* Color preview */}
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <p className="text-xs font-semibold text-muted-foreground">Color Palette:</p>
-                      <div className="flex gap-2 flex-wrap">
+                      <div className="flex gap-1 flex-wrap">
                         {preset.config?.colorPalette ? (
                           [
                             preset.config.colorPalette.primary,
@@ -123,7 +123,7 @@ export function ThemePresetSelector({
                             .map((color, idx) => (
                               <div
                                 key={idx}
-                                className="w-8 h-8 rounded border border-gray-300"
+                                className="w-6 h-6 rounded border border-gray-400 flex-shrink-0"
                                 style={{ backgroundColor: color }}
                                 title={color}
                               />
@@ -134,28 +134,23 @@ export function ThemePresetSelector({
                       </div>
                     </div>
 
-                    {/* Typography info */}
-                    {preset.config?.typography && (
-                      <div className="mt-3 text-xs text-muted-foreground">
-                        <p>
-                          <strong>Fonts:</strong> {preset.config.typography.headingFont} /{' '}
-                          {preset.config.typography.bodyFont}
+                    {/* Typography & Style info */}
+                    <div className="mt-2 text-xs text-muted-foreground space-y-0.5">
+                      {preset.config?.typography && (
+                        <p className="line-clamp-1">
+                          <strong>Fonts:</strong> {preset.config.typography.headingFont}
                         </p>
-                      </div>
-                    )}
-
-                    {/* Style info */}
-                    {preset.config?.style && (
-                      <div className="mt-2 text-xs text-muted-foreground">
-                        <p>
+                      )}
+                      {preset.config?.style && (
+                        <p className="line-clamp-1">
                           <strong>Style:</strong> {preset.config.style}
                         </p>
-                      </div>
-                    )}
+                      )}
+                    </div>
 
                     {/* Apply button */}
                     <Button
-                      className="w-full mt-4"
+                      className="w-full mt-3 h-8 text-sm"
                       variant={selectedPresetId === preset.id ? 'default' : 'outline'}
                       onClick={(e) => {
                         e.stopPropagation();
