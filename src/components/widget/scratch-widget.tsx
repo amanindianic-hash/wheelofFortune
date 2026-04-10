@@ -285,6 +285,7 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
     e.preventDefault();
     if (formConfig.gdpr_enabled && !gdprConsent) { toast.error('Please accept the consent checkbox'); return; }
     idempotencyKeyRef.current = crypto.randomUUID();
+    setIsTriggered(true);
     setPhase('ready');
   }
 

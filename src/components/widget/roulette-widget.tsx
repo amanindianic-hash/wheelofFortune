@@ -232,6 +232,7 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
   async function handleFormSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (formConfig.gdpr_enabled && !gdprConsent) { toast.error('Please accept the consent checkbox'); return; }
+    setIsTriggered(true);
     setPhase('ready');
   }
 
