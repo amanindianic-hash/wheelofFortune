@@ -172,7 +172,7 @@ describe('SlotWidget', () => {
     });
     render(<SlotWidget embedToken="tok" />);
     await waitFor(() => {
-      expect(screen.getByText(/Slot Machine/i)).toBeInTheDocument();
+      expect(screen.getByText(/CASINO/i)).toBeInTheDocument();
     });
   });
 
