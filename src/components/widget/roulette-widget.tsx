@@ -239,7 +239,7 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
   const primaryColor = branding.primary_color ?? '#7C3AED';
   const buttonText   = (branding as { button_text?: string }).button_text ?? 'SPIN!';
   const fontFamily   = (branding as { font_family?: string }).font_family ?? 'Inter, sans-serif';
-  const bgColor      = (branding as { background_value?: string }).background_value ?? '#076324';
+  const bgColor      = (branding as { background_value?: string }).background_value ?? '#F3E8FF';
   const pocketStyle  = rConfig.roulette_pocket_style ?? 'classic';
 
   const tableGreen   = pocketStyle === 'neon' ? '#0A0A14' : '#065c20';

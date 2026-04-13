@@ -213,7 +213,7 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
   }
 
   const primaryColor = branding.primary_color ?? '#7C3AED';
-  const bgColor = branding.background_value ?? '#FFFFFF';
+  const bgColor = branding.background_value ?? '#F3E8FF';
   const fontFamily = branding.font_family ?? 'Inter, sans-serif';
   const buttonText = branding.button_text ?? 'SPIN!';
   const reelCount = slotConfig.slot_reel_count ?? 3;

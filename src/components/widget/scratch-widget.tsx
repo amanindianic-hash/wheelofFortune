@@ -290,7 +290,7 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
   }
 
   const primaryColor = branding.primary_color ?? '#7C3AED';
-  const bgColor = branding.background_value ?? '#FFFFFF';
+  const bgColor = branding.background_value ?? '#F3E8FF';
   const fontFamily = branding.font_family ?? 'Inter, sans-serif';
   const layout = scratchConfig.scratch_card_layout ?? 'single';
   const sizeKey = scratchConfig.scratch_card_size ?? 'medium';
