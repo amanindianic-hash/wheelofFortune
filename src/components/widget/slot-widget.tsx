@@ -307,80 +307,173 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
   // ── Ready / spinning ──────────────────────────────────────────────────────
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-4" style={{ backgroundColor: bgColor, fontFamily }}>
-      <div className="text-center">
-        <h2 className="text-2xl font-bold">🎰 Slot Machine</h2>
-        <p className="text-sm text-gray-500 mt-1">Match symbols to win!</p>
-      </div>
+      {/* Classic Casino Slot Machine Cabinet */}
+      <div style={{
+        width: '100%',
+        maxWidth: 500,
+        perspective: '1200px',
+      }}>
+        {/* Cabinet Container */}
+        <div style={{
+          background: 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%)',
+          borderRadius: '40px 40px 20px 20px',
+          padding: '20px',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.1)',
+          border: '3px solid #1a1a1a',
+          position: 'relative',
+        }}>
+          {/* Top Marquee - CASINO */}
+          <div style={{
+            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)',
+            borderRadius: '20px 20px 0 0',
+            padding: '16px',
+            marginBottom: '20px',
+            textAlign: 'center',
+            boxShadow: '0 8px 20px rgba(255,165,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)',
+            border: '2px solid #DAA520',
+          }}>
+            <h1 style={{
+              fontSize: '32px',
+              fontWeight: 'bold',
+              color: '#8B0000',
+              textShadow: '2px 2px 4px rgba(0,0,0,0.3), -1px -1px 0 rgba(255,255,255,0.2)',
+              letterSpacing: '4px',
+              margin: 0,
+            }}>
+              ♦ CASINO ♦
+            </h1>
+          </div>
 
-      {/* Cabinet */}
-      <div style={styles.cabinet as React.CSSProperties}>
-        {/* Reel window */}
-        <div
-          className="flex gap-3 rounded-3xl p-3"
-          style={{
-            background: styles.reelBg,
-            boxShadow: 'inset 0 8px 24px rgba(0,0,0,0.8), inset 0 -2px 4px rgba(255,255,255,0.08)',
-            border: styles.reelBorder,
-          }}
-        >
-          {Array.from({ length: reelCount }, (_, reelIdx) => (
-            <div key={reelIdx} className="relative rounded-xl overflow-hidden" style={{ width: reelW, height: windowH }}>
-              {/* Win-line highlight on center row (or only row if visRows=1) */}
-              {visRows >= 1 && (
+          {/* Main Cabinet Body */}
+          <div style={{
+            display: 'flex',
+            gap: '16px',
+            alignItems: 'flex-start',
+          }}>
+            {/* Reels Container */}
+            <div style={{ flex: 1 }}>
+              {/* Chrome Frame around reels */}
+              <div style={{
+                background: 'linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 50%, #A9A9A9 100%)',
+                borderRadius: '12px',
+                padding: '12px',
+                boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.6), inset 0 -2px 8px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.5)',
+                border: '2px solid #808080',
+              }}>
+                {/* Reel Display Window */}
                 <div
-                  className="absolute inset-x-0 z-10 pointer-events-none"
+                  className="flex gap-2 rounded-lg p-2"
                   style={{
-                    top: Math.floor(visRows / 2) * rowH,
-                    height: rowH,
-                    border: `3px solid ${winLineColor}`,
-                    borderRadius: 8,
-                    boxShadow: `0 0 20px ${winLineColor}cc, inset 0 0 10px ${winLineColor}66, 0 0 40px ${winLineColor}44`,
+                    background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%)',
+                    boxShadow: 'inset 0 8px 24px rgba(0,0,0,0.8), inset 0 -2px 4px rgba(255,255,255,0.08)',
+                    border: '2px solid #000',
                   }}
-                />
-              )}
-              {/* Scrolling strip */}
-              <div
-                style={{
-                  transform: `translateY(${reelOffsets[reelIdx] ?? 0}px)`,
-                  transition: reelTransitions[reelIdx] ?? 'none',
-                }}
-              >
-                {buildStrip(reelIdx * 3).map((seg, rowIdx) => (
-                  <SymbolCell key={rowIdx} seg={seg} mode={symbolMode} rowH={rowH} />
-                ))}
+                >
+                  {Array.from({ length: reelCount }, (_, reelIdx) => (
+                    <div key={reelIdx} className="relative rounded-lg overflow-hidden" style={{
+                      width: reelW,
+                      height: windowH,
+                      background: '#000',
+                      boxShadow: 'inset 0 0 10px rgba(0,0,0,0.9)',
+                    }}>
+                      {/* Win-line highlight */}
+                      {visRows >= 1 && (
+                        <div
+                          className="absolute inset-x-0 z-10 pointer-events-none"
+                          style={{
+                            top: Math.floor(visRows / 2) * rowH,
+                            height: rowH,
+                            border: `2px solid ${winLineColor}`,
+                            borderRadius: 4,
+                            boxShadow: `0 0 15px ${winLineColor}dd, inset 0 0 8px ${winLineColor}88`,
+                          }}
+                        />
+                      )}
+                      {/* Scrolling strip */}
+                      <div
+                        style={{
+                          transform: `translateY(${reelOffsets[reelIdx] ?? 0}px)`,
+                          transition: reelTransitions[reelIdx] ?? 'none',
+                        }}
+                      >
+                        {buildStrip(reelIdx * 3).map((seg, rowIdx) => (
+                          <SymbolCell key={rowIdx} seg={seg} mode={symbolMode} rowH={rowH} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
 
-        {/* Spin button */}
-        <Button
-          className="w-full font-bold mt-6 transition-all active:scale-95 duration-200"
-          style={{
-            backgroundColor: primaryColor,
-            height: 56,
-            fontSize: 18,
-            borderRadius: 20,
-            boxShadow: `0 8px 20px ${primaryColor}44, inset 0 2px 4px rgba(255,255,255,0.2)`,
-            border: `2px solid ${primaryColor}`,
-          }}
-          onClick={handleSpin}
-          disabled={phase === 'spinning'}
-        >
-          {phase === 'spinning' ? (
-            <span className="flex items-center gap-2">
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Spinning…
-            </span>
-          ) : (
-            <span className="flex items-center gap-2 justify-center">
-              🎰 {buttonText}
-            </span>
-          )}
-        </Button>
+            {/* Mechanical Lever */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '8px',
+              paddingTop: '20px',
+            }}>
+              {/* Lever shaft */}
+              <div style={{
+                width: '8px',
+                height: '40px',
+                background: 'linear-gradient(90deg, #808080, #A9A9A9)',
+                borderRadius: '4px',
+                boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+              }} />
+              {/* Lever handle */}
+              <button
+                onClick={handleSpin}
+                disabled={phase === 'spinning'}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle at 30% 30%, #FF4500, #DC143C)',
+                  border: '3px solid #8B0000',
+                  boxShadow: '0 6px 16px rgba(0,0,0,0.6), inset -2px -2px 6px rgba(0,0,0,0.3), inset 2px 2px 6px rgba(255,255,255,0.2)',
+                  cursor: phase === 'spinning' ? 'not-allowed' : 'pointer',
+                  transition: 'transform 0.1s',
+                  transform: phase === 'spinning' ? 'translateY(4px)' : 'translateY(0)',
+                  opacity: phase === 'spinning' ? 0.7 : 1,
+                }}
+                title="Pull the lever!"
+              />
+            </div>
+          </div>
+
+          {/* Bottom JACKPOT text */}
+          <div style={{
+            marginTop: '16px',
+            textAlign: 'center',
+            padding: '12px',
+            background: 'linear-gradient(135deg, #2a2a2a, #1a1a1a)',
+            borderRadius: '8px',
+            border: '2px solid #FFD700',
+          }}>
+            <p style={{
+              fontSize: '18px',
+              fontWeight: 'bold',
+              color: '#FFD700',
+              textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,215,0,0.3)',
+              margin: 0,
+              letterSpacing: '2px',
+            }}>
+              🎰 JACKPOT 🎰
+            </p>
+          </div>
+        </div>
       </div>
 
-      <p className="text-xs text-gray-400">{reelCount} reels · {visRows} visible row{visRows !== 1 ? 's' : ''}</p>
+      {/* Status text */}
+      <p style={{
+        fontSize: '12px',
+        color: '#999',
+        marginTop: '8px',
+      }}>
+        {phase === 'spinning' ? '🔄 Spinning...' : '👉 Pull the lever to spin!'}
+      </p>
     </div>
   );
 }
