@@ -708,38 +708,68 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     Branding
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Button Text</Label>
-                    <Input value={wheel.branding.button_text ?? 'SPIN NOW!'}
-                      onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, button_text: e.target.value } })} />
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Primary Color</Label>
+                      <div className="flex gap-2 items-center">
+                        <input type="color"
+                          value={wheel.branding.primary_color ?? '#7C3AED'}
+                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, primary_color: e.target.value } })}
+                          className="w-8 h-8 rounded cursor-pointer border" />
+                        <Input value={wheel.branding.primary_color ?? '#7C3AED'}
+                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, primary_color: e.target.value } })}
+                          className="h-8 text-sm font-mono" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Button, borders, accents</p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Background Color</Label>
+                      <div className="flex gap-2 items-center">
+                        <input type="color"
+                          value={wheel.branding.background_value ?? '#F3E8FF'}
+                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, background_value: e.target.value } })}
+                          className="w-8 h-8 rounded cursor-pointer border" />
+                        <Input value={wheel.branding.background_value ?? '#F3E8FF'}
+                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, background_value: e.target.value } })}
+                          className="h-8 text-sm font-mono" />
+                      </div>
+                      <p className="text-xs text-muted-foreground">Page background</p>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label>Font Family</Label>
-                    <Select
-                      value={wheel.branding.font_family ?? 'Inter, sans-serif'}
-                      onValueChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, font_family: v ?? undefined } })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose font…" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {['Sans-serif', 'Display', 'Handwriting', 'Serif', 'Monospace', 'System'].map((cat) => {
-                          const opts = FONT_OPTIONS.filter((f) => f.category === cat);
-                          if (!opts.length) return null;
-                          return (
-                            <div key={cat}>
-                              <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{cat}</div>
-                              {opts.map((f) => (
-                                <SelectItem key={f.value} value={f.value}>
-                                  <span style={{ fontFamily: f.value }}>{f.label}</span>
-                                </SelectItem>
-                              ))}
-                            </div>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>Button Text</Label>
+                      <Input value={wheel.branding.button_text ?? 'SPIN NOW!'}
+                        onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, button_text: e.target.value } })} />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Font Family</Label>
+                      <Select
+                        value={wheel.branding.font_family ?? 'Inter, sans-serif'}
+                        onValueChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, font_family: v ?? undefined } })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Choose font…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['Sans-serif', 'Display', 'Handwriting', 'Serif', 'Monospace', 'System'].map((cat) => {
+                            const opts = FONT_OPTIONS.filter((f) => f.category === cat);
+                            if (!opts.length) return null;
+                            return (
+                              <div key={cat}>
+                                <div className="px-2 py-1 text-xs font-semibold text-muted-foreground uppercase tracking-wider">{cat}</div>
+                                {opts.map((f) => (
+                                  <SelectItem key={f.value} value={f.value}>
+                                    <span style={{ fontFamily: f.value }}>{f.label}</span>
+                                  </SelectItem>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
