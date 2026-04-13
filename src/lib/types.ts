@@ -88,6 +88,18 @@ export interface WheelConfig {
   shopify_store_url?: string | null;                               // e.g. https://mystore.myshopify.com
 }
 
+export interface SlotConfig {
+  slot_reel_count?: 2 | 3 | 5;
+  slot_visible_rows?: 1 | 3 | 5;
+  slot_symbol_mode?: 'icon' | 'label' | 'both';
+  slot_spin_duration_ms?: number;
+  slot_stop_delay_ms?: number;
+  slot_cabinet_style?: 'classic' | 'modern' | 'neon';
+  slot_win_line_color?: string;
+  sound_enabled?: boolean;
+  sound_url?: string | null;
+}
+
 export interface WheelBranding {
   logo_url?: string | null;
   logo_position?: 'above' | 'center';
@@ -116,7 +128,7 @@ export interface WheelBranding {
   label_letter_spacing?: number;                                     // px, default 0
   // Icon placement (when segment has icon_url)
   icon_position?: 'outer' | 'inner' | 'overlay';                    // default 'outer' (icon near rim, label near hub); 'overlay' = label on top of icon
-  
+
   // Premium Image Layer URLs
   premium_face_url?: string | null;
   premium_stand_url?: string | null;
