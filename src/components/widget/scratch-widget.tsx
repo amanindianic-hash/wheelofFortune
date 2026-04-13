@@ -321,8 +321,12 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
 
   if (phase === 'form') return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: bgColor, fontFamily }}>
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-5">
-        <div className="text-center"><p className="text-3xl mb-2">🎴</p><h2 className="text-xl font-bold">Scratch to Win!</h2><p className="text-sm text-gray-500">Enter your details to reveal your prize</p></div>
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 space-y-5 text-gray-900 border border-gray-100">
+        <div className="text-center">
+          <p className="text-4xl mb-3 drop-shadow-md">🎴</p>
+          <h2 className="text-2xl font-bold text-gray-900">Scratch to Win!</h2>
+          <p className="text-sm text-gray-500 mt-1">Enter your details to reveal your prize</p>
+        </div>
         <form onSubmit={handleFormSubmit} className="space-y-4">
           {(formConfig.fields ?? [{ key: 'email', label: 'Email', type: 'email', required: true }]).map((field) => (
             <div key={field.key} className="space-y-1.5">

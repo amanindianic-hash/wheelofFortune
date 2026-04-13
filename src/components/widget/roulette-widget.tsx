@@ -267,11 +267,11 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
 
   if (phase === 'form') return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: bgColor, fontFamily }}>
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-8 space-y-5">
+      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 space-y-5 text-gray-900 border border-gray-100">
         <div className="text-center">
-          <p className="text-3xl mb-2">🎰</p>
-          <h2 className="text-xl font-bold">Spin the Roulette!</h2>
-          <p className="text-sm text-gray-500">Enter your details to spin</p>
+          <p className="text-4xl mb-3 drop-shadow-md">🎰</p>
+          <h2 className="text-2xl font-bold text-gray-900">Spin the Roulette!</h2>
+          <p className="text-sm text-gray-500 mt-1">Enter your details to spin</p>
         </div>
         <form onSubmit={handleFormSubmit} className="space-y-4">
           {(formConfig.fields ?? [{ key: 'email', label: 'Email', type: 'email', required: true }, { key: 'name', label: 'Name', type: 'text', required: false }]).map((field) => (
