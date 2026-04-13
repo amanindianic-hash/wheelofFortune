@@ -316,20 +316,29 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
     >
       {/* Table felt area */}
       <div
-        className="rounded-3xl p-6 flex flex-col items-center gap-6 shadow-2xl"
-        style={{ backgroundColor: tableGreen, border: pocketStyle === 'neon' ? `2px solid ${primaryColor}44` : '2px solid rgba(255,255,255,0.15)' }}
+        className="rounded-3xl p-8 flex flex-col items-center gap-8 shadow-2xl"
+        style={{
+          backgroundColor: tableGreen,
+          border: pocketStyle === 'neon' ? `3px solid ${primaryColor}` : '3px solid #C8A050',
+          boxShadow: pocketStyle === 'neon'
+            ? `0 0 30px ${primaryColor}aa, 0 0 80px ${primaryColor}55, inset 0 0 30px rgba(0,0,0,0.8), 0 20px 60px rgba(0,0,0,0.6)`
+            : '0 20px 60px rgba(0,0,0,0.6), inset 0 0 30px rgba(0,0,0,0.4), 0 0 0 1px rgba(200,160,80,0.3)',
+        }}
       >
         <div className="text-center">
-          <h2 className="text-white font-bold text-xl tracking-wide">🎰 Roulette</h2>
-          <p className="text-white/60 text-xs mt-0.5">Place your bet and spin!</p>
+          <h2 className="text-white font-bold text-2xl tracking-wide">🎰 Roulette</h2>
+          <p className="text-white/70 text-sm mt-1">Place your bet and spin!</p>
         </div>
 
         {/* Pointer triangle at top */}
         <div className="relative">
-          <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+          <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-10 drop-shadow-xl">
             <div
-              className="w-0 h-0 border-l-[10px] border-r-[10px] border-t-[20px] border-l-transparent border-r-transparent"
-              style={{ borderTopColor: pocketStyle === 'neon' ? primaryColor : '#C8A050' }}
+              className="w-0 h-0 border-l-[12px] border-r-[12px] border-t-[24px] border-l-transparent border-r-transparent"
+              style={{
+                borderTopColor: pocketStyle === 'neon' ? primaryColor : '#F4D03F',
+                filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.5))',
+              }}
             />
           </div>
           <canvas
@@ -337,22 +346,35 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
             width={400}
             height={400}
             className="rounded-full shadow-2xl"
-            style={{ border: `3px solid ${pocketStyle === 'neon' ? primaryColor : '#C8A050'}` }}
+            style={{
+              border: pocketStyle === 'neon' ? `4px solid ${primaryColor}` : '4px solid #C8A050',
+              boxShadow: pocketStyle === 'neon'
+                ? `0 0 20px ${primaryColor}88, inset 0 0 15px rgba(0,0,0,0.4)`
+                : 'inset 0 0 15px rgba(0,0,0,0.4), 0 8px 20px rgba(0,0,0,0.5)',
+            }}
           />
         </div>
 
         <Button
-          className="w-44 h-12 text-base font-bold rounded-full shadow-lg transition-transform active:scale-95"
-          style={{ backgroundColor: primaryColor }}
+          className="w-48 h-14 text-lg font-bold rounded-full shadow-lg transition-all active:scale-95 duration-200"
+          style={{
+            backgroundColor: primaryColor,
+            boxShadow: `0 8px 20px ${primaryColor}44, inset 0 2px 4px rgba(255,255,255,0.2)`,
+            border: `2px solid ${primaryColor}`,
+          }}
           onClick={handleSpin}
           disabled={phase === 'spinning'}
         >
           {phase === 'spinning' ? (
             <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Rolling…
             </span>
-          ) : buttonText}
+          ) : (
+            <span className="flex items-center gap-2">
+              🎯 {buttonText}
+            </span>
+          )}
         </Button>
       </div>
 
