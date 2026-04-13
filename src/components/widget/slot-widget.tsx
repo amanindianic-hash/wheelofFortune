@@ -70,7 +70,7 @@ function getCabinetStyles(style: SlotConfig['slot_cabinet_style'], primaryColor:
   }
 }
 
-// ─── Symbol cell ──────────────────────────────────────────────────────────────
+// ─── Premium Symbol cell with 3D effects ──────────────────────────────────────
 
 function SymbolCell({
   seg, mode, rowH,
@@ -79,29 +79,71 @@ function SymbolCell({
   mode: SlotConfig['slot_symbol_mode'];
   rowH: number;
 }) {
+  const bgColor = seg?.bg_color ?? '#2A2A2A';
+  const textColor = seg?.text_color ?? '#FFFFFF';
+
   return (
     <div
-      className="flex flex-col items-center justify-center gap-0.5 w-full"
+      className="flex flex-col items-center justify-center gap-0.5 w-full relative"
       style={{
         height: rowH,
-        backgroundColor: seg?.bg_color ?? '#2A2A2A',
-        backgroundImage: `linear-gradient(135deg, ${seg?.bg_color ?? '#2A2A2A'} 0%, ${seg?.bg_color ?? '#2A2A2A'}dd 100%)`,
-        borderBottom: '1px solid rgba(255,255,255,0.1)',
-        borderTop: '1px solid rgba(0,0,0,0.3)',
-        boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.05)',
+        background: `linear-gradient(135deg, ${bgColor} 0%, ${bgColor}dd 50%, ${bgColor}cc 100%)`,
+        borderBottom: '1px solid rgba(0,0,0,0.4)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: `
+          inset 0 1px 3px rgba(255,255,255,0.1),
+          inset 0 -1px 2px rgba(0,0,0,0.3),
+          0 2px 4px rgba(0,0,0,0.2)
+        `,
         flexShrink: 0,
+        position: 'relative',
       }}
     >
+      {/* Glossy overlay for premium look */}
+      <div style={{
+        position: 'absolute',
+        inset: 0,
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 50%, rgba(0,0,0,0.02) 100%)',
+        pointerEvents: 'none',
+      }} />
+
       {(mode === 'icon' || mode === 'both') && (
         seg?.icon_url
           // eslint-disable-next-line @next/next/no-img-element
-          ? <img src={seg.icon_url} alt={seg.label} className="object-contain rounded drop-shadow-lg" style={{ width: rowH * 0.4, height: rowH * 0.4 }} />
-          : <span style={{ fontSize: rowH * 0.35, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>🎁</span>
+          ? <img
+              src={seg.icon_url}
+              alt={seg.label}
+              className="object-contain rounded"
+              style={{
+                width: rowH * 0.45,
+                height: rowH * 0.45,
+                filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5)) brightness(1.05)',
+                zIndex: 1,
+              }}
+            />
+          : <span style={{
+              fontSize: rowH * 0.4,
+              filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))',
+              zIndex: 1,
+            }}>
+              🎁
+            </span>
       )}
       {(mode === 'label' || mode === 'both') && (
         <span
-          className="font-bold text-center leading-tight px-1 truncate w-full text-center drop-shadow"
-          style={{ color: seg?.text_color ?? '#FFFFFF', fontSize: rowH * 0.17, textShadow: '0 2px 4px rgba(0,0,0,0.4)' }}
+          className="font-bold text-center leading-tight px-1 truncate w-full text-center"
+          style={{
+            color: textColor,
+            fontSize: rowH * 0.18,
+            textShadow: `
+              0 2px 4px rgba(0,0,0,0.6),
+              0 -1px 1px rgba(255,255,255,0.1),
+              0 0 2px ${textColor}33
+            `,
+            zIndex: 1,
+            fontWeight: 800,
+            letterSpacing: '0.5px',
+          }}
         >
           {(seg?.label ?? '?').length > 8 ? seg!.label.slice(0, 7) + '…' : (seg?.label ?? '?')}
         </span>
@@ -306,39 +348,96 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
 
   // ── Ready / spinning ──────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-8 p-4" style={{ backgroundColor: bgColor, fontFamily }}>
+    <div
+      className="min-h-screen flex flex-col items-center justify-center gap-8 p-4"
+      style={{
+        backgroundColor: bgColor,
+        fontFamily,
+        background: `linear-gradient(135deg, ${bgColor} 0%, ${bgColor}dd 100%), radial-gradient(circle at 50% 0%, rgba(255,255,255,0.05) 0%, transparent 50%)`,
+        backgroundAttachment: 'fixed',
+      }}
+    >
       {/* Classic Casino Slot Machine Cabinet */}
       <div style={{
         width: '100%',
-        maxWidth: 500,
+        maxWidth: 520,
         perspective: '1200px',
+        filter: 'drop-shadow(0 40px 100px rgba(0,0,0,0.3))',
       }}>
-        {/* Cabinet Container */}
+        {/* Cabinet Container with premium metallic finish */}
         <div style={{
-          background: 'linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%)',
+          background: `linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 30%, #0a0a0a 60%, #1a1a1a 100%)`,
           borderRadius: '40px 40px 20px 20px',
           padding: '20px',
-          boxShadow: '0 30px 80px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.1)',
-          border: '3px solid #1a1a1a',
+          boxShadow: `
+            0 40px 100px rgba(0,0,0,0.8),
+            inset 0 1px 2px rgba(255,255,255,0.15),
+            inset 0 -2px 4px rgba(0,0,0,0.5),
+            inset 0 0 30px rgba(0,0,0,0.3)
+          `,
+          border: '3px solid #0a0a0a',
           position: 'relative',
+          overflow: 'hidden',
         }}>
-          {/* Top Marquee - CASINO */}
+          {/* Premium metal texture background */}
           <div style={{
-            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)',
+            position: 'absolute',
+            inset: 0,
+            background: `
+              repeating-linear-gradient(
+                90deg,
+                transparent,
+                transparent 2px,
+                rgba(255,255,255,0.01) 2px,
+                rgba(255,255,255,0.01) 4px
+              ),
+              repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.02) 2px,
+                rgba(0,0,0,0.02) 4px
+              )
+            `,
+            pointerEvents: 'none',
+          }} />
+          {/* Top Marquee - CASINO (Premium gold with premium effects) */}
+          <div style={{
+            background: `linear-gradient(165deg, #FFE55C 0%, #FFD700 25%, #FFA500 50%, #FFD700 75%, #FFE55C 100%)`,
             borderRadius: '20px 20px 0 0',
-            padding: '16px',
+            padding: '18px 16px',
             marginBottom: '20px',
             textAlign: 'center',
-            boxShadow: '0 8px 20px rgba(255,165,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.2)',
-            border: '2px solid #DAA520',
+            boxShadow: `
+              0 12px 30px rgba(255,165,0,0.6),
+              inset 0 1px 1px rgba(255,255,255,0.4),
+              inset 0 -2px 3px rgba(139,69,19,0.3),
+              0 0 40px rgba(255,215,0,0.3)
+            `,
+            border: '3px solid #DAA520',
+            position: 'relative',
+            overflow: 'hidden',
           }}>
+            {/* Metallic shine effect */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)',
+              pointerEvents: 'none',
+            }} />
             <h1 style={{
-              fontSize: '32px',
+              fontSize: '36px',
               fontWeight: 'bold',
               color: '#8B0000',
-              textShadow: '2px 2px 4px rgba(0,0,0,0.3), -1px -1px 0 rgba(255,255,255,0.2)',
-              letterSpacing: '4px',
+              textShadow: `
+                3px 3px 6px rgba(0,0,0,0.5),
+                -1px -1px 0 rgba(255,255,255,0.3),
+                0 0 15px rgba(255,215,0,0.4)
+              `,
+              letterSpacing: '5px',
               margin: 0,
+              position: 'relative',
+              zIndex: 1,
             }}>
               ♦ CASINO ♦
             </h1>
@@ -349,43 +448,85 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
             display: 'flex',
             gap: '16px',
             alignItems: 'flex-start',
+            position: 'relative',
+            zIndex: 1,
           }}>
             {/* Reels Container */}
-            <div style={{ flex: 1 }}>
-              {/* Chrome Frame around reels */}
+            <div style={{ flex: 1, position: 'relative' }}>
+              {/* Premium Chrome Frame around reels */}
               <div style={{
-                background: 'linear-gradient(135deg, #E8E8E8 0%, #C0C0C0 50%, #A9A9A9 100%)',
+                background: `linear-gradient(165deg, #F5F5F5 0%, #E8E8E8 15%, #C0C0C0 50%, #A9A9A9 85%, #909090 100%)`,
                 borderRadius: '12px',
-                padding: '12px',
-                boxShadow: 'inset 0 2px 8px rgba(255,255,255,0.6), inset 0 -2px 8px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.5)',
-                border: '2px solid #808080',
+                padding: '14px',
+                boxShadow: `
+                  inset 0 2px 6px rgba(255,255,255,0.8),
+                  inset 0 -2px 6px rgba(0,0,0,0.4),
+                  inset 0 0 20px rgba(0,0,0,0.15),
+                  0 6px 16px rgba(0,0,0,0.6),
+                  0 0 30px rgba(0,0,0,0.2)
+                `,
+                border: '3px solid #606060',
+                position: 'relative',
               }}>
-                {/* Reel Display Window */}
+                {/* Metallic texture on chrome */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: `
+                    repeating-linear-gradient(
+                      90deg,
+                      transparent,
+                      transparent 1px,
+                      rgba(255,255,255,0.05) 1px,
+                      rgba(255,255,255,0.05) 2px
+                    )
+                  `,
+                  borderRadius: '12px',
+                  pointerEvents: 'none',
+                }} />
+                {/* Reel Display Window - Premium deep black */}
                 <div
-                  className="flex gap-2 rounded-lg p-2"
+                  className="flex gap-2 rounded-lg p-2 relative"
                   style={{
-                    background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%)',
-                    boxShadow: 'inset 0 8px 24px rgba(0,0,0,0.8), inset 0 -2px 4px rgba(255,255,255,0.08)',
+                    background: `linear-gradient(165deg, #050505 0%, #0a0a0a 30%, #000000 50%, #0a0a0a 70%, #050505 100%)`,
+                    boxShadow: `
+                      inset 0 10px 30px rgba(0,0,0,0.9),
+                      inset 0 -2px 6px rgba(255,255,255,0.05),
+                      inset 0 0 20px rgba(0,0,0,0.5),
+                      0 2px 4px rgba(0,0,0,0.3)
+                    `,
                     border: '2px solid #000',
+                    zIndex: 1,
                   }}
                 >
                   {Array.from({ length: reelCount }, (_, reelIdx) => (
                     <div key={reelIdx} className="relative rounded-lg overflow-hidden" style={{
                       width: reelW,
                       height: windowH,
-                      background: '#000',
-                      boxShadow: 'inset 0 0 10px rgba(0,0,0,0.9)',
+                      background: 'linear-gradient(135deg, #0a0a0a 0%, #000000 50%, #0a0a0a 100%)',
+                      boxShadow: `
+                        inset 0 0 15px rgba(0,0,0,0.95),
+                        inset 0 2px 4px rgba(255,255,255,0.03),
+                        0 2px 6px rgba(0,0,0,0.4)
+                      `,
+                      border: '1px solid rgba(255,255,255,0.05)',
                     }}>
-                      {/* Win-line highlight */}
+                      {/* Premium Win-line highlight with glow */}
                       {visRows >= 1 && (
                         <div
                           className="absolute inset-x-0 z-10 pointer-events-none"
                           style={{
                             top: Math.floor(visRows / 2) * rowH,
                             height: rowH,
-                            border: `2px solid ${winLineColor}`,
+                            border: `3px solid ${winLineColor}`,
                             borderRadius: 4,
-                            boxShadow: `0 0 15px ${winLineColor}dd, inset 0 0 8px ${winLineColor}88`,
+                            boxShadow: `
+                              0 0 20px ${winLineColor}ff,
+                              0 0 40px ${winLineColor}aa,
+                              inset 0 0 10px ${winLineColor}55,
+                              0 0 60px ${winLineColor}44
+                            `,
+                            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                           }}
                         />
                       )}
@@ -406,59 +547,103 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
               </div>
             </div>
 
-            {/* Mechanical Lever */}
+            {/* Premium Mechanical Lever */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              gap: '8px',
+              gap: '10px',
               paddingTop: '20px',
+              position: 'relative',
             }}>
-              {/* Lever shaft */}
+              {/* Lever mount bracket */}
               <div style={{
-                width: '8px',
-                height: '40px',
-                background: 'linear-gradient(90deg, #808080, #A9A9A9)',
+                width: '28px',
+                height: '8px',
+                background: 'linear-gradient(90deg, #606060, #808080)',
                 borderRadius: '4px',
-                boxShadow: '0 4px 8px rgba(0,0,0,0.5)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2)',
+                border: '1px solid #404040',
               }} />
-              {/* Lever handle */}
+
+              {/* Lever shaft - Premium chrome */}
+              <div style={{
+                width: '10px',
+                height: '45px',
+                background: 'linear-gradient(90deg, #A9A9A9 0%, #E0E0E0 50%, #A9A9A9 100%)',
+                borderRadius: '5px',
+                boxShadow: `
+                  0 6px 16px rgba(0,0,0,0.5),
+                  inset -1px 0 2px rgba(0,0,0,0.3),
+                  inset 1px 0 2px rgba(255,255,255,0.4)
+                `,
+              }} />
+
+              {/* Premium Lever handle button */}
               <button
                 onClick={handleSpin}
                 disabled={phase === 'spinning'}
                 style={{
-                  width: '48px',
-                  height: '48px',
+                  width: '56px',
+                  height: '56px',
                   borderRadius: '50%',
-                  background: 'radial-gradient(circle at 30% 30%, #FF4500, #DC143C)',
-                  border: '3px solid #8B0000',
-                  boxShadow: '0 6px 16px rgba(0,0,0,0.6), inset -2px -2px 6px rgba(0,0,0,0.3), inset 2px 2px 6px rgba(255,255,255,0.2)',
+                  background: `radial-gradient(circle at 35% 35%, #FF6B35, #DC143C, #8B0000)`,
+                  border: '4px solid #5A0000',
+                  boxShadow: `
+                    0 8px 20px rgba(0,0,0,0.7),
+                    inset -3px -3px 8px rgba(0,0,0,0.4),
+                    inset 3px 3px 8px rgba(255,255,255,0.15),
+                    0 0 30px rgba(220,20,60,0.3)
+                  `,
                   cursor: phase === 'spinning' ? 'not-allowed' : 'pointer',
-                  transition: 'transform 0.1s',
-                  transform: phase === 'spinning' ? 'translateY(4px)' : 'translateY(0)',
-                  opacity: phase === 'spinning' ? 0.7 : 1,
+                  transition: 'all 0.1s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: phase === 'spinning' ? 'translateY(6px) scale(0.95)' : 'translateY(0)',
+                  opacity: phase === 'spinning' ? 0.75 : 1,
                 }}
-                title="Pull the lever!"
-              />
+                title="Pull the lever to spin!"
+              >
+                <span style={{ fontSize: '28px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>🎰</span>
+              </button>
             </div>
           </div>
 
-          {/* Bottom JACKPOT text */}
+          {/* Premium Bottom JACKPOT text with glow effects */}
           <div style={{
             marginTop: '16px',
             textAlign: 'center',
-            padding: '12px',
-            background: 'linear-gradient(135deg, #2a2a2a, #1a1a1a)',
-            borderRadius: '8px',
-            border: '2px solid #FFD700',
+            padding: '14px 12px',
+            background: `linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 50%, #0a0a0a 100%)`,
+            borderRadius: '10px',
+            border: '3px solid #FFD700',
+            boxShadow: `
+              0 0 25px rgba(255,215,0,0.5),
+              inset 0 1px 0 rgba(255,255,255,0.1),
+              inset 0 -1px 2px rgba(0,0,0,0.3)
+            `,
+            position: 'relative',
+            overflow: 'hidden',
           }}>
+            {/* Animated glow background */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: `radial-gradient(circle at 50% 50%, rgba(255,215,0,0.1) 0%, transparent 70%)`,
+              pointerEvents: 'none',
+              animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }} />
             <p style={{
-              fontSize: '18px',
+              fontSize: '20px',
               fontWeight: 'bold',
               color: '#FFD700',
-              textShadow: '0 2px 4px rgba(0,0,0,0.8), 0 0 10px rgba(255,215,0,0.3)',
+              textShadow: `
+                0 3px 6px rgba(0,0,0,0.9),
+                0 0 20px rgba(255,215,0,0.5),
+                -1px -1px 0 rgba(255,255,255,0.1)
+              `,
               margin: 0,
-              letterSpacing: '2px',
+              letterSpacing: '3px',
+              position: 'relative',
+              zIndex: 1,
             }}>
               🎰 JACKPOT 🎰
             </p>
