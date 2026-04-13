@@ -32,40 +32,40 @@ function getCabinetStyles(style: SlotConfig['slot_cabinet_style'], primaryColor:
       return {
         cabinet: {
           background: `linear-gradient(160deg, #c0392b, #8e1c12, #c0392b)`,
-          border: `4px solid #f39c12`,
-          borderRadius: 24,
-          padding: 20,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15)',
+          border: `5px solid #f39c12`,
+          borderRadius: 28,
+          padding: 24,
+          boxShadow: '0 20px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.5)',
         },
-        reelBg: '#1a0000',
-        reelBorder: '2px solid #f39c12',
+        reelBg: 'linear-gradient(135deg, #1a0000 0%, #2a1a1a 50%, #1a0000 100%)',
+        reelBorder: '3px solid #f39c12',
         panelBg: 'linear-gradient(180deg,#c0392b,#8e1c12)',
       };
     case 'neon':
       return {
         cabinet: {
           background: '#0A0A14',
-          border: `3px solid ${primaryColor}`,
-          borderRadius: 20,
-          padding: 18,
-          boxShadow: `0 0 20px ${primaryColor}88, 0 0 60px ${primaryColor}33, inset 0 0 20px rgba(0,0,0,0.8)`,
+          border: `4px solid ${primaryColor}`,
+          borderRadius: 24,
+          padding: 20,
+          boxShadow: `0 0 30px ${primaryColor}aa, 0 0 80px ${primaryColor}55, inset 0 0 20px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.1)`,
         },
-        reelBg: '#05050D',
-        reelBorder: `2px solid ${primaryColor}88`,
+        reelBg: 'linear-gradient(135deg, #05050D 0%, #0a0a18 50%, #05050D 100%)',
+        reelBorder: `3px solid ${primaryColor}`,
         panelBg: '#0A0A14',
       };
     default: // modern
       return {
         cabinet: {
-          background: `linear-gradient(135deg, ${primaryColor}22, ${primaryColor}44)`,
-          border: `3px solid ${primaryColor}`,
-          borderRadius: 24,
-          padding: 16,
-          boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+          background: `linear-gradient(135deg, ${primaryColor}33, ${primaryColor}55)`,
+          border: `4px solid ${primaryColor}`,
+          borderRadius: 28,
+          padding: 20,
+          boxShadow: `0 20px 50px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.15), inset 0 -1px 2px rgba(0,0,0,0.3)`,
         },
-        reelBg: '#111',
-        reelBorder: 'none',
-        panelBg: 'transparent',
+        reelBg: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%)',
+        reelBorder: `2px solid ${primaryColor}`,
+        panelBg: `linear-gradient(180deg, ${primaryColor}11, ${primaryColor}08)`,
       };
   }
 }
@@ -82,18 +82,26 @@ function SymbolCell({
   return (
     <div
       className="flex flex-col items-center justify-center gap-0.5 w-full"
-      style={{ height: rowH, backgroundColor: seg?.bg_color ?? '#2A2A2A', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}
+      style={{
+        height: rowH,
+        backgroundColor: seg?.bg_color ?? '#2A2A2A',
+        backgroundImage: `linear-gradient(135deg, ${seg?.bg_color ?? '#2A2A2A'} 0%, ${seg?.bg_color ?? '#2A2A2A'}dd 100%)`,
+        borderBottom: '1px solid rgba(255,255,255,0.1)',
+        borderTop: '1px solid rgba(0,0,0,0.3)',
+        boxShadow: 'inset 0 1px 2px rgba(255,255,255,0.05)',
+        flexShrink: 0,
+      }}
     >
       {(mode === 'icon' || mode === 'both') && (
         seg?.icon_url
           // eslint-disable-next-line @next/next/no-img-element
-          ? <img src={seg.icon_url} alt={seg.label} className="object-contain rounded" style={{ width: rowH * 0.38, height: rowH * 0.38 }} />
-          : <span style={{ fontSize: rowH * 0.32 }}>🎁</span>
+          ? <img src={seg.icon_url} alt={seg.label} className="object-contain rounded drop-shadow-lg" style={{ width: rowH * 0.4, height: rowH * 0.4 }} />
+          : <span style={{ fontSize: rowH * 0.35, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))' }}>🎁</span>
       )}
       {(mode === 'label' || mode === 'both') && (
         <span
-          className="font-bold text-center leading-tight px-1 truncate w-full text-center"
-          style={{ color: seg?.text_color ?? '#FFFFFF', fontSize: rowH * 0.165 }}
+          className="font-bold text-center leading-tight px-1 truncate w-full text-center drop-shadow"
+          style={{ color: seg?.text_color ?? '#FFFFFF', fontSize: rowH * 0.17, textShadow: '0 2px 4px rgba(0,0,0,0.4)' }}
         >
           {(seg?.label ?? '?').length > 8 ? seg!.label.slice(0, 7) + '…' : (seg?.label ?? '?')}
         </span>
@@ -308,8 +316,12 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
       <div style={styles.cabinet as React.CSSProperties}>
         {/* Reel window */}
         <div
-          className="flex gap-2 rounded-2xl p-2"
-          style={{ background: styles.reelBg, boxShadow: 'inset 0 4px 16px rgba(0,0,0,0.6)' }}
+          className="flex gap-3 rounded-3xl p-3"
+          style={{
+            background: styles.reelBg,
+            boxShadow: 'inset 0 8px 24px rgba(0,0,0,0.8), inset 0 -2px 4px rgba(255,255,255,0.08)',
+            border: styles.reelBorder,
+          }}
         >
           {Array.from({ length: reelCount }, (_, reelIdx) => (
             <div key={reelIdx} className="relative rounded-xl overflow-hidden" style={{ width: reelW, height: windowH }}>
@@ -320,9 +332,9 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                   style={{
                     top: Math.floor(visRows / 2) * rowH,
                     height: rowH,
-                    border: `2px solid ${winLineColor}`,
-                    borderRadius: 4,
-                    boxShadow: `0 0 10px ${winLineColor}88`,
+                    border: `3px solid ${winLineColor}`,
+                    borderRadius: 8,
+                    boxShadow: `0 0 20px ${winLineColor}cc, inset 0 0 10px ${winLineColor}66, 0 0 40px ${winLineColor}44`,
                   }}
                 />
               )}
@@ -343,17 +355,28 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
 
         {/* Spin button */}
         <Button
-          className="w-full font-bold mt-4 transition-transform active:scale-95"
-          style={{ backgroundColor: primaryColor, height: 48, fontSize: 16, borderRadius: 16 }}
+          className="w-full font-bold mt-6 transition-all active:scale-95 duration-200"
+          style={{
+            backgroundColor: primaryColor,
+            height: 56,
+            fontSize: 18,
+            borderRadius: 20,
+            boxShadow: `0 8px 20px ${primaryColor}44, inset 0 2px 4px rgba(255,255,255,0.2)`,
+            border: `2px solid ${primaryColor}`,
+          }}
           onClick={handleSpin}
           disabled={phase === 'spinning'}
         >
           {phase === 'spinning' ? (
             <span className="flex items-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
               Spinning…
             </span>
-          ) : buttonText}
+          ) : (
+            <span className="flex items-center gap-2 justify-center">
+              🎰 {buttonText}
+            </span>
+          )}
         </Button>
       </div>
 
