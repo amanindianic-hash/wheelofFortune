@@ -162,7 +162,7 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
   const buttonColor = branding.primary_color ?? '#7C3AED';
   const buttonText = branding.button_text ?? 'SPIN NOW!';
   const fontFamily = branding.font_family ?? 'Inter, sans-serif';
-  const bgColor = branding.background_value ?? '#FFFFFF';
+  const bgColor = branding.background_value ?? '#F3E8FF';
 
   if (phase === 'loading') {
     return (
