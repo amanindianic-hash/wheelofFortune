@@ -23,7 +23,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-777',
     label: '777',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/777.png',
     bg_color: '#1a1a2e',
     text_color: '#FFD700',
     weight: 3,
@@ -32,7 +32,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-watermelon',
     label: 'Watermelon',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/watermelon.png',
     bg_color: '#1a1a2e',
     text_color: '#FFFFFF',
     weight: 2,
@@ -41,7 +41,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-bar',
     label: 'BAR',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/bar.png',
     bg_color: '#1a1a2e',
     text_color: '#FFD700',
     weight: 2,
@@ -50,7 +50,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-apple',
     label: 'Apple',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/apple.png',
     bg_color: '#1a1a2e',
     text_color: '#FFFFFF',
     weight: 2,
@@ -59,7 +59,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-diamonds',
     label: 'Diamonds',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/diamonds.png',
     bg_color: '#1a1a2e',
     text_color: '#FF1493',
     weight: 2,
@@ -68,7 +68,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-crown',
     label: 'Crown',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/crown.png',
     bg_color: '#1a1a2e',
     text_color: '#FFD700',
     weight: 3,
@@ -77,7 +77,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-bonus',
     label: 'BONUS',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/bonus.png',
     bg_color: '#1a1a2e',
     text_color: '#FFD700',
     weight: 1,
@@ -86,7 +86,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-cherries',
     label: 'Cherries',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/cherries.png',
     bg_color: '#1a1a2e',
     text_color: '#FF69B4',
     weight: 2,
@@ -95,7 +95,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-money',
     label: 'Money',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/money.png',
     bg_color: '#1a1a2e',
     text_color: '#00FF00',
     weight: 2,
@@ -104,7 +104,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-wild',
     label: 'WILD',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/wild.png',
     bg_color: '#1a1a2e',
     text_color: '#FFD700',
     weight: 1,
@@ -113,7 +113,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-lemon',
     label: 'Lemon',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/lemon.png',
     bg_color: '#1a1a2e',
     text_color: '#FFFF00',
     weight: 2,
@@ -122,7 +122,7 @@ export const PREMIUM_CASINO_SYMBOLS: SlotSymbol[] = [
   {
     id: 'premium-seven',
     label: '7',
-    icon_url: '/slot-icons-premium.png',
+    icon_url: '/slot-icons/seven.png',
     bg_color: '#1a1a2e',
     text_color: '#FF4500',
     weight: 2,
