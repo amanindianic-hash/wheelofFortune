@@ -9,7 +9,8 @@ import { WinQRCard } from './win-qr-card';
 
 interface FormConfig { enabled?: boolean; fields?: Array<{ key: string; label: string; type: string; required?: boolean }>; gdpr_enabled?: boolean; gdpr_text?: string; privacy_policy_url?: string | null; }
 interface SpinResult { is_winner: boolean; segment: { id: string; label: string }; prize?: { display_title: string; display_description?: string; type: string; custom_message_html?: string; redirect_url?: string } | null; coupon_code?: string | null; consolation_message?: string | null; }
-interface WheelSegment { id: string; label: string; bg_color: string; text_color: string; icon_url?: string | null; }
+interface WheelSegment { id: string; label: string; bg_color: string; text_color: string; icon_url?: string | null; prize_id?: string | null; }
+interface PrizeInfo { id: string; display_title: string; }
 interface ScratchConfig {
   scratch_layer_color?: string;
   scratch_layer_style?: 'solid' | 'metallic' | 'foil' | 'striped';
@@ -105,27 +106,31 @@ function drawScratchLayer(
 // ─── Prize reveal background ──────────────────────────────────────────────────
 
 function PrizeBg({
-  layout, segments, primaryColor,
+  layout, segments, primaryColor, prizes = {},
 }: {
   layout: ScratchConfig['scratch_card_layout'];
   segments: WheelSegment[];
   primaryColor: string;
+  prizes?: Record<string, PrizeInfo>;
 }) {
-  const fill = (seg: WheelSegment | undefined, key: number) => (
-    <div
-      key={key}
-      className="flex flex-col items-center justify-center gap-1 h-full"
-      style={{ backgroundColor: seg?.bg_color ?? primaryColor, flex: 1 }}
-    >
-      {seg?.icon_url
-        // eslint-disable-next-line @next/next/no-img-element
-        ? <img src={seg.icon_url} alt={seg.label} className="w-8 h-8 object-contain rounded" />
-        : <span className="text-2xl">🎁</span>}
-      <span className="text-xs font-bold text-center px-1 truncate max-w-full" style={{ color: seg?.text_color ?? '#fff' }}>
-        {seg?.label ?? '?'}
-      </span>
-    </div>
-  );
+  const fill = (seg: WheelSegment | undefined, key: number) => {
+    const displayTitle = seg?.id && prizes[seg.id] ? prizes[seg.id].display_title : seg?.label ?? '?';
+    return (
+      <div
+        key={key}
+        className="flex flex-col items-center justify-center gap-1 h-full"
+        style={{ backgroundColor: seg?.bg_color ?? primaryColor, flex: 1 }}
+      >
+        {seg?.icon_url
+          // eslint-disable-next-line @next/next/no-img-element
+          ? <img src={seg.icon_url} alt={displayTitle} className="w-8 h-8 object-contain rounded" />
+          : <span className="text-2xl">🎁</span>}
+        <span className="text-xs font-bold text-center px-1 truncate max-w-full" style={{ color: seg?.text_color ?? '#fff' }}>
+          {displayTitle}
+        </span>
+      </div>
+    );
+  };
 
   if (layout === 'grid_2x2') {
     const cells = [0, 1, 2, 3].map((i) => segments[i % (segments.length || 1)]);
@@ -166,6 +171,7 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
   const [phase, setPhase] = useState<Phase>('loading');
   const [sessionId, setSessionId] = useState('');
   const [segments, setSegments] = useState<WheelSegment[]>([]);
+  const [prizes, setPrizes] = useState<Record<string, PrizeInfo>>({});
   const [formConfig, setFormConfig] = useState<FormConfig>({});
   const [scratchConfig, setScratchConfig] = useState<ScratchConfig>({});
   const [branding, setBranding] = useState<{ primary_color?: string; button_text?: string; background_value?: string; font_family?: string }>({});
@@ -197,6 +203,25 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
         setFormConfig(data.wheel?.form_config ?? {});
         setBranding(data.wheel?.branding ?? {});
         setScratchConfig(data.wheel?.config ?? {});
+
+        // Fetch prize info for segments
+        if (data.segments && data.segments.length > 0) {
+          const prizeMap: Record<string, PrizeInfo> = {};
+          for (const seg of data.segments) {
+            if (seg.prize_id) {
+              try {
+                const prizeRes = await fetch(`/api/prizes/${seg.prize_id}`);
+                if (prizeRes.ok) {
+                  const prizeData = await prizeRes.json();
+                  prizeMap[seg.id] = { id: seg.prize_id, display_title: prizeData.display_title };
+                }
+              } catch (e) {
+                // If prize fetch fails, we'll just show segment label
+              }
+            }
+          }
+          setPrizes(prizeMap);
+        }
 
         const rules = data.wheel?.trigger_rules || {};
         if (!rules.time_on_page && !rules.scroll_depth && !rules.exit_intent) setIsTriggered(true);
@@ -373,7 +398,7 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
         style={{ width: cardW, height: cardH, borderRadius, border: `3px solid ${borderColor}` }}
       >
         {/* Prize reveal background */}
-        <PrizeBg layout={layout} segments={segments} primaryColor={primaryColor} />
+        <PrizeBg layout={layout} segments={segments} primaryColor={primaryColor} prizes={prizes} />
 
         {/* Scratch canvas on top */}
         <canvas
