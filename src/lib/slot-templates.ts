@@ -1,4 +1,5 @@
 import type { SlotConfig, WheelBranding, GameType } from '@/lib/types';
+import { PREMIUM_CASINO_SYMBOLS } from '@/lib/slot-symbol-palette';
 
 export interface SlotTemplate {
   id: string;
@@ -14,12 +15,17 @@ export interface SlotTemplate {
 
 // ─── Slot Machine Templates ────────────────────────────────────────────────────
 
+/**
+ * Export premium casino symbols for use as default icons
+ */
+export { PREMIUM_CASINO_SYMBOLS, createDefaultSlotSegments } from '@/lib/slot-symbol-palette';
+
 export const SLOT_TEMPLATES: SlotTemplate[] = [
   {
     id: 'classic-casino',
     gameType: 'slot_machine',
     name: 'Classic Casino',
-    description: 'Professional 3D casino cabinet with gold accents',
+    description: 'Professional 3D casino cabinet with premium icon set (777, Watermelon, BAR, Crown, etc.)',
     emoji: '🎰',
     config: {
       slot_reel_count: 3,
