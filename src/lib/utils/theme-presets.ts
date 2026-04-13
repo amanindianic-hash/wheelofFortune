@@ -1,4 +1,5 @@
 import { sql } from '@/lib/db';
+import { SLOT_TEMPLATES } from '@/lib/slot-templates';
 
 export interface ThemePreset {
   id: string;
@@ -7,6 +8,26 @@ export interface ThemePreset {
   description: string;
   category: 'gaming' | 'entertainment';
   config: any;
+  gameType?: string;
+}
+
+/**
+ * Convert slot templates to ThemePreset format
+ */
+function convertSlotTemplatesToPresets(): ThemePreset[] {
+  return SLOT_TEMPLATES.map((template) => ({
+    id: `slot-${template.id}`,
+    name: template.name,
+    emoji: template.emoji,
+    description: template.description,
+    category: 'gaming',
+    gameType: template.gameType,
+    config: {
+      colorPalette: template.segmentPalette,
+      branding: template.branding,
+      config: template.config,
+    },
+  }));
 }
 
 /**
@@ -30,7 +51,7 @@ export async function getThemePresets(category?: string): Promise<ThemePreset[]>
   }
 
   const results = (await query) as any[];
-  return results.map((r) => ({
+  const dbPresets = results.map((r) => ({
     id: r.id,
     name: r.name,
     emoji: r.emoji,
@@ -38,6 +59,16 @@ export async function getThemePresets(category?: string): Promise<ThemePreset[]>
     category: r.category,
     config: typeof r.config === 'string' ? JSON.parse(r.config) : r.config,
   }));
+
+  // Add slot machine templates if gaming category or no category filter
+  const slotPresets = convertSlotTemplatesToPresets();
+  const allPresets = [...dbPresets, ...slotPresets];
+
+  if (category) {
+    return allPresets.filter((p) => p.category === category);
+  }
+
+  return allPresets;
 }
 
 /**
