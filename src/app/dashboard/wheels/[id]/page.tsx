@@ -1660,33 +1660,43 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                             className={`w-full transition-colors ${appliedTheme?.id === theme.id ? 'bg-amber-500 text-black border-amber-500' : 'group-hover:bg-amber-500 group-hover:text-black group-hover:border-amber-500'}`}
                             onClick={() => {
                               if (!wheel) return;
-                              const tb = theme.branding as Record<string, unknown>;
+                              const tb = theme.branding as Record<string, any>;
                               setWheel({
                                 ...wheel,
                                 config: { ...wheel.config, ...theme.config },
                                 branding: {
                                   ...wheel.branding,
-                                  // Explicitly clear premium URLs when the custom theme doesn't set them,
-                                  // so switching away from a premium theme always removes the overlay.
-                                  premium_face_url: (tb.premium_face_url as string) ?? null,
-                                  premium_stand_url: (tb.premium_stand_url as string) ?? null,
                                   ...theme.branding,
+                                  // Explicitly ensure all premium assets from the theme are adopted
+                                  premium_face_url:    tb.premium_face_url    ?? null,
+                                  premium_stand_url:   tb.premium_stand_url   ?? null,
+                                  premium_frame_url:   tb.premium_frame_url   ?? null,
+                                  premium_pointer_url: tb.premium_pointer_url ?? null,
                                 },
                               });
                               if (theme.segment_palette.length > 0) {
-                                setSegments((prev) =>
-                                  prev.map((seg, i) => {
-                                    const palette = theme.segment_palette[i % theme.segment_palette.length] as any;
-                                    return { 
-                                      ...seg, 
-                                      bg_color: palette.bg_color, 
+                                setSegments((prev) => {
+                                  // Sync segment count and properties to theme
+                                  return theme.segment_palette.map((palette: any, i: number) => {
+                                    const existing = prev[i];
+                                    return {
+                                      id: existing?.id ?? `temp-${Date.now()}-${i}`,
+                                      wheel_id: id,
+                                      position: i,
+                                      label: existing?.label ?? `Segment ${i + 1}`,
+                                      bg_color: palette.bg_color,
                                       text_color: palette.text_color,
-                                      icon_url: palette.image_url ?? seg.icon_url,
-                                      icon_offset_x: palette.offset_x ?? seg.icon_offset_x,
-                                      icon_offset_y: palette.offset_y ?? seg.icon_offset_y
+                                      icon_url: palette.image_url ?? (existing?.icon_url || null),
+                                      weight: existing?.weight ?? 1.0,
+                                      prize_id: existing?.prize_id ?? null,
+                                      is_no_prize: existing?.is_no_prize ?? true,
+                                      wins_today: existing?.wins_today ?? 0,
+                                      wins_total: existing?.wins_total ?? 0,
+                                      icon_offset_x: palette.offset_x ?? (existing?.icon_offset_x || null),
+                                      icon_offset_y: palette.offset_y ?? (existing?.icon_offset_y || null),
                                     };
-                                  }),
-                                );
+                                  });
+                                });
                                 setAppliedTheme({ id: theme.id, name: theme.name, emoji: theme.emoji, type: 'custom' });
                                 toast.success(`"${theme.name}" applied — save to persist`);
                               } else {
