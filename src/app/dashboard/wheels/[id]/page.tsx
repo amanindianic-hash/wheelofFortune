@@ -1676,8 +1676,15 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                               if (theme.segment_palette.length > 0) {
                                 setSegments((prev) =>
                                   prev.map((seg, i) => {
-                                    const palette = theme.segment_palette[i % theme.segment_palette.length];
-                                    return { ...seg, bg_color: palette.bg_color, text_color: palette.text_color };
+                                    const palette = theme.segment_palette[i % theme.segment_palette.length] as any;
+                                    return { 
+                                      ...seg, 
+                                      bg_color: palette.bg_color, 
+                                      text_color: palette.text_color,
+                                      icon_url: palette.image_url ?? seg.icon_url,
+                                      icon_offset_x: palette.offset_x ?? seg.icon_offset_x,
+                                      icon_offset_y: palette.offset_y ?? seg.icon_offset_y
+                                    };
                                   }),
                                 );
                                 setAppliedTheme({ id: theme.id, name: theme.name, emoji: theme.emoji, type: 'custom' });
