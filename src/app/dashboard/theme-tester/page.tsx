@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Upload, Play, Pause, Copy, Check, RotateCcw,
   ImageIcon, Info, Wand2, Download, X, Layers, SplitSquareHorizontal,
-  Save, Pencil, Trash2, BookMarked,
+  Save, Pencil, Trash2, BookMarked, Palette,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,6 +20,8 @@ import {
   type WheelSegment, type WheelConfig, type WheelBranding, type ImageCache,
 } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
+import { SegmentUploader } from '@/components/segment-uploader/segment-upload';
+import { SegmentPreview } from '@/components/segment-uploader/segment-preview';
 
 // ── Sample labels ────────────────────────────────────────────────────────────
 const PREVIEW_LABELS = ['10% OFF', 'FREE GIFT', '20% OFF', 'TRY AGAIN', 'JACKPOT', '5% OFF', 'BONUS', '50% OFF'];
@@ -68,6 +70,7 @@ function buildSegmentsFromPalette(
 // ── Spinning Canvas ──────────────────────────────────────────────────────────
 function SpinningCanvas({
   segments, config, branding, isSpinning, spinSpeed, cacheKey, label,
+  frameInfo, hubInfo, pointerInfo,
 }: {
   segments: WheelSegment[];
   config: WheelConfig;
@@ -76,6 +79,9 @@ function SpinningCanvas({
   spinSpeed: number;
   cacheKey: string;
   label?: string;
+  frameInfo?: ImageInfo | null;
+  hubInfo?: ImageInfo | null;
+  pointerInfo?: ImageInfo | null;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const cacheRef  = useRef<ImageCache>(new Map());
@@ -115,31 +121,31 @@ function SpinningCanvas({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cacheKey, segments, config]);
 
-  const pointerColor = branding.primary_color || '#7C3AED';
+  const pointerColor = branding.pointer_color || branding.primary_color || '#7C3AED';
 
   return (
     <div className="flex flex-col items-center gap-2">
       {label && (
         <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">{label}</span>
       )}
-      <div className="relative isolate pt-5 flex flex-col items-center">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
-          <div className="w-8 h-4 bg-gradient-to-b from-[#f8f9fa] to-[#d1d5db] rounded-t-md shadow-sm border border-b-0 border-black/10" />
-          <div className="relative -mt-0.5 drop-shadow-xl">
-            <svg width="28" height="38" viewBox="0 0 32 40" fill="none">
-              <path d="M16 38L2 14V2C2 2 12 4 16 4C20 4 30 2 30 2V14L16 38Z"
-                fill={pointerColor} stroke="rgba(255,255,255,0.6)" strokeWidth="2" />
-              <path d="M16 34L4 15V5C7 6.5 11 7.5 16 7.5C21 7.5 25 6.5 28 5V15L16 34Z"
-                fill="url(#tester-grad)" />
-              <defs>
-                <linearGradient id="tester-grad" x1="16" y1="5" x2="16" y2="34" gradientUnits="userSpaceOnUse">
-                  <stop stopColor="white" stopOpacity="0.3" />
-                  <stop offset="1" stopColor="black" stopOpacity="0.25" />
-                </linearGradient>
-              </defs>
+      <div className="relative w-[320px] h-[320px] mx-auto overflow-visible perspective-[1200px] mt-4 mb-4">
+        {/* Frame / Outer Rim Overlay (Z=10) */}
+        {frameInfo && (
+          <img src={frameInfo.url} className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none drop-shadow-xl" alt="Outer Frame Overlay" />
+        )}
+
+        {/* Floating Center Pointer (HTML Overlay / Custom Image Z=30) */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-30 drop-shadow-md pointer-events-none">
+          {pointerInfo ? (
+             <img src={pointerInfo.url} className="w-[320px] h-[320px] max-w-none object-contain -translate-x-1/2 -translate-y-[-2px]" alt="Custom Pointer" />
+          ) : (
+            <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M16 38L2 14V2C2 2 12 4 16 4C20 4 30 2 30 2V14L16 38Z" fill={pointerColor} />
+              <path d="M16 38L2 14V2C2 2 12 4 16 4C20 4 30 2 30 2V14L16 38Z" stroke="white" strokeWidth="2" />
             </svg>
-          </div>
+          )}
         </div>
+
         <canvas
           ref={canvasRef}
           width={720} height={720}
@@ -264,17 +270,37 @@ function DropZone({ label, hint, info, onFile, onRemove, isLoading }: {
 export default function ThemeTesterPage() {
   const [faceInfo,  setFaceInfo]  = useState<ImageInfo | null>(null);
   const [standInfo, setStandInfo] = useState<ImageInfo | null>(null);
+  
+  // ── Local Figma Overlay Testing ───────────────────────────────────────────
+  const [hubInfo,     setHubInfo]     = useState<ImageInfo | null>(null);
+  const [pointerInfo, setPointerInfo] = useState<ImageInfo | null>(null);
+  const [frameInfo,   setFrameInfo]   = useState<ImageInfo | null>(null);
+
   const [cacheKey,  setCacheKey]  = useState('init');
   const [faceUploading,  setFaceUploading]  = useState(false);
   const [standUploading, setStandUploading] = useState(false);
+  const [hubUploading,     setHubUploading]     = useState(false);
+  const [pointerUploading, setPointerUploading] = useState(false);
+  const [frameUploading,   setFrameUploading]   = useState(false);
 
   const [contentScale,  setContentScale]  = useState(0.75);
   const [centerOffsetY, setCenterOffsetY] = useState(0);
+  const [segmentImageOffsetX, setSegmentImageOffsetX] = useState(0);
+  const [segmentImageOffsetY, setSegmentImageOffsetY] = useState(0);
   const [fontSize,      setFontSize]      = useState(12);
   const [fontWeight,    setFontWeight]    = useState<'400'|'600'|'700'|'800'>('800');
   const [labelPosition, setLabelPosition] = useState<'inner'|'center'|'outer'>('outer');
-  const [textColor,     setTextColor]     = useState('#FFFFFF');
   const [primaryColor,  setPrimaryColor]  = useState('#7C3AED');
+  const [pointerColor,  setPointerColor]  = useState('#7C3AED');
+  const [outerRingColor, setOuterRingColor] = useState('#7C3AED');
+  const [innerRingColor, setInnerRingColor] = useState('rgba(255,255,255,0.18)');
+  const [rimTickColor,  setRimTickColor]  = useState('#FFFFFF');
+  const [segmentPalette, setSegmentPalette] = useState<Array<{bg_color: string, text_color: string}>>(
+    Array.from({ length: 8 }).map((_, i) => ({
+      bg_color: i % 2 === 0 ? '#7C3AED' : '#5B21B6',
+      text_color: '#FFFFFF'
+    }))
+  );
   const [showLabels,    setShowLabels]    = useState(false); // default OFF — most PNG wheels have pre-baked labels
 
   const [isSpinning,    setIsSpinning]    = useState(true);
@@ -293,16 +319,25 @@ export default function ThemeTesterPage() {
   const [editEmoji,     setEditEmoji]     = useState('');
   const [editSaving,    setEditSaving]    = useState(false);
 
+  // ── Segment images for custom wheel segments ────────────────────────────────
+  const [segmentImages, setSegmentImages] = useState<(string | null)[]>(Array(8).fill(null));
+  const [selectedThemeForSegments, setSelectedThemeForSegments] = useState<SavedTheme | null>(null);
+
   // ── Custom theme segments & branding ───────────────────────────────────────
   const customSegments: WheelSegment[] = PREVIEW_LABELS.map((label, i) => ({
     id: String(i + 1), position: i, label,
-    bg_color:   faceInfo ? 'transparent' : (i % 2 === 0 ? '#7C3AED' : '#5B21B6'),
-    text_color: textColor,
+    bg_color:   faceInfo ? 'transparent' : segmentPalette[i].bg_color,
+    text_color: segmentPalette[i].text_color,
     weight: 1, is_no_prize: false,
+    segment_image_url: segmentImages[i] ?? undefined,
   }));
 
   const customBranding: WheelBranding = {
     primary_color:           primaryColor,
+    pointer_color:           pointerColor,
+    outer_ring_color:        outerRingColor,
+    inner_ring_color:        innerRingColor,
+    rim_tick_color:          rimTickColor,
     outer_ring_width:        faceInfo ? 0 : 20,
     inner_ring_enabled:      !faceInfo,
     rim_tick_style:          faceInfo ? 'none' : 'triangles',
@@ -311,8 +346,19 @@ export default function ThemeTesterPage() {
     label_position:          labelPosition,
     premium_face_url:        faceInfo?.url  ?? null,
     premium_stand_url:       standInfo?.url ?? null,
+    premium_frame_url:       frameInfo?.url ?? null,
+    premium_pointer_url:     pointerInfo?.url ?? null,
     premium_content_scale:   faceInfo ? contentScale : undefined,
     premium_center_offset_y: faceInfo ? centerOffsetY : undefined,
+    segment_image_offset_x:  segmentImageOffsetX !== 0 ? segmentImageOffsetX : undefined,
+    segment_image_offset_y:  segmentImageOffsetY !== 0 ? segmentImageOffsetY : undefined,
+  };
+
+  const customConfig: WheelConfig = {
+    ...BASE_CONFIG,
+    spin_duration_ms: 4000,
+    show_segment_labels: showLabels,
+    center_image_url: hubInfo?.url ?? null,
   };
 
   // ── Comparison template ─────────────────────────────────────────────────────
@@ -396,6 +442,48 @@ export default function ThemeTesterPage() {
     }
   }
 
+  async function handleHubUpload(file: File) {
+    if (hubInfo) URL.revokeObjectURL(hubInfo.url);
+    const localInfo = await loadImageInfo(file);
+    setHubInfo(localInfo);
+    setHubUploading(true);
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      URL.revokeObjectURL(localInfo.url);
+      setHubInfo({ ...localInfo, url: dataUrl });
+      toast.success('Hub overlay loaded');
+    } catch { toast.error('Failed to process image'); } 
+    finally { setHubUploading(false); }
+  }
+
+  async function handlePointerUpload(file: File) {
+    if (pointerInfo) URL.revokeObjectURL(pointerInfo.url);
+    const localInfo = await loadImageInfo(file);
+    setPointerInfo(localInfo);
+    setPointerUploading(true);
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      URL.revokeObjectURL(localInfo.url);
+      setPointerInfo({ ...localInfo, url: dataUrl });
+      toast.success('Pointer overlay loaded');
+    } catch { toast.error('Failed to process image'); } 
+    finally { setPointerUploading(false); }
+  }
+
+  async function handleFrameUpload(file: File) {
+    if (frameInfo) URL.revokeObjectURL(frameInfo.url);
+    const localInfo = await loadImageInfo(file);
+    setFrameInfo(localInfo);
+    setFrameUploading(true);
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      URL.revokeObjectURL(localInfo.url);
+      setFrameInfo({ ...localInfo, url: dataUrl });
+      toast.success('Frame overlay loaded');
+    } catch { toast.error('Failed to process image'); } 
+    finally { setFrameUploading(false); }
+  }
+
   function removeFace() {
     if (faceInfo) URL.revokeObjectURL(faceInfo.url);
     setFaceInfo(null);
@@ -413,10 +501,22 @@ export default function ThemeTesterPage() {
   function handleReset() {
     if (faceInfo)  URL.revokeObjectURL(faceInfo.url);
     if (standInfo) URL.revokeObjectURL(standInfo.url);
+    if (hubInfo)     URL.revokeObjectURL(hubInfo.url);
+    if (pointerInfo) URL.revokeObjectURL(pointerInfo.url);
+    if (frameInfo)   URL.revokeObjectURL(frameInfo.url);
+    
     setFaceInfo(null); setStandInfo(null);
+    setHubInfo(null); setPointerInfo(null); setFrameInfo(null);
     setContentScale(0.75); setCenterOffsetY(0);
     setFontSize(12); setFontWeight('800');
-    setLabelPosition('outer'); setTextColor('#FFFFFF'); setPrimaryColor('#7C3AED');
+    setLabelPosition('outer'); setPrimaryColor('#7C3AED');
+    setOuterRingColor('#7C3AED'); setInnerRingColor('rgba(255,255,255,0.18)'); setRimTickColor('#FFFFFF');
+    setSegmentPalette(
+      Array.from({ length: 8 }).map((_, i) => ({
+        bg_color: i % 2 === 0 ? '#7C3AED' : '#5B21B6',
+        text_color: '#FFFFFF'
+      }))
+    );
     setShowLabels(false);
     setCompareId('none');
     setCacheKey(`reset-${Date.now()}`);
@@ -458,10 +558,8 @@ export default function ThemeTesterPage() {
           name: saveName.trim(),
           emoji: saveEmoji,
           branding: cfg,
-          config: { show_segment_labels: showLabels },
-          segment_palette: faceInfo
-            ? [{ bg_color: 'transparent', text_color: textColor }]
-            : [{ bg_color: primaryColor, text_color: textColor }],
+          config: buildFinalConfig(),
+          segment_palette: segmentPalette,
         }),
       });
       if (!res.ok) { toast.error('Failed to save theme'); return; }
@@ -505,8 +603,38 @@ export default function ThemeTesterPage() {
     if (b.label_font_weight       !== undefined) setFontWeight(b.label_font_weight);
     if (b.label_position          !== undefined) setLabelPosition(b.label_position);
     if (b.primary_color           !== undefined) setPrimaryColor(b.primary_color);
+    if (b.pointer_color           !== undefined) setPointerColor(b.pointer_color);
+    if (b.outer_ring_color        !== undefined) setOuterRingColor(b.outer_ring_color);
+    if (b.inner_ring_color        !== undefined) setInnerRingColor(b.inner_ring_color);
+    if (b.rim_tick_color          !== undefined) setRimTickColor(b.rim_tick_color);
+    
+    if (theme.segment_palette && theme.segment_palette.length > 0) {
+      setSegmentPalette(Array.from({ length: 8 }).map((_, i) => ({
+        bg_color: theme.segment_palette[i % theme.segment_palette.length].bg_color,
+        text_color: theme.segment_palette[i % theme.segment_palette.length].text_color
+      })));
+    }
+
     const c = theme.config as any;
     if (c.show_segment_labels !== undefined) setShowLabels(c.show_segment_labels);
+    if (c.center_image_url) {
+      setHubInfo({ url: c.center_image_url, name: 'hub-from-db', size: '—', width: 800, height: 800 });
+    } else {
+      setHubInfo(null);
+    }
+    
+    if (b.premium_frame_url) {
+      setFrameInfo({ url: b.premium_frame_url, name: 'frame-from-db', size: '—', width: 800, height: 800 });
+    } else {
+      setFrameInfo(null);
+    }
+    
+    if (b.premium_pointer_url) {
+      setPointerInfo({ url: b.premium_pointer_url, name: 'pointer-from-db', size: '—', width: 800, height: 800 });
+    } else {
+      setPointerInfo(null);
+    }
+
     toast.success(`Loaded "${theme.name}"`);
   }
 
@@ -516,12 +644,28 @@ export default function ThemeTesterPage() {
       premium_stand_url:       standInfo?.url ?? null,
       premium_content_scale:   contentScale,
       ...(centerOffsetY ? { premium_center_offset_y: centerOffsetY } : {}),
+      ...(segmentImageOffsetX !== 0 ? { segment_image_offset_x: segmentImageOffsetX } : {}),
+      ...(segmentImageOffsetY !== 0 ? { segment_image_offset_y: segmentImageOffsetY } : {}),
+      primary_color:           primaryColor,
+      pointer_color:           pointerColor,
+      outer_ring_color:        outerRingColor,
+      inner_ring_color:        innerRingColor,
+      rim_tick_color:          rimTickColor,
       label_font_size:   fontSize,
       label_font_weight: fontWeight,
       label_position:    labelPosition,
       show_segment_labels: showLabels,
       outer_ring_width:  faceInfo ? 0 : 20,
+      premium_frame_url: frameInfo?.url ?? null,
+      premium_pointer_url: pointerInfo?.url ?? null,
       ...(faceInfo ? { inner_ring_enabled: false, rim_tick_style: 'none' } : {}),
+    };
+  }
+  
+  function buildFinalConfig() {
+    return {
+      show_segment_labels: showLabels,
+      center_image_url: hubInfo?.url ?? null,
     };
   }
 
@@ -531,6 +675,29 @@ export default function ThemeTesterPage() {
       toast.success('Config copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     });
+  }
+
+  // ── Segment image functions ───────────────────────────────────────────────
+  async function loadThemeSegments(themeId: string) {
+    try {
+      const res = await fetch(`/api/segments/${themeId}`);
+      if (res.ok) {
+        const { segmentImages: images } = await res.json();
+        setSegmentImages(images);
+      }
+    } catch (err) {
+      console.error('Error loading segments:', err);
+    }
+  }
+
+  function handleSegmentPreview(urls: (string | null)[]) {
+    setSegmentImages(urls);
+    setCacheKey(`segments-${Date.now()}`);
+  }
+
+  function handleSegmentSaveComplete(urls: (string | null)[]) {
+    setSegmentImages(urls);
+    setCacheKey(`segments-saved-${Date.now()}`);
   }
 
   // Load comparison template images on select (for server URLs)
@@ -546,9 +713,7 @@ export default function ThemeTesterPage() {
   }, []);
 
   const showCompare = compareTemplate !== null;
-  const customCacheKey = `${cacheKey}-${faceInfo?.url ?? ''}-${standInfo?.url ?? ''}`;
-  const customConfig: WheelConfig = { ...BASE_CONFIG, show_segment_labels: showLabels };
-
+  const customCacheKey = `${cacheKey}-${faceInfo?.url ?? ''}-${standInfo?.url ?? ''}-sox${segmentImageOffsetX}-soy${segmentImageOffsetY}`;
   return (
     <div className="min-h-full p-6 space-y-6">
 
@@ -590,14 +755,12 @@ export default function ThemeTesterPage() {
                 onRemove={removeFace}
                 isLoading={faceUploading}
               />
-              <DropZone
-                label="Stand.png — Frame / pedestal"
-                hint="Drag & drop or click to upload the static frame PNG"
-                info={standInfo ?? undefined}
-                onFile={handleStandUpload}
-                onRemove={removeStand}
-                isLoading={standUploading}
-              />
+              {/* Stand/Background upload hidden per request 
+                  <DropZone 
+                    label="Stand / Background" hint="Static graphic behind the wheel (Layer 0)"
+                    info={standInfo ?? undefined} onFile={handleStandUpload} onRemove={removeStand} isLoading={standUploading}
+                  /> 
+              */}
               <div className="flex items-start gap-2 rounded-lg bg-blue-500/8 border border-blue-500/15 p-2.5">
                 <Info className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
                 <p className="text-[11px] text-blue-300/80 leading-relaxed">
@@ -706,25 +869,192 @@ export default function ThemeTesterPage() {
                   </Select>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Text Color</Label>
-                  <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
-                    <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)}
-                      className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0" />
-                    <span className="text-xs font-mono text-muted-foreground">{textColor}</span>
+          {/* Color Palettes */}
+          <Card className="border-white/8">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Palette className="w-4 h-4 text-pink-400" />
+                Ring & Hub Styles
+                {faceInfo && <Badge variant="outline" className="text-[10px] ml-auto">Rings hidden in Premium</Badge>}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              
+              <p className="text-[11px] text-muted-foreground/80 mb-2 leading-relaxed">
+                Configure default solid colors on the left, or override the component entirely with a transparent Figma layer (800x800) on the right.
+              </p>
+
+              <div className="space-y-6 pt-2">
+                {/* 1. Center Hub */}
+                <div className="grid grid-cols-[1fr_1fr] gap-6 items-start">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-foreground">Center Hub</Label>
+                    <p className="text-[10px] text-muted-foreground leading-snug">Base color used for the central pivot.</p>
+                    <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
+                      <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)}
+                        className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0 shrink-0" />
+                      <Input value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-foreground">Center Hub Image</Label>
+                    <DropZone 
+                      label="Logo Upload" hint="(Direct crop, any size)"
+                      info={hubInfo ?? undefined} onFile={handleHubUpload} onRemove={() => setHubInfo(null)} isLoading={hubUploading}
+                    />
                   </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs text-muted-foreground">Pointer Color</Label>
-                  <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
-                    <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)}
-                      className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0" />
-                    <span className="text-xs font-mono text-muted-foreground">{primaryColor}</span>
+
+                {/* 2. Pointer */}
+                <div className="grid grid-cols-[1fr_1fr] gap-6 items-start">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-foreground">Pointer / Arrow</Label>
+                    <p className="text-[10px] text-muted-foreground leading-snug">Base color used for the 3D SVG pointer.</p>
+                    <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
+                      <input type="color" value={pointerColor} onChange={(e) => setPointerColor(e.target.value)}
+                        className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0 shrink-0" />
+                      <Input value={pointerColor} onChange={(e) => setPointerColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-foreground">Pointer / Arrow Image</Label>
+                    <DropZone 
+                      label="Custom Pointer" hint="(800x800)"
+                      info={pointerInfo ?? undefined} onFile={handlePointerUpload} onRemove={() => setPointerInfo(null)} isLoading={pointerUploading}
+                    />
                   </div>
                 </div>
+
+                {/* 3. Outer Ring */}
+                {!faceInfo && (
+                  <div className="grid grid-cols-[1fr_1fr] gap-6 items-start pt-4 border-t border-white/5">
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold text-foreground">Outer Rim Colors</Label>
+                        <p className="text-[10px] text-muted-foreground leading-snug">Tune the 3 concentric rings of the wheel boundary.</p>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Outer Edge</Label>
+                        <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
+                          <input type="color" value={outerRingColor} onChange={(e) => setOuterRingColor(e.target.value)}
+                            className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0 shrink-0" />
+                          <Input value={outerRingColor} onChange={(e) => setOuterRingColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Inner Band</Label>
+                        <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
+                          <div className="relative w-5 h-5 rounded overflow-hidden shrink-0 ring-1 ring-inset ring-white/20">
+                            <div className="absolute inset-0 bg-[repeating-conic-gradient(#80808033_0%_25%,_transparent_0%_50%)] bg-[length:8px_8px]"></div>
+                            <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: innerRingColor }}></div>
+                            <input type="color" value={innerRingColor.startsWith('#') ? innerRingColor.slice(0, 7) : '#ffffff'} 
+                              onChange={(e) => setInnerRingColor(e.target.value)}
+                              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
+                          </div>
+                          <Input value={innerRingColor} onChange={(e) => setInnerRingColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Rim Ticks</Label>
+                        <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
+                          <input type="color" value={rimTickColor} onChange={(e) => setRimTickColor(e.target.value)}
+                            className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0 shrink-0" />
+                          <Input value={rimTickColor} onChange={(e) => setRimTickColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs font-bold text-foreground">Outer Rim Image</Label>
+                        <p className="text-[10px] text-muted-foreground leading-snug">Masks Outer Edge, Inner Band & Ticks</p>
+                      </div>
+                      <DropZone 
+                        label="Exact Rim Upload" hint="(800x800)"
+                        info={frameInfo ?? undefined} onFile={handleFrameUpload} onRemove={() => setFrameInfo(null)} isLoading={frameUploading}
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Segment Colors */}
+          <Card className="border-white/8">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <Layers className="w-4 h-4 text-emerald-400" />
+                Segment Colors
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-y-3 gap-x-6">
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pb-1 border-b border-white/10">Backgrounds {faceInfo && '(Hidden)'}</div>
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pb-1 border-b border-white/10">Text</div>
+                {segmentPalette.map((p, i) => (
+                  <div key={i} className="contents">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] w-3 text-muted-foreground">{i + 1}</span>
+
+                      {/* Segment Image Upload trigger */}
+                      <input type="file" id={`seg-img-${i}`} accept="image/png,image/jpeg,image/webp" className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]; if (!file) return;
+                          try {
+                            const dataUrl = await fileToDataUrl(file);
+                            setSegmentImages(prev => { const next = [...prev]; next[i] = dataUrl; return next; });
+                            setCacheKey(`segimg-${Date.now()}`);
+                            toast.success(`Segment ${i+1} image loaded`);
+                          } catch { toast.error('Failed to load image'); e.target.value = ''; }
+                        }}
+                      />
+                      {segmentImages[i] ? (
+                        <button onClick={() => { setSegmentImages(prev => { const next = [...prev]; next[i] = null; return next; }); setCacheKey(`segimg-del-${Date.now()}`); }}
+                          className="h-7 w-7 rounded border border-emerald-500/50 bg-emerald-500/10 flex items-center justify-center relative overflow-hidden group shrink-0" title="Remove custom image">
+                          <img src={segmentImages[i]!} className="absolute inset-0 w-full h-full object-cover opacity-60" />
+                          <X className="w-4 h-4 text-white drop-shadow-md relative z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ) : (
+                        <button onClick={() => document.getElementById(`seg-img-${i}`)?.click()} disabled={!!faceInfo}
+                          className="h-7 w-7 rounded border border-dashed border-white/20 hover:border-emerald-500/50 hover:bg-white/5 flex items-center justify-center text-muted-foreground hover:text-emerald-400 shrink-0 disabled:opacity-50 transition-colors" title="Upload custom segment image">
+                          <ImageIcon className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      <input type="color" value={p.bg_color.startsWith('#') ? p.bg_color : '#000000'} disabled={!!faceInfo}
+                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
+                        className="w-6 h-6 rounded cursor-pointer border-0 p-0 disabled:opacity-50 shrink-0" />
+                      <Input value={p.bg_color} disabled={!!faceInfo}
+                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
+                        className="h-7 border border-input bg-background text-xs font-mono disabled:opacity-50 min-w-0" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input type="color" value={p.text_color.startsWith('#') ? p.text_color : '#ffffff'}
+                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: e.target.value } : item))}
+                        className="w-6 h-6 rounded cursor-pointer border-0 p-0" />
+                      <Input value={p.text_color}
+                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: e.target.value } : item))}
+                        className="h-7 border border-input bg-background text-xs font-mono" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Segment Custom Image positioning handles */}
+              {segmentImages.some(img => img !== null) && (
+                <div className="pt-4 mt-2 border-t border-white/10 space-y-3 w-full">
+                  <Label className="text-xs font-bold text-emerald-400">Segment Image Tuning</Label>
+                  <SliderRow label="Radial Offset (In/Out)" value={segmentImageOffsetX} min={-100} max={100} step={1} unit="px" onChange={setSegmentImageOffsetX} />
+                  <SliderRow label="Lateral Offset (Left/Right)" value={segmentImageOffsetY} min={-50} max={50} step={1} unit="px" onChange={setSegmentImageOffsetY} />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -744,6 +1074,8 @@ export default function ThemeTesterPage() {
               </Button>
             </CardContent>
           </Card>
+
+          {/* Segment Images Upload UI explicitly hidden here for now */}
 
           {/* Save Theme */}
           <Card className="border-white/8">
@@ -882,7 +1214,7 @@ export default function ThemeTesterPage() {
         </div>
 
         {/* ── Right Panel — Preview(s) ─────────────────────────────────────── */}
-        <div className="space-y-4">
+        <div className="space-y-4 sticky top-6">
           <Card className="border-white/8">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
@@ -909,6 +1241,7 @@ export default function ThemeTesterPage() {
                         segments={customSegments} config={customConfig} branding={customBranding}
                         isSpinning={isSpinning} spinSpeed={spinSpeed} cacheKey={customCacheKey}
                         label="Your Custom Theme"
+                        frameInfo={frameInfo} hubInfo={hubInfo} pointerInfo={pointerInfo}
                       />
                     </div>
                     {/* Compare */}
@@ -937,11 +1270,11 @@ export default function ThemeTesterPage() {
                       ['Label Position', labelPosition,                       compareTemplate!.branding.label_position ?? 'outer'],
                       ['Ring Width',     `${faceInfo ? 0 : 20}px`,           `${compareTemplate!.branding.outer_ring_width ?? 20}px`],
                     ] as [string, string, string][]).map(([prop, a, b]) => (
-                      <>
-                        <span key={`p-${prop}`} className="text-muted-foreground/70">{prop}</span>
-                        <span key={`a-${prop}`} className="text-center font-mono text-violet-300/80">{a}</span>
-                        <span key={`b-${prop}`} className="text-center font-mono text-sky-300/80">{b}</span>
-                      </>
+                      <div key={prop} className="contents">
+                        <span className="text-muted-foreground/70">{prop}</span>
+                        <span className="text-center font-mono text-violet-300/80">{a}</span>
+                        <span className="text-center font-mono text-sky-300/80">{b}</span>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -951,6 +1284,7 @@ export default function ThemeTesterPage() {
                   <SpinningCanvas
                     segments={customSegments} config={customConfig} branding={customBranding}
                     isSpinning={isSpinning} spinSpeed={spinSpeed} cacheKey={customCacheKey}
+                    frameInfo={frameInfo} hubInfo={hubInfo} pointerInfo={pointerInfo}
                   />
 
                   {/* Status */}
@@ -973,7 +1307,6 @@ export default function ThemeTesterPage() {
                       ['Font Size', `${fontSize}px`],
                       ['Font Weight', fontWeight],
                       ['Label Position', labelPosition],
-                      ['Text Color', textColor],
                     ] as [string, string|number][]).map(([k, v]) => (
                       <div key={k} className="flex items-center justify-between gap-2">
                         <span className="text-[11px] text-muted-foreground">{k}</span>

@@ -2,6 +2,7 @@
 
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import type { WheelBranding, WheelConfig } from '@/lib/types';
+import { getRandomSlotIcon } from '@/lib/utils/slot-utils';
 
 interface SlotPreviewProps {
   segments: WheelSegment[];
@@ -74,7 +75,18 @@ export function SlotPreview({ segments, branding, config }: SlotPreviewProps) {
               {reelRows(reelIdx * 2).map((seg, rowIdx) => (
                 <div key={rowIdx} className="flex flex-col items-center justify-center gap-0.5 w-full"
                   style={{ height: rowH, backgroundColor: seg?.bg_color ?? '#2A2A2A', borderBottom: '1px solid rgba(255,255,255,0.08)', flexShrink: 0 }}>
-                  {(symbolMode === 'icon' || symbolMode === 'both') && <span style={{ fontSize: rowH * 0.32 }}>🎁</span>}
+                  {(symbolMode === 'icon' || symbolMode === 'both') && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={seg?.icon_url ?? getRandomSlotIcon()}
+                      alt={seg?.label ?? 'slot icon'}
+                      className="object-contain rounded"
+                      style={{
+                        width: rowH * 0.32,
+                        height: rowH * 0.32,
+                      }}
+                    />
+                  )}
                   {(symbolMode === 'label' || symbolMode === 'both') && (
                     <span className="font-bold text-center leading-none px-0.5 truncate w-full text-center"
                       style={{ color: seg?.text_color ?? '#FFF', fontSize: Math.max(8, rowH * 0.16) }}>

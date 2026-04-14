@@ -104,6 +104,7 @@ export interface WheelBranding {
   logo_url?: string | null;
   logo_position?: 'above' | 'center';
   primary_color?: string;
+  pointer_color?: string;
   secondary_color?: string;
   background_type?: 'solid' | 'gradient' | 'image';
   background_value?: string;
@@ -132,8 +133,12 @@ export interface WheelBranding {
   // Premium Image Layer URLs
   premium_face_url?: string | null;
   premium_stand_url?: string | null;
+  premium_frame_url?: string | null;
+  premium_pointer_url?: string | null;
   premium_content_scale?: number;     // e.g. 0.65 to pull text closer to center if image wheel is smaller than canvas
   premium_center_offset_y?: number;   // e.g. 10 to shift rotation center down if image is not vertically centered
+  segment_image_offset_x?: number;    // px offset for segment custom images (radial axis)
+  segment_image_offset_y?: number;    // px offset for segment custom images (perpendicular axis)
 }
 
 export interface WheelFormConfig {

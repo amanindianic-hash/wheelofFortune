@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { getRandomSlotIcon } from '@/lib/utils/slot-utils';
 import { WinQRCard } from './win-qr-card';
 
 interface FormConfig { enabled?: boolean; fields?: Array<{ key: string; label: string; type: string; required?: boolean }>; gdpr_enabled?: boolean; gdpr_text?: string; privacy_policy_url?: string | null; }
@@ -108,26 +109,18 @@ function SymbolCell({
       }} />
 
       {(mode === 'icon' || mode === 'both') && (
-        seg?.icon_url
-          // eslint-disable-next-line @next/next/no-img-element
-          ? <img
-              src={seg.icon_url}
-              alt={seg.label}
-              className="object-contain rounded"
-              style={{
-                width: rowH * 0.45,
-                height: rowH * 0.45,
-                filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5)) brightness(1.05)',
-                zIndex: 1,
-              }}
-            />
-          : <span style={{
-              fontSize: rowH * 0.4,
-              filter: 'drop-shadow(0 3px 8px rgba(0,0,0,0.4))',
-              zIndex: 1,
-            }}>
-              🎁
-            </span>
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={seg?.icon_url ?? getRandomSlotIcon()}
+          alt={seg?.label ?? 'slot icon'}
+          className="object-contain rounded"
+          style={{
+            width: rowH * 0.45,
+            height: rowH * 0.45,
+            filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.5)) brightness(1.05)',
+            zIndex: 1,
+          }}
+        />
       )}
       {(mode === 'label' || mode === 'both') && (
         <span

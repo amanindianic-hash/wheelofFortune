@@ -19,6 +19,8 @@ export interface WheelSegment {
   weight: number;
   is_no_prize: boolean;
   icon_url?: string | null;
+  // NEW: Custom segment background image (replaces solid color)
+  segment_image_url?: string | null;
   // Per-segment position overrides (local coords: X = radial outward, Y = perpendicular clockwise)
   label_offset_x?: number | null;
   label_offset_y?: number | null;
@@ -84,7 +86,10 @@ export async function preloadSegmentImages(
   cache: ImageCache,
 ): Promise<void> {
   const urls = [
+    // Icon URLs (center icons on segments)
     ...segments.filter((s) => s.icon_url).map((s) => s.icon_url!),
+    // NEW: Segment background images
+    ...segments.filter((s) => s.segment_image_url).map((s) => s.segment_image_url!),
     ...(config.center_image_url ? [config.center_image_url] : []),
     ...(branding.premium_face_url ? [branding.premium_face_url] : []),
     ...(branding.premium_stand_url ? [branding.premium_stand_url] : []),
@@ -252,19 +257,57 @@ export function drawWheel(
         const startAngle = rotation + i * segAngle - Math.PI / 2;
         const endAngle = startAngle + segAngle;
 
-        // Deep 3D radial gradient: almost black at center → mid-color → full color at edge
-        const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.05, cx, cy, innerRadius);
-        grad.addColorStop(0, '#000000'); // Deep dark core
-        grad.addColorStop(0.35, lightenHex(seg.bg_color, 10)); // Darker mid
-        grad.addColorStop(0.85, seg.bg_color); // Pure color
-        grad.addColorStop(1, lightenHex(seg.bg_color, 25)); // Slightly lighter edge to catch light
+        // Check if segment has custom image
+        const hasSegmentImage = !!(seg.segment_image_url && imageCache?.has(seg.segment_image_url));
 
-        ctx.beginPath();
-        ctx.moveTo(cx, cy);
-        ctx.arc(cx, cy, innerRadius, startAngle, endAngle);
-        ctx.closePath();
-        ctx.fillStyle = grad;
-        ctx.fill();
+        if (hasSegmentImage) {
+          // ── Render segment with custom image ────────────────────────────────
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, innerRadius, startAngle, endAngle);
+          ctx.closePath();
+          ctx.clip();
+
+          // Draw the segment image
+          const img = imageCache!.get(seg.segment_image_url!)!;
+          const imgSize = innerRadius * 2;
+          
+          // Move context origin to wheel center
+          ctx.translate(cx, cy);
+          const segMidAngle = (startAngle + endAngle) / 2;
+          // Rotate context so the Y axis aligns with the outward midpoint vector (standard upright orientation)
+          // We add Math.PI / 2 because native canvas images point upward (negative Y), but segMidAngle has X pointing outward.
+          ctx.rotate(segMidAngle + Math.PI / 2);
+          
+          // Draw the image halfway outwards
+          // Because of our +90deg rotation matrices, negative Y is directly outwards from center matching the slice.
+          // The image's top (which points to negative Y) will face exactly outward toward the rim.
+          const imgBaseX = -imgSize / 2;
+          const imgBaseY = -imgSize / 2 - (innerRadius / 2);
+          
+          // Apply custom user offsets if provided in branding
+          const userOffsetX = branding.segment_image_offset_x ?? 0;
+          const userOffsetY = branding.segment_image_offset_y ?? 0;
+          
+          ctx.drawImage(img, imgBaseX + userOffsetX, imgBaseY + userOffsetY, imgSize, imgSize);
+          ctx.restore();
+        } else {
+          // ── Render segment with solid color gradient (original logic) ────────
+          const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.05, cx, cy, innerRadius);
+          const safeBg = lightenHex(seg.bg_color || '#7c3aed', 0);
+          grad.addColorStop(0, '#000000'); // Deep dark core
+          grad.addColorStop(0.35, lightenHex(safeBg, 10)); // Darker mid
+          grad.addColorStop(0.85, safeBg); // Pure color
+          grad.addColorStop(1, lightenHex(safeBg, 25)); // Slightly lighter edge to catch light
+
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, innerRadius, startAngle, endAngle);
+          ctx.closePath();
+          ctx.fillStyle = grad;
+          ctx.fill();
+        }
 
         // Crisp white divider
         ctx.strokeStyle = 'rgba(255,255,255,0.55)';
@@ -463,11 +506,12 @@ export function drawWheel(
     const [br, bg, bb] = hexToRgb(outerRingColor);
     
     // Create a metallic specular reflection by layering stops
+    const safeOuter = lightenHex(outerRingColor, 0);
     metallicOuterGrad.addColorStop(0, `rgb(${Math.min(br+80, 255)},${Math.min(bg+80, 255)},${Math.min(bb+80, 255)})`);
-    metallicOuterGrad.addColorStop(0.15, outerRingColor);
+    metallicOuterGrad.addColorStop(0.15, safeOuter);
     metallicOuterGrad.addColorStop(0.4, `rgb(${Math.max(br-60, 0)},${Math.max(bg-60, 0)},${Math.max(bb-60, 0)})`);
     metallicOuterGrad.addColorStop(0.8, `rgb(${Math.max(br-90, 0)},${Math.max(bg-90, 0)},${Math.max(bb-90, 0)})`);
-    metallicOuterGrad.addColorStop(0.95, outerRingColor);
+    metallicOuterGrad.addColorStop(0.95, safeOuter);
     metallicOuterGrad.addColorStop(1, `rgb(${Math.min(br+50, 255)},${Math.min(bg+50, 255)},${Math.min(bb+50, 255)})`);
 
     ctx.beginPath();
