@@ -127,10 +127,23 @@ function hexToRgb(hex: string): [number, number, number] {
   return [124, 58, 237]; // fallback violet
 }
 
-/** Lighten a hex color by mixing toward white by `amount` (0-255). */
-function lightenHex(hex: string, amount: number): string {
-  const [r, g, b] = hexToRgb(hex);
+/** Lighten a hex color by mixing toward white by `amount` (0-255).
+ *  If it's an rgba or non-hex, returns it unmodified since native canvas gradients ingest them safely.
+ */
+function lightenHex(color: string, amount: number): string {
+  if (!color || typeof color !== 'string') return '#7c3aed';
+  // Allow native passthrough for rgba(), rgb(), hsla(), hsl(), or transparent
+  if (!color.startsWith('#')) return color;
+  
+  const [r, g, b] = hexToRgb(color);
   const blend = (c: number) => Math.min(255, Math.round(c + amount));
+  
+  // If it's an 8-character hex (#rrggbbaa), preserve its alpha channel at the end
+  if (color.replace('#', '').length === 8) {
+    const alphaHex = color.slice(-2);
+    return `rgba(${blend(r)},${blend(g)},${blend(b)},${parseInt(alphaHex, 16)/255})`;
+  }
+  
   return `rgb(${blend(r)},${blend(g)},${blend(b)})`;
 }
 

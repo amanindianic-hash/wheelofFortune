@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import {
   Upload, Play, Pause, Copy, Check, RotateCcw,
   ImageIcon, Info, Wand2, Download, X, Layers, SplitSquareHorizontal,
-  Save, Pencil, Trash2, BookMarked, Palette,
+  Save, Pencil, Trash2, BookMarked, Palette, Plus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -1030,11 +1030,12 @@ export default function ThemeTesterPage() {
                         </button>
                       )}
 
-                      <input type="color" value={segmentPalette[i].bg_color.startsWith('#') ? segmentPalette[i].bg_color : '#000000'} disabled={!!faceInfo}
+                      <input type="color" value={segmentPalette[i].bg_color.startsWith('#') && segmentPalette[i].bg_color.length <= 7 ? segmentPalette[i].bg_color : '#000000'} disabled={!!faceInfo}
                         onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
                         className="w-6 h-6 rounded cursor-pointer border-0 p-0 disabled:opacity-50 shrink-0" />
                       <Input value={segmentPalette[i].bg_color} disabled={!!faceInfo}
                         onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
+                        placeholder="rgba, hex8..."
                         className="h-7 border border-input bg-background text-xs font-mono disabled:opacity-50 min-w-0" />
                     </div>
                     <div className="flex items-center gap-2">
