@@ -563,7 +563,12 @@ export default function ThemeTesterPage() {
           emoji: saveEmoji,
           branding: cfg,
           config: buildFinalConfig(),
-          segment_palette: segmentPalette,
+          segment_palette: segmentPalette.map((p, i) => ({
+            ...p,
+            image_url: segmentImages[i] ?? null,
+            offset_x: segmentImageOffsets[i].x,
+            offset_y: segmentImageOffsets[i].y
+          })).slice(0, numSegments),
         }),
       });
       if (!res.ok) { toast.error('Failed to save theme'); return; }
@@ -613,9 +618,21 @@ export default function ThemeTesterPage() {
     if (b.rim_tick_color          !== undefined) setRimTickColor(b.rim_tick_color);
     
     if (theme.segment_palette && theme.segment_palette.length > 0) {
+      const dbLength = Math.max(2, Math.min(8, theme.segment_palette.length));
+      setNumSegments(dbLength);
+      
       setSegmentPalette(Array.from({ length: 8 }).map((_, i) => ({
         bg_color: theme.segment_palette[i % theme.segment_palette.length].bg_color,
         text_color: theme.segment_palette[i % theme.segment_palette.length].text_color
+      })));
+      
+      setSegmentImages(Array.from({ length: 8 }).map((_, i) => 
+        (i < theme.segment_palette.length) ? (theme.segment_palette[i].image_url ?? null) : null
+      ));
+      
+      setSegmentImageOffsets(Array.from({ length: 8 }).map((_, i) => ({
+        x: (i < theme.segment_palette.length) ? (theme.segment_palette[i].offset_x ?? 0) : 0,
+        y: (i < theme.segment_palette.length) ? (theme.segment_palette[i].offset_y ?? 0) : 0
       })));
     }
 
