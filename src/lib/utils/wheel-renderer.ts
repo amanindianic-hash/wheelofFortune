@@ -286,9 +286,10 @@ export function drawWheel(
           const imgBaseX = -imgSize / 2;
           const imgBaseY = -imgSize / 2 - (innerRadius / 2);
           
-          // Apply custom user offsets if provided in branding
-          const userOffsetX = branding.segment_image_offset_x ?? 0;
-          const userOffsetY = branding.segment_image_offset_y ?? 0;
+          // Apply custom user offsets if provided in branding (Global) or segment (Local)
+          // Local segment offsets override global offsets
+          const userOffsetX = seg.icon_offset_x ?? branding.segment_image_offset_x ?? 0;
+          const userOffsetY = seg.icon_offset_y ?? branding.segment_image_offset_y ?? 0;
           
           ctx.drawImage(img, imgBaseX + userOffsetX, imgBaseY + userOffsetY, imgSize, imgSize);
           ctx.restore();

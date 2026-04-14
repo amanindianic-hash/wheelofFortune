@@ -295,6 +295,7 @@ export default function ThemeTesterPage() {
   const [outerRingColor, setOuterRingColor] = useState('#7C3AED');
   const [innerRingColor, setInnerRingColor] = useState('rgba(255,255,255,0.18)');
   const [rimTickColor,  setRimTickColor]  = useState('#FFFFFF');
+  const [numSegments, setNumSegments] = useState(2);
   const [segmentPalette, setSegmentPalette] = useState<Array<{bg_color: string, text_color: string}>>(
     Array.from({ length: 8 }).map((_, i) => ({
       bg_color: i % 2 === 0 ? '#7C3AED' : '#5B21B6',
@@ -321,15 +322,20 @@ export default function ThemeTesterPage() {
 
   // ── Segment images for custom wheel segments ────────────────────────────────
   const [segmentImages, setSegmentImages] = useState<(string | null)[]>(Array(8).fill(null));
+  const [segmentImageOffsets, setSegmentImageOffsets] = useState<Array<{x: number, y: number}>>(
+    Array(8).fill({ x: 0, y: 0 })
+  );
   const [selectedThemeForSegments, setSelectedThemeForSegments] = useState<SavedTheme | null>(null);
 
   // ── Custom theme segments & branding ───────────────────────────────────────
-  const customSegments: WheelSegment[] = PREVIEW_LABELS.map((label, i) => ({
-    id: String(i + 1), position: i, label,
+  const customSegments: WheelSegment[] = Array.from({ length: numSegments }).map((_, i) => ({
+    id: String(i + 1), position: i, label: PREVIEW_LABELS[i % PREVIEW_LABELS.length],
     bg_color:   faceInfo ? 'transparent' : segmentPalette[i].bg_color,
     text_color: segmentPalette[i].text_color,
     weight: 1, is_no_prize: false,
     segment_image_url: segmentImages[i] ?? undefined,
+    icon_offset_x: segmentImageOffsets[i].x !== 0 ? segmentImageOffsets[i].x : undefined,
+    icon_offset_y: segmentImageOffsets[i].y !== 0 ? segmentImageOffsets[i].y : undefined,
   }));
 
   const customBranding: WheelBranding = {
@@ -350,8 +356,6 @@ export default function ThemeTesterPage() {
     premium_pointer_url:     pointerInfo?.url ?? null,
     premium_content_scale:   faceInfo ? contentScale : undefined,
     premium_center_offset_y: faceInfo ? centerOffsetY : undefined,
-    segment_image_offset_x:  segmentImageOffsetX !== 0 ? segmentImageOffsetX : undefined,
-    segment_image_offset_y:  segmentImageOffsetY !== 0 ? segmentImageOffsetY : undefined,
   };
 
   const customConfig: WheelConfig = {
@@ -644,8 +648,6 @@ export default function ThemeTesterPage() {
       premium_stand_url:       standInfo?.url ?? null,
       premium_content_scale:   contentScale,
       ...(centerOffsetY ? { premium_center_offset_y: centerOffsetY } : {}),
-      ...(segmentImageOffsetX !== 0 ? { segment_image_offset_x: segmentImageOffsetX } : {}),
-      ...(segmentImageOffsetY !== 0 ? { segment_image_offset_y: segmentImageOffsetY } : {}),
       primary_color:           primaryColor,
       pointer_color:           pointerColor,
       outer_ring_color:        outerRingColor,
@@ -998,7 +1000,7 @@ export default function ThemeTesterPage() {
               <div className="grid grid-cols-2 gap-y-3 gap-x-6">
                 <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pb-1 border-b border-white/10">Backgrounds {faceInfo && '(Hidden)'}</div>
                 <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest pb-1 border-b border-white/10">Text</div>
-                {segmentPalette.map((p, i) => (
+                {Array.from({ length: numSegments }).map((_, i) => (
                   <div key={i} className="contents">
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] w-3 text-muted-foreground">{i + 1}</span>
@@ -1028,33 +1030,77 @@ export default function ThemeTesterPage() {
                         </button>
                       )}
 
-                      <input type="color" value={p.bg_color.startsWith('#') ? p.bg_color : '#000000'} disabled={!!faceInfo}
+                      <input type="color" value={segmentPalette[i].bg_color.startsWith('#') ? segmentPalette[i].bg_color : '#000000'} disabled={!!faceInfo}
                         onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
                         className="w-6 h-6 rounded cursor-pointer border-0 p-0 disabled:opacity-50 shrink-0" />
-                      <Input value={p.bg_color} disabled={!!faceInfo}
+                      <Input value={segmentPalette[i].bg_color} disabled={!!faceInfo}
                         onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
                         className="h-7 border border-input bg-background text-xs font-mono disabled:opacity-50 min-w-0" />
                     </div>
                     <div className="flex items-center gap-2">
-                      <input type="color" value={p.text_color.startsWith('#') ? p.text_color : '#ffffff'}
+                       {/* Per-segment image offset controls (inline) */}
+                       {segmentImages[i] !== null && (
+                         <div className="flex flex-col gap-1 px-2 border-l border-white/10 w-[90px] shrink-0">
+                           <div className="flex items-center gap-1" title="Radial Offset (In/Out)">
+                             <span className="text-[9px] text-muted-foreground w-2">R</span>
+                             <input type="range" min={-100} max={100} value={segmentImageOffsets[i].x} 
+                               onChange={(e) => {
+                                 const val = parseInt(e.target.value);
+                                 setSegmentImageOffsets(prev => prev.map((item, idx) => idx === i ? { ...item, x: val } : item));
+                                 setCacheKey(`segimg-off-${Date.now()}`);
+                               }}
+                               className="w-full h-1 accent-emerald-500 rounded-full appearance-none bg-white/10" />
+                           </div>
+                           <div className="flex items-center gap-1" title="Lateral Offset (Left/Right)">
+                             <span className="text-[9px] text-muted-foreground w-2">L</span>
+                             <input type="range" min={-50} max={50} value={segmentImageOffsets[i].y} 
+                               onChange={(e) => {
+                                 const val = parseInt(e.target.value);
+                                 setSegmentImageOffsets(prev => prev.map((item, idx) => idx === i ? { ...item, y: val } : item));
+                                 setCacheKey(`segimg-off-${Date.now()}`);
+                               }}
+                               className="w-full h-1 accent-emerald-500 rounded-full appearance-none bg-white/10" />
+                           </div>
+                         </div>
+                       )}
+                      <input type="color" value={segmentPalette[i].text_color.startsWith('#') ? segmentPalette[i].text_color : '#ffffff'}
                         onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: e.target.value } : item))}
                         className="w-6 h-6 rounded cursor-pointer border-0 p-0" />
-                      <Input value={p.text_color}
+                      <Input value={segmentPalette[i].text_color}
                         onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: e.target.value } : item))}
                         className="h-7 border border-input bg-background text-xs font-mono" />
+                      
+                      {/* Delete specific segment */}
+                      <button 
+                        onClick={() => {
+                          if (numSegments <= 2) {
+                            toast.error("You must have at least 2 segments.");
+                            return;
+                          }
+                          setNumSegments(prev => prev - 1);
+                          setSegmentPalette(prev => prev.filter((_, idx) => idx !== i).concat([{bg_color: '#5B21B6', text_color: '#FFFFFF'}]));
+                          setSegmentImages(prev => prev.filter((_, idx) => idx !== i).concat([null]));
+                          setSegmentImageOffsets(prev => prev.filter((_, idx) => idx !== i).concat([{x: 0, y: 0}]));
+                          setCacheKey(`segm-del-${Date.now()}`);
+                        }}
+                        disabled={numSegments <= 2}
+                        className="h-7 w-7 rounded border border-white/10 hover:border-red-500/50 hover:bg-red-500/10 flex items-center justify-center text-muted-foreground hover:text-red-400 shrink-0 disabled:opacity-20 transition-colors"
+                        title="Remove segment"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
+              
+              <div className="flex gap-2 pt-2 border-t border-white/5">
+                <Button variant="outline" size="sm" className="w-full text-xs" 
+                  disabled={numSegments >= 8} onClick={() => { setNumSegments(prev => Math.min(8, prev + 1)); setCacheKey(`segc-${Date.now()}`); }}>
+                  <Plus className="w-3.5 h-3.5 mr-1" /> Add Segment
+                </Button>
+              </div>
 
-              {/* Segment Custom Image positioning handles */}
-              {segmentImages.some(img => img !== null) && (
-                <div className="pt-4 mt-2 border-t border-white/10 space-y-3 w-full">
-                  <Label className="text-xs font-bold text-emerald-400">Segment Image Tuning</Label>
-                  <SliderRow label="Radial Offset (In/Out)" value={segmentImageOffsetX} min={-100} max={100} step={1} unit="px" onChange={setSegmentImageOffsetX} />
-                  <SliderRow label="Lateral Offset (Left/Right)" value={segmentImageOffsetY} min={-50} max={50} step={1} unit="px" onChange={setSegmentImageOffsetY} />
-                </div>
-              )}
             </CardContent>
           </Card>
 
