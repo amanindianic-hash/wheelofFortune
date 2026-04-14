@@ -1686,14 +1686,16 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                       label: existing?.label ?? `Segment ${i + 1}`,
                                       bg_color: palette.bg_color,
                                       text_color: palette.text_color,
-                                      icon_url: palette.image_url ?? (existing?.icon_url || null),
+                                      // Explicitly clear or set icons and offsets from the theme
+                                      // to prevent "state leak" from previously applied themes.
+                                      icon_url:      palette.image_url ?? null,
+                                      icon_offset_x: palette.offset_x  ?? null,
+                                      icon_offset_y: palette.offset_y  ?? null,
                                       weight: existing?.weight ?? 1.0,
                                       prize_id: existing?.prize_id ?? null,
                                       is_no_prize: existing?.is_no_prize ?? true,
                                       wins_today: existing?.wins_today ?? 0,
                                       wins_total: existing?.wins_total ?? 0,
-                                      icon_offset_x: palette.offset_x ?? (existing?.icon_offset_x || null),
-                                      icon_offset_y: palette.offset_y ?? (existing?.icon_offset_y || null),
                                     };
                                   });
                                 });
@@ -1751,13 +1753,17 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                             
                             const { newConfig, newBranding, newSegments } = applyTemplateToWheel(tpl, segments);
                             
-                            const newWheel = {
+                            // Re-apply common wheel settings that shouldn't be overridden by basic templates
+                            const finalBranding = {
+                              ...wheel.branding,
+                              ...newBranding,
+                            };
+
+                            setWheel({
                               ...wheel,
                               config: { ...wheel.config, ...newConfig },
-                              branding: { ...wheel.branding, ...newBranding },
-                            };
-                            
-                            setWheel(newWheel);
+                              branding: finalBranding,
+                            });
                             setSegments(newSegments);
                             setAppliedTheme({ id: tpl.id, name: tpl.name, emoji: tpl.emoji, type: 'built-in' });
                             
