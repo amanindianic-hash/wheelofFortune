@@ -22,7 +22,7 @@ import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview'
 import { ThemeDialog } from '@/components/theme-dialog';
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
-import { applyTemplateToWheel } from '@/lib/utils/theme-utils';
+import { applyTemplateToWheel, BRANDING_RESET_BASE } from '@/lib/utils/theme-utils';
 import { normalizeSegment } from '@/lib/utils/segment-utils';
 import {
   ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
@@ -1664,10 +1664,14 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                               setWheel({
                                 ...wheel,
                                 config: { ...wheel.config, ...theme.config },
+                                // Start from a clean baseline (BRANDING_RESET_BASE), then stamp the
+                                // saved theme on top. This prevents properties from a previously
+                                // applied theme from "leaking" into this one.
                                 branding: {
-                                  ...wheel.branding,
+                                  ...BRANDING_RESET_BASE,
                                   ...theme.branding,
-                                  // Explicitly ensure all premium assets from the theme are adopted
+                                  // Explicitly force premium asset slots so falsy values from the
+                                  // saved theme always win over the reset-base defaults.
                                   premium_face_url:    tb.premium_face_url    ?? null,
                                   premium_stand_url:   tb.premium_stand_url   ?? null,
                                   premium_frame_url:   tb.premium_frame_url   ?? null,
@@ -1753,16 +1757,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                             
                             const { newConfig, newBranding, newSegments } = applyTemplateToWheel(tpl, segments);
                             
-                            // Re-apply common wheel settings that shouldn't be overridden by basic templates
-                            const finalBranding = {
-                              ...wheel.branding,
-                              ...newBranding,
-                            };
-
+                            // `newBranding` already starts from BRANDING_RESET_BASE (inside applyTemplateToWheel),
+                            // so we do NOT merge wheel.branding — that would re-introduce the old theme's stale values.
                             setWheel({
                               ...wheel,
                               config: { ...wheel.config, ...newConfig },
-                              branding: finalBranding,
+                              branding: newBranding,
                             });
                             setSegments(newSegments);
                             setAppliedTheme({ id: tpl.id, name: tpl.name, emoji: tpl.emoji, type: 'built-in' });

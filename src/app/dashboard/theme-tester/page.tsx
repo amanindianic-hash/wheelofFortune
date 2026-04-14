@@ -1047,9 +1047,16 @@ export default function ThemeTesterPage() {
                         </button>
                       )}
 
-                      <input type="color" value={segmentPalette[i].bg_color.startsWith('#') && segmentPalette[i].bg_color.length <= 7 ? segmentPalette[i].bg_color : '#000000'} disabled={!!faceInfo}
-                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
-                        className="w-6 h-6 rounded cursor-pointer border-0 p-0 disabled:opacity-50 shrink-0" />
+                      <input 
+                        type="color" 
+                        value={segmentPalette[i].bg_color.startsWith('#') && segmentPalette[i].bg_color.length === 7 ? segmentPalette[i].bg_color : '#000000'} 
+                        disabled={!!faceInfo}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: val } : item));
+                        }}
+                        className="w-6 h-6 rounded cursor-pointer border-0 p-0 disabled:opacity-50 shrink-0" 
+                      />
                       <Input value={segmentPalette[i].bg_color} disabled={!!faceInfo}
                         onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
                         placeholder="rgba, hex8..."
@@ -1081,12 +1088,23 @@ export default function ThemeTesterPage() {
                            </div>
                          </div>
                        )}
-                      <input type="color" value={segmentPalette[i].text_color.startsWith('#') ? segmentPalette[i].text_color : '#ffffff'}
-                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: e.target.value } : item))}
-                        className="w-6 h-6 rounded cursor-pointer border-0 p-0" />
-                      <Input value={segmentPalette[i].text_color}
-                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: e.target.value } : item))}
-                        className="h-7 border border-input bg-background text-xs font-mono" />
+                      <input 
+                        type="color" 
+                        value={segmentPalette[i].text_color.startsWith('#') && segmentPalette[i].text_color.length === 7 ? segmentPalette[i].text_color : '#ffffff'}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: val } : item));
+                        }}
+                        className="w-6 h-6 rounded cursor-pointer border-0 p-0" 
+                      />
+                      <Input 
+                        value={segmentPalette[i].text_color}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, text_color: val } : item));
+                        }}
+                        className="h-7 border border-input bg-background text-xs font-mono" 
+                      />
                       
                       {/* Delete specific segment */}
                       <button 
