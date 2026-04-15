@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { put } from '@vercel/blob';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,13 +13,37 @@ interface SegmentUploadProps {
   onSaveComplete?: (urls: (string | null)[]) => void;
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 export function SegmentUploader({ themeId, onPreview, onSaveComplete }: SegmentUploadProps) {
   const [files, setFiles] = useState<(File | null)[]>(Array(8).fill(null));
   const [previewUrls, setPreviewUrls] = useState<(string | null)[]>(Array(8).fill(null));
   const [saving, setSaving] = useState(false);
   const objectUrlsRef = useRef<string[]>([]);
 
+  // Cleanup object URLs on unmount
+  useEffect(() => {
+    return () => {
+      objectUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    };
+  }, []);
+
   const handleFileSelect = (index: number, file: File | null) => {
+    if (file) {
+      // Validate file type
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        toast.error('Invalid file type. Please use JPEG, PNG, or WebP.');
+        return;
+      }
+
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+        toast.error(`File too large. Maximum size is 5MB, got ${(file.size / 1024 / 1024).toFixed(1)}MB.`);
+        return;
+      }
+    }
+
     const newFiles = [...files];
     newFiles[index] = file;
     setFiles(newFiles);
@@ -68,18 +92,22 @@ export function SegmentUploader({ themeId, onPreview, onSaveComplete }: SegmentU
     try {
       const uploadedUrls: (string | null)[] = Array(8).fill(null);
 
-      // Now upload to Vercel Blob
+      // Upload to Vercel Blob
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         if (!file) continue;
 
-        const { url } = await put(
-          `segment-images/${themeId}/segment-${i + 1}-${Date.now()}.png`,
-          file,
-          { access: 'public' }
-        );
-
-        uploadedUrls[i] = url;
+        try {
+          const { url } = await put(
+            `segment-images/${themeId}/segment-${i + 1}-${Date.now()}`,
+            file,
+            { access: 'public' }
+          );
+          uploadedUrls[i] = url;
+        } catch (uploadErr) {
+          console.error(`Failed to upload segment ${i + 1}:`, uploadErr);
+          throw new Error(`Upload failed for segment ${i + 1}`);
+        }
       }
 
       // Save URLs to database
@@ -90,7 +118,11 @@ export function SegmentUploader({ themeId, onPreview, onSaveComplete }: SegmentU
       });
 
       if (!res.ok) {
-        throw new Error('Failed to save segments to database');
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(
+          errData.error?.message ||
+          `Server error: ${res.status} ${res.statusText}`
+        );
       }
 
       toast.success('💾 Segments uploaded and saved!');
@@ -103,7 +135,8 @@ export function SegmentUploader({ themeId, onPreview, onSaveComplete }: SegmentU
       objectUrlsRef.current = [];
     } catch (err) {
       console.error('Save error:', err);
-      toast.error('❌ Save failed: ' + (err instanceof Error ? err.message : 'Unknown error'));
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      toast.error(`❌ Save failed: ${message}`);
     } finally {
       setSaving(false);
     }
@@ -119,6 +152,23 @@ export function SegmentUploader({ themeId, onPreview, onSaveComplete }: SegmentU
 
   const filledSlots = files.filter(f => f !== null).length;
   const hasPreview = previewUrls.some(u => u !== null);
+
+  // Generate preview URLs for files (memoized)
+  const filePreviewUrls = useRef<(string | null)[]>(Array(8).fill(null));
+  useEffect(() => {
+    filePreviewUrls.current.forEach((url, i) => {
+      if (url && !files[i]) {
+        URL.revokeObjectURL(url);
+        filePreviewUrls.current[i] = null;
+      }
+    });
+
+    files.forEach((file, i) => {
+      if (file && !filePreviewUrls.current[i]) {
+        filePreviewUrls.current[i] = URL.createObjectURL(file);
+      }
+    });
+  }, [files]);
 
   return (
     <Card className="w-full">
@@ -136,7 +186,7 @@ export function SegmentUploader({ themeId, onPreview, onSaveComplete }: SegmentU
             >
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 onChange={(e) => handleFileSelect(i, e.target.files?.[0] || null)}
                 disabled={saving}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
@@ -147,7 +197,7 @@ export function SegmentUploader({ themeId, onPreview, onSaveComplete }: SegmentU
                   <>
                     <div className="w-full aspect-square bg-foreground/5 rounded flex items-center justify-center overflow-hidden">
                       <img
-                        src={URL.createObjectURL(files[i]!)}
+                        src={filePreviewUrls.current[i] || ''}
                         alt={`Segment ${i + 1}`}
                         className="w-full h-full object-cover"
                       />

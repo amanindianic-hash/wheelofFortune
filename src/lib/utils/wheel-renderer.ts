@@ -48,10 +48,16 @@ export interface WheelConfig {
 export interface WheelBranding {
   button_text?: string;
   primary_color?: string;
-  border_color?: string;
-  border_width?: number;
+  pointer_color?: string;
+  secondary_color?: string;
+  background_type?: 'solid' | 'gradient' | 'image';
   background_value?: string;
   font_family?: string;
+  button_color?: string;
+  border_color?: string;
+  border_width?: number;
+  logo_url?: string | null;
+  logo_position?: 'above' | 'center';
   // Ring customization
   outer_ring_color?: string;
   outer_ring_width?: number;
@@ -67,12 +73,16 @@ export interface WheelBranding {
   label_letter_spacing?: number;
   // Icon placement
   icon_position?: 'outer' | 'inner' | 'overlay';
-  
+
   // Premium Image Layer URLs
   premium_face_url?: string | null;
   premium_stand_url?: string | null;
+  premium_frame_url?: string | null;
+  premium_pointer_url?: string | null;
   premium_content_scale?: number;
   premium_center_offset_y?: number;
+  segment_image_offset_x?: number;
+  segment_image_offset_y?: number;
 }
 
 // ─── Image cache ──────────────────────────────────────────────────────────────
