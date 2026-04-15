@@ -682,8 +682,12 @@ export function drawWheel(
         const w = frameImg.width * scale;
         const h = frameImg.height * scale;
         ctx.globalAlpha = 1;
+        // Draw with a semi-transparent tint to see if image is rendering at all
+        ctx.globalCompositeOperation = 'screen';
         ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
+        ctx.globalCompositeOperation = 'source-over';
         ctx.restore();
+        console.log('Frame drawn at:', { cx, cy, rotation, w, h, scale });
       } else {
         // Fallback: draw a visual indicator that frame code is running
         ctx.save();
