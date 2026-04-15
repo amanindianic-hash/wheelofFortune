@@ -679,9 +679,21 @@ export function drawWheel(
         const scale = (outerRadius * 2.5) / Math.max(frameImg.width, frameImg.height);
         const w = frameImg.width * scale;
         const h = frameImg.height * scale;
+
+        // DEBUG: Draw a colored rectangle to show where frame will be drawn
+        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(-w / 2, -h / 2, w, h);
+
         ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
         ctx.restore();
+
+        console.log('Frame rendering:', { frameLoaded: true, w, h, scale, imgDim: `${frameImg.width}x${frameImg.height}` });
+      } else {
+        console.log('Frame not ready:', { hasImg: !!frameImg, width: frameImg?.width, height: frameImg?.height });
       }
+    } else {
+      console.log('No premium frame URL or not in cache');
     }
 
     // ── 6. Center hub with gloss ──────────────────────────────────────────────
