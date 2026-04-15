@@ -669,7 +669,10 @@ export function drawWheel(
     // ── 5.5. Premium Frame Layer (ROTATING OUTER RIM — drawn on top of wheel) ──
     // Frame rotates with wheel and appears on top of the wheel geometry
     if (branding.premium_frame_url) {
+      console.log('Frame URL detected:', branding.premium_frame_url);
       const frameImg = imageCache?.get(branding.premium_frame_url);
+      console.log('Frame image in cache:', !!frameImg, frameImg?.width, frameImg?.height);
+
       if (frameImg && frameImg.width > 0 && frameImg.height > 0) {
         ctx.save();
         ctx.translate(cx, cy);
@@ -681,9 +684,17 @@ export function drawWheel(
         ctx.globalAlpha = 1;
         ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
         ctx.restore();
-      } else if (frameImg) {
-        // Image exists but hasn't loaded yet or dimensions are 0
-        console.warn('Frame image not ready:', { width: frameImg?.width, height: frameImg?.height });
+      } else {
+        // Fallback: draw a visual indicator that frame code is running
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation);
+        ctx.strokeStyle = 'rgba(255, 0, 255, 0.3)';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 0, outerRadius * 1.3, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.restore();
       }
     }
 
