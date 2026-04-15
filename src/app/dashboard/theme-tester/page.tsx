@@ -129,9 +129,14 @@ function SpinningCanvas({
         <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">{label}</span>
       )}
       <div className="relative w-[320px] h-[320px] mx-auto overflow-visible perspective-[1200px] mt-4 mb-4">
-        {/* Frame / Outer Rim Overlay (Z=10) */}
+        {/* Frame / Outer Rim Overlay (Z=10 - rotates with wheel) */}
         {frameInfo && (
-          <img src={frameInfo.url} className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none drop-shadow-xl" alt="Outer Frame Overlay" />
+          <img
+            src={frameInfo.url}
+            className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none drop-shadow-xl"
+            style={{ transform: `rotate(${rotRef.current}rad)` }}
+            alt="Outer Frame Overlay"
+          />
         )}
 
         {/* Floating Center Pointer (HTML Overlay / Custom Image Z=30) */}
