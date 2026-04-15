@@ -240,6 +240,23 @@ export function drawWheel(
       }
     }
 
+    // ── 0.5. Premium Frame Layer (ROTATING OUTER RIM — drawn early before clipping) ──
+    // Frame rotates with wheel and can extend beyond the circle
+    const hasPremiumFrame = branding.premium_frame_url && imageCache?.has(branding.premium_frame_url);
+    if (hasPremiumFrame) {
+      const frameImg = imageCache!.get(branding.premium_frame_url!);
+      if (frameImg) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation);
+        const scale = (outerRadius * 2.4) / Math.max(frameImg.width, frameImg.height);
+        const w = frameImg.width * scale;
+        const h = frameImg.height * scale;
+        ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
+        ctx.restore();
+      }
+    }
+
     // ── Pre-calculate shadow base ─────────────────────────────────────────────
     // To make it look like a physical 3D object on the screen, add a soft drop shadow
     // beneath the entire wheel to give depth before drawing anything.
@@ -659,22 +676,6 @@ export function drawWheel(
     ctx.strokeStyle = 'rgba(0,0,0,0.5)';
     ctx.lineWidth = 2;
     ctx.stroke();
-
-    // ── 5.5. Premium frame overlay (rotating) ─────────────────────────────────
-    const hasPremiumFrame = branding.premium_frame_url && imageCache?.has(branding.premium_frame_url);
-    if (hasPremiumFrame) {
-      const frameImg = imageCache!.get(branding.premium_frame_url!);
-      if (frameImg) {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(rotation);
-        const scale = (outerRadius * 2.2) / Math.max(frameImg.width, frameImg.height);
-        const w = frameImg.width * scale;
-        const h = frameImg.height * scale;
-        ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
-        ctx.restore();
-      }
-    }
 
     // ── 6. Center hub with gloss ──────────────────────────────────────────────
     const centerR = Math.max(22, innerRadius * 0.16);
