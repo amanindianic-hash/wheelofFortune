@@ -84,6 +84,7 @@ function SpinningCanvas({
   pointerInfo?: ImageInfo | null;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameImgRef = useRef<HTMLImageElement>(null);
   const cacheRef  = useRef<ImageCache>(new Map());
   const rotRef    = useRef(0);
   const rafRef    = useRef<number>(0);
@@ -112,6 +113,10 @@ function SpinningCanvas({
         if (canvasRef.current) {
           drawWheel(canvasRef.current, segments, rotRef.current, config, brandRef.current, cacheRef.current);
         }
+        // Update frame image rotation to match wheel
+        if (frameImgRef.current) {
+          frameImgRef.current.style.transform = `rotate(${rotRef.current}rad)`;
+        }
         rafRef.current = requestAnimationFrame(tick);
       }
       tick();
@@ -132,9 +137,9 @@ function SpinningCanvas({
         {/* Frame / Outer Rim Overlay (Z=10 - rotates with wheel) */}
         {frameInfo && (
           <img
+            ref={frameImgRef}
             src={frameInfo.url}
             className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none drop-shadow-xl"
-            style={{ transform: `rotate(${rotRef.current}rad)` }}
             alt="Outer Frame Overlay"
           />
         )}
