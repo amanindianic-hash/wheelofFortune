@@ -70,7 +70,7 @@ function buildSegmentsFromPalette(
 // ── Spinning Canvas ──────────────────────────────────────────────────────────
 function SpinningCanvas({
   segments, config, branding, isSpinning, spinSpeed, cacheKey, label,
-  frameInfo, hubInfo, pointerInfo,
+  frameInfo, hubInfo, pointerInfo, frameOffsetX = 0, frameOffsetY = 0,
 }: {
   segments: WheelSegment[];
   config: WheelConfig;
@@ -82,6 +82,8 @@ function SpinningCanvas({
   frameInfo?: ImageInfo | null;
   hubInfo?: ImageInfo | null;
   pointerInfo?: ImageInfo | null;
+  frameOffsetX?: number;
+  frameOffsetY?: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameImgRef = useRef<HTMLImageElement>(null);
@@ -92,10 +94,14 @@ function SpinningCanvas({
   const brandRef  = useRef(branding);
   const spinRef   = useRef(isSpinning);
   const speedRef  = useRef(spinSpeed);
+  const frameOffsetXRef = useRef(frameOffsetX);
+  const frameOffsetYRef = useRef(frameOffsetY);
 
   useEffect(() => { brandRef.current = branding; }, [branding]);
   useEffect(() => { spinRef.current  = isSpinning; }, [isSpinning]);
   useEffect(() => { speedRef.current = spinSpeed; }, [spinSpeed]);
+  useEffect(() => { frameOffsetXRef.current = frameOffsetX; }, [frameOffsetX]);
+  useEffect(() => { frameOffsetYRef.current = frameOffsetY; }, [frameOffsetY]);
 
   useEffect(() => {
     runRef.current = false;
@@ -113,9 +119,9 @@ function SpinningCanvas({
         if (canvasRef.current) {
           drawWheel(canvasRef.current, segments, rotRef.current, config, brandRef.current, cacheRef.current);
         }
-        // Update frame image rotation to match wheel
+        // Update frame image rotation and offset to match wheel
         if (frameImgRef.current) {
-          frameImgRef.current.style.transform = `rotate(${rotRef.current}rad)`;
+          frameImgRef.current.style.transform = `rotate(${rotRef.current}rad) translate(${frameOffsetXRef.current}px, ${frameOffsetYRef.current}px)`;
         }
         rafRef.current = requestAnimationFrame(tick);
       }
@@ -297,6 +303,8 @@ export default function ThemeTesterPage() {
   const [centerOffsetY, setCenterOffsetY] = useState(0);
   const [segmentImageOffsetX, setSegmentImageOffsetX] = useState(0);
   const [segmentImageOffsetY, setSegmentImageOffsetY] = useState(0);
+  const [frameOffsetX, setFrameOffsetX] = useState(0);
+  const [frameOffsetY, setFrameOffsetY] = useState(0);
   const [fontSize,      setFontSize]      = useState(12);
   const [fontWeight,    setFontWeight]    = useState<'400'|'600'|'700'|'800'>('800');
   const [labelPosition, setLabelPosition] = useState<'inner'|'center'|'outer'>('outer');
@@ -1004,10 +1012,43 @@ export default function ThemeTesterPage() {
                         <Label className="text-xs font-bold text-foreground">Outer Rim Image</Label>
                         <p className="text-[10px] text-muted-foreground leading-snug">Masks Outer Edge, Inner Band & Ticks</p>
                       </div>
-                      <DropZone 
+                      <DropZone
                         label="Exact Rim Upload" hint="(800x800)"
                         info={frameInfo ?? undefined} onFile={handleFrameUpload} onRemove={() => setFrameInfo(null)} isLoading={frameUploading}
                       />
+                      {/* Frame offset controls */}
+                      {frameInfo && (
+                        <div className="space-y-3 pt-2 border-t border-white/10">
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="text-[11px] font-semibold text-muted-foreground">Radial Offset (In/Out)</label>
+                              <span className="text-[10px] font-mono text-primary">{frameOffsetX}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={-100}
+                              max={100}
+                              value={frameOffsetX}
+                              onChange={(e) => setFrameOffsetX(parseInt(e.target.value))}
+                              className="w-full h-1.5 accent-emerald-500 rounded-full appearance-none bg-white/10"
+                            />
+                          </div>
+                          <div>
+                            <div className="flex items-center justify-between mb-1.5">
+                              <label className="text-[11px] font-semibold text-muted-foreground">Lateral Offset (Left/Right)</label>
+                              <span className="text-[10px] font-mono text-primary">{frameOffsetY}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min={-100}
+                              max={100}
+                              value={frameOffsetY}
+                              onChange={(e) => setFrameOffsetY(parseInt(e.target.value))}
+                              className="w-full h-1.5 accent-emerald-500 rounded-full appearance-none bg-white/10"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1334,6 +1375,7 @@ export default function ThemeTesterPage() {
                         isSpinning={isSpinning} spinSpeed={spinSpeed} cacheKey={customCacheKey}
                         label="Your Custom Theme"
                         frameInfo={frameInfo} hubInfo={hubInfo} pointerInfo={pointerInfo}
+                        frameOffsetX={frameOffsetX} frameOffsetY={frameOffsetY}
                       />
                     </div>
                     {/* Compare */}
@@ -1377,6 +1419,7 @@ export default function ThemeTesterPage() {
                     segments={customSegments} config={customConfig} branding={customBranding}
                     isSpinning={isSpinning} spinSpeed={spinSpeed} cacheKey={customCacheKey}
                     frameInfo={frameInfo} hubInfo={hubInfo} pointerInfo={pointerInfo}
+                    frameOffsetX={frameOffsetX} frameOffsetY={frameOffsetY}
                   />
 
                   {/* Status */}
