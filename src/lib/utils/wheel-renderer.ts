@@ -112,9 +112,15 @@ export async function preloadSegmentImages(
       (url) =>
         new Promise<void>((resolve) => {
           const img = new Image();
-          img.crossOrigin = 'anonymous';
+          // Don't set crossOrigin for blob URLs (they don't need it and it can cause issues)
+          if (!url.startsWith('blob:')) {
+            img.crossOrigin = 'anonymous';
+          }
           img.onload = () => { cache.set(url, img); resolve(); };
-          img.onerror = () => resolve();
+          img.onerror = () => {
+            console.warn(`Failed to load image: ${url}`);
+            resolve();
+          };
           img.src = url;
         }),
     ),
@@ -665,13 +671,15 @@ export function drawWheel(
     const hasPremiumFrame = branding.premium_frame_url && imageCache?.has(branding.premium_frame_url);
     if (hasPremiumFrame) {
       const frameImg = imageCache!.get(branding.premium_frame_url!);
-      if (frameImg) {
+      if (frameImg && frameImg.width > 0 && frameImg.height > 0) {
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(rotation);
-        const scale = (outerRadius * 2.4) / Math.max(frameImg.width, frameImg.height);
+        // Scale frame to be larger than wheel so it appears as outer ring
+        const scale = (outerRadius * 2.8) / Math.max(frameImg.width, frameImg.height);
         const w = frameImg.width * scale;
         const h = frameImg.height * scale;
+        ctx.globalAlpha = 1;
         ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
         ctx.restore();
       }
