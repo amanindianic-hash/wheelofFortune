@@ -103,6 +103,8 @@ export async function preloadSegmentImages(
     ...(config.center_image_url ? [config.center_image_url] : []),
     ...(branding.premium_face_url ? [branding.premium_face_url] : []),
     ...(branding.premium_stand_url ? [branding.premium_stand_url] : []),
+    ...(branding.premium_frame_url ? [branding.premium_frame_url] : []),
+    ...(branding.premium_pointer_url ? [branding.premium_pointer_url] : []),
   ].filter((url) => !cache.has(url));
 
   await Promise.all(
@@ -657,6 +659,22 @@ export function drawWheel(
     ctx.strokeStyle = 'rgba(0,0,0,0.5)';
     ctx.lineWidth = 2;
     ctx.stroke();
+
+    // ── 5.5. Premium frame overlay (rotating) ─────────────────────────────────
+    const hasPremiumFrame = branding.premium_frame_url && imageCache?.has(branding.premium_frame_url);
+    if (hasPremiumFrame) {
+      const frameImg = imageCache!.get(branding.premium_frame_url!);
+      if (frameImg) {
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.rotate(rotation);
+        const scale = (outerRadius * 2.2) / Math.max(frameImg.width, frameImg.height);
+        const w = frameImg.width * scale;
+        const h = frameImg.height * scale;
+        ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
+        ctx.restore();
+      }
+    }
 
     // ── 6. Center hub with gloss ──────────────────────────────────────────────
     const centerR = Math.max(22, innerRadius * 0.16);
