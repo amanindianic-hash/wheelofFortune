@@ -668,36 +668,18 @@ export function drawWheel(
 
     // ── 5.5. Premium Frame Layer (ROTATING OUTER RIM — drawn on top of wheel) ──
     // Frame rotates with wheel and appears on top of the wheel geometry
-    if (branding.premium_frame_url) {
-      console.log('Frame URL detected:', branding.premium_frame_url);
-      const frameImg = imageCache?.get(branding.premium_frame_url);
-      console.log('Frame image in cache:', !!frameImg, frameImg?.width, frameImg?.height);
-
+    const hasPremiumFrame = branding.premium_frame_url && imageCache?.has(branding.premium_frame_url);
+    if (hasPremiumFrame) {
+      const frameImg = imageCache!.get(branding.premium_frame_url!);
       if (frameImg && frameImg.width > 0 && frameImg.height > 0) {
         ctx.save();
         ctx.translate(cx, cy);
         ctx.rotate(rotation);
-        // Scale frame to be larger than wheel so it appears as outer ring
-        const scale = (outerRadius * 2.8) / Math.max(frameImg.width, frameImg.height);
+        // Scale frame to match the wheel size
+        const scale = (outerRadius * 2.5) / Math.max(frameImg.width, frameImg.height);
         const w = frameImg.width * scale;
         const h = frameImg.height * scale;
-        ctx.globalAlpha = 1;
-        // Draw with a semi-transparent tint to see if image is rendering at all
-        ctx.globalCompositeOperation = 'screen';
         ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.restore();
-        console.log('Frame drawn at:', { cx, cy, rotation, w, h, scale });
-      } else {
-        // Fallback: draw a visual indicator that frame code is running
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate(rotation);
-        ctx.strokeStyle = 'rgba(255, 0, 255, 0.3)';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(0, 0, outerRadius * 1.3, 0, 2 * Math.PI);
-        ctx.stroke();
         ctx.restore();
       }
     }
