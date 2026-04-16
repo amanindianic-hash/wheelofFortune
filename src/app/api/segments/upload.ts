@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     }
 
     // Verify theme exists
-    const themeCheck = await sql`
+    const themeCheck = (await sql`
       SELECT id FROM custom_themes WHERE id = ${themeId} LIMIT 1
-    `;
+    `) as any[];
 
     if (themeCheck.length === 0) {
       return errorResponse('THEME_NOT_FOUND', 'Theme does not exist', 404);
