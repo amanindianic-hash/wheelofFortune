@@ -145,6 +145,7 @@ export interface WheelBranding {
   label_perp_offset?: number;         // relative perpendicular offset (-1 to 1)
   icon_radial_offset?: number;        // relative radial offset (0-1)
   icon_perp_offset?: number;          // relative perpendicular offset (-1 to 1)
+  [key: string]: any;
 }
 
 export interface WheelFormConfig {
@@ -220,6 +221,7 @@ export interface Segment {
   icon_radial_offset?: number | null;
   icon_perp_offset?: number | null;
   label_font_scale?: number | null;
+  [key: string]: any;
 }
 
 export interface Prize {
