@@ -4,10 +4,10 @@ import { okResponse, errorResponse } from '@/lib/middleware-utils';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { themeId: string } }
+  { params }: { params: Promise<{ themeId: string }> }
 ) {
   try {
-    const { themeId } = params;
+    const { themeId } = await params;
 
     if (!themeId) {
       return errorResponse('MISSING_THEME_ID', 'Theme ID is required', 400);
@@ -44,10 +44,10 @@ export async function GET(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { themeId: string } }
+  { params }: { params: Promise<{ themeId: string }> }
 ) {
   try {
-    const { themeId } = params;
+    const { themeId } = await params;
 
     // Delete all segment images for this theme
     await sql`
