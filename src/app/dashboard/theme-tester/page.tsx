@@ -71,6 +71,7 @@ function buildSegmentsFromPalette(
 function SpinningCanvas({
   segments, config, branding, isSpinning, spinSpeed, cacheKey, label,
   frameInfo, hubInfo, pointerInfo, frameOffsetX = 0, frameOffsetY = 0,
+  hubOffsetX = 0, hubOffsetY = 0,
 }: {
   segments: WheelSegment[];
   config: WheelConfig;
@@ -84,9 +85,13 @@ function SpinningCanvas({
   pointerInfo?: ImageInfo | null;
   frameOffsetX?: number;
   frameOffsetY?: number;
+  hubOffsetX?: number;
+  hubOffsetY?: number;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameImgRef = useRef<HTMLImageElement>(null);
+  const hubImgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const cacheRef  = useRef<ImageCache>(new Map());
   const rotRef    = useRef(0);
   const rafRef    = useRef<number>(0);
@@ -96,12 +101,16 @@ function SpinningCanvas({
   const speedRef  = useRef(spinSpeed);
   const frameOffsetXRef = useRef(frameOffsetX);
   const frameOffsetYRef = useRef(frameOffsetY);
+  const hubOffsetXRef = useRef(hubOffsetX);
+  const hubOffsetYRef = useRef(hubOffsetY);
 
   useEffect(() => { brandRef.current = branding; }, [branding]);
   useEffect(() => { spinRef.current  = isSpinning; }, [isSpinning]);
   useEffect(() => { speedRef.current = spinSpeed; }, [spinSpeed]);
   useEffect(() => { frameOffsetXRef.current = frameOffsetX; }, [frameOffsetX]);
   useEffect(() => { frameOffsetYRef.current = frameOffsetY; }, [frameOffsetY]);
+  useEffect(() => { hubOffsetXRef.current = hubOffsetX; }, [hubOffsetX]);
+  useEffect(() => { hubOffsetYRef.current = hubOffsetY; }, [hubOffsetY]);
 
   useEffect(() => {
     runRef.current = false;
@@ -123,6 +132,10 @@ function SpinningCanvas({
         if (frameImgRef.current) {
           frameImgRef.current.style.transform = `rotate(${rotRef.current}rad) translate(${frameOffsetXRef.current}px, ${frameOffsetYRef.current}px)`;
         }
+        // Update hub image rotation and offset to match wheel
+        if (hubImgRef.current) {
+          hubImgRef.current.style.transform = `translate(-50%, -50%) rotate(${rotRef.current}rad) translate(${hubOffsetXRef.current}px, ${hubOffsetYRef.current}px)`;
+        }
         rafRef.current = requestAnimationFrame(tick);
       }
       tick();
@@ -139,7 +152,7 @@ function SpinningCanvas({
       {label && (
         <span className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60">{label}</span>
       )}
-      <div className="relative w-[320px] h-[320px] mx-auto overflow-visible perspective-[1200px] mt-4 mb-4">
+      <div ref={containerRef} className="relative w-[320px] h-[320px] mx-auto overflow-visible perspective-[1200px] mt-4 mb-4">
         {/* Frame / Outer Rim Overlay (Z=10 - rotates with wheel) */}
         {frameInfo && (
           <img
@@ -149,6 +162,17 @@ function SpinningCanvas({
             alt="Outer Frame Overlay"
           />
         )}
+
+        {/* Hub / Center Image Overlay (Z=20 - rotates with wheel, behind pointer) - DISABLED */}
+        {/* {hubInfo && (
+          <img
+            ref={hubImgRef}
+            src={hubInfo.url}
+            className="absolute left-1/2 top-1/2 w-[160px] h-[160px] object-contain z-20 pointer-events-none drop-shadow-md"
+            style={{ transformOrigin: '50% 50%' }}
+            alt="Center Hub Overlay"
+          />
+        )} */}
 
         {/* Floating Center Pointer (HTML Overlay / Custom Image Z=30) */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-2 z-30 drop-shadow-md pointer-events-none">
@@ -305,14 +329,25 @@ export default function ThemeTesterPage() {
   const [segmentImageOffsetY, setSegmentImageOffsetY] = useState(0);
   const [frameOffsetX, setFrameOffsetX] = useState(0);
   const [frameOffsetY, setFrameOffsetY] = useState(0);
-  const [fontSize,      setFontSize]      = useState(12);
-  const [fontWeight,    setFontWeight]    = useState<'400'|'600'|'700'|'800'>('800');
-  const [labelPosition, setLabelPosition] = useState<'inner'|'center'|'outer'>('outer');
-  const [primaryColor,  setPrimaryColor]  = useState('#7C3AED');
-  const [pointerColor,  setPointerColor]  = useState('#7C3AED');
+  const [hubOffsetX, setHubOffsetX] = useState(0);
+  const [hubOffsetY, setHubOffsetY] = useState(0);
+  const [rimTickColor,  setRimTickColor]  = useState('#FFFFFF');
+
+  // ── Branding Color States ──
+  const [primaryColor, setPrimaryColor] = useState('#7C3AED');
+  const [pointerColor, setPointerColor] = useState('#7C3AED');
   const [outerRingColor, setOuterRingColor] = useState('#7C3AED');
   const [innerRingColor, setInnerRingColor] = useState('rgba(255,255,255,0.18)');
-  const [rimTickColor,  setRimTickColor]  = useState('#FFFFFF');
+  const [fontWeight, setFontWeight] = useState<'400' | '600' | '700' | '800'>('700');
+  const [labelPosition, setLabelPosition] = useState<'inner' | 'center' | 'outer'>('outer');
+
+  // ── Relative Placement States ──
+  const [labelFontScale, setLabelFontScale] = useState(0.087); // ~12px / 138px
+  const [labelRadialOffset, setLabelRadialOffset] = useState(0);
+  const [labelPerpOffset, setLabelPerpOffset] = useState(0);
+  const [iconRadialOffset, setIconRadialOffset] = useState(0);
+  const [iconPerpOffset, setIconPerpOffset] = useState(0);
+
   const [numSegments, setNumSegments] = useState(2);
   const [segmentPalette, setSegmentPalette] = useState<Array<{bg_color: string, text_color: string}>>(
     Array.from({ length: 8 }).map((_, i) => ({
@@ -340,8 +375,8 @@ export default function ThemeTesterPage() {
 
   // ── Segment images for custom wheel segments ────────────────────────────────
   const [segmentImages, setSegmentImages] = useState<(string | null)[]>(Array(8).fill(null));
-  const [segmentImageOffsets, setSegmentImageOffsets] = useState<Array<{x: number, y: number}>>(
-    Array(8).fill({ x: 0, y: 0 })
+  const [segmentImageOffsets, setSegmentImageOffsets] = useState<Array<{radial: number, perp: number}>>(
+    Array(8).fill({ radial: 0, perp: 0 })
   );
   const [selectedThemeForSegments, setSelectedThemeForSegments] = useState<SavedTheme | null>(null);
 
@@ -352,8 +387,8 @@ export default function ThemeTesterPage() {
     text_color: segmentPalette[i].text_color,
     weight: 1, is_no_prize: false,
     segment_image_url: segmentImages[i] ?? undefined,
-    icon_offset_x: segmentImageOffsets[i].x !== 0 ? segmentImageOffsets[i].x : undefined,
-    icon_offset_y: segmentImageOffsets[i].y !== 0 ? segmentImageOffsets[i].y : undefined,
+    icon_radial_offset: segmentImageOffsets[i].radial !== 0 ? segmentImageOffsets[i].radial : undefined,
+    icon_perp_offset: segmentImageOffsets[i].perp !== 0 ? segmentImageOffsets[i].perp : undefined,
   }));
 
   const customBranding: WheelBranding = {
@@ -365,9 +400,13 @@ export default function ThemeTesterPage() {
     outer_ring_width:        faceInfo ? 0 : 20,
     inner_ring_enabled:      !faceInfo,
     rim_tick_style:          faceInfo ? 'none' : 'triangles',
-    label_font_size:         fontSize,
+    label_font_scale:        labelFontScale,
     label_font_weight:       fontWeight,
     label_position:          labelPosition,
+    label_radial_offset:     labelRadialOffset,
+    label_perp_offset:       labelPerpOffset,
+    icon_radial_offset:      iconRadialOffset,
+    icon_perp_offset:        iconPerpOffset,
     premium_face_url:        faceInfo?.url  ?? null,
     premium_stand_url:       standInfo?.url ?? null,
     premium_frame_url:       frameInfo?.url ?? null,
@@ -530,8 +569,10 @@ export default function ThemeTesterPage() {
     setFaceInfo(null); setStandInfo(null);
     setHubInfo(null); setPointerInfo(null); setFrameInfo(null);
     setContentScale(0.75); setCenterOffsetY(0);
-    setFontSize(12); setFontWeight('800');
+    setLabelFontScale(0.087); setFontWeight('800');
     setLabelPosition('outer'); setPrimaryColor('#7C3AED');
+    setLabelRadialOffset(0); setLabelPerpOffset(0);
+    setIconRadialOffset(0); setIconPerpOffset(0);
     setOuterRingColor('#7C3AED'); setInnerRingColor('rgba(255,255,255,0.18)'); setRimTickColor('#FFFFFF');
     setSegmentPalette(
       Array.from({ length: 8 }).map((_, i) => ({
@@ -584,8 +625,11 @@ export default function ThemeTesterPage() {
           segment_palette: segmentPalette.map((p, i) => ({
             ...p,
             image_url: segmentImages[i] ?? null,
-            offset_x: segmentImageOffsets[i].x,
-            offset_y: segmentImageOffsets[i].y
+            label_radial_offset: labelRadialOffset,
+            label_perp_offset: labelPerpOffset,
+            icon_radial_offset: segmentImageOffsets[i].radial,
+            icon_perp_offset: segmentImageOffsets[i].perp,
+            label_font_scale: labelFontScale
           })).slice(0, numSegments),
         }),
       });
@@ -624,9 +668,31 @@ export default function ThemeTesterPage() {
 
   function handleLoadTheme(theme: SavedTheme) {
     const b = theme.branding as any;
+    const NORM_RADIUS = 138; // Inner radius of 320px preview wheel
+
     if (b.premium_content_scale   !== undefined) setContentScale(b.premium_content_scale);
     if (b.premium_center_offset_y !== undefined) setCenterOffsetY(b.premium_center_offset_y);
-    if (b.label_font_size         !== undefined) setFontSize(b.label_font_size);
+    
+    // ── Font Scale Normalization ──
+    if (b.label_font_scale !== undefined) {
+      setLabelFontScale(b.label_font_scale);
+    } else if (b.label_font_size !== undefined) {
+      setLabelFontScale(b.label_font_size / NORM_RADIUS);
+    }
+
+    // ── Global Offset Normalization ──
+    if (b.label_radial_offset !== undefined) setLabelRadialOffset(b.label_radial_offset);
+    else if (b.label_offset_x !== undefined) setLabelRadialOffset(b.label_offset_x / NORM_RADIUS);
+    
+    if (b.label_perp_offset !== undefined) setLabelPerpOffset(b.label_perp_offset);
+    else if (b.label_offset_y !== undefined) setLabelPerpOffset(b.label_offset_y / NORM_RADIUS);
+
+    if (b.icon_radial_offset !== undefined) setIconRadialOffset(b.icon_radial_offset);
+    else if (b.icon_offset_x !== undefined) setIconRadialOffset(b.icon_offset_x / NORM_RADIUS);
+
+    if (b.icon_perp_offset !== undefined) setIconPerpOffset(b.icon_perp_offset);
+    else if (b.icon_offset_y !== undefined) setIconPerpOffset(b.icon_offset_y / NORM_RADIUS);
+
     if (b.label_font_weight       !== undefined) setFontWeight(b.label_font_weight);
     if (b.label_position          !== undefined) setLabelPosition(b.label_position);
     if (b.primary_color           !== undefined) setPrimaryColor(b.primary_color);
@@ -634,6 +700,18 @@ export default function ThemeTesterPage() {
     if (b.outer_ring_color        !== undefined) setOuterRingColor(b.outer_ring_color);
     if (b.inner_ring_color        !== undefined) setInnerRingColor(b.inner_ring_color);
     if (b.rim_tick_color          !== undefined) setRimTickColor(b.rim_tick_color);
+
+    if (b.premium_face_url) {
+      setFaceInfo({ url: b.premium_face_url, name: 'face-from-db', size: '—', width: 800, height: 800 });
+    } else {
+      setFaceInfo(null);
+    }
+
+    if (b.premium_stand_url) {
+      setStandInfo({ url: b.premium_stand_url, name: 'stand-from-db', size: '—', width: 800, height: 800 });
+    } else {
+      setStandInfo(null);
+    }
     
     if (theme.segment_palette && theme.segment_palette.length > 0) {
       const dbLength = Math.max(2, Math.min(8, theme.segment_palette.length));
@@ -648,10 +726,13 @@ export default function ThemeTesterPage() {
         (i < theme.segment_palette.length) ? (theme.segment_palette[i].image_url ?? null) : null
       ));
       
-      setSegmentImageOffsets(Array.from({ length: 8 }).map((_, i) => ({
-        x: (i < theme.segment_palette.length) ? (theme.segment_palette[i].offset_x ?? 0) : 0,
-        y: (i < theme.segment_palette.length) ? (theme.segment_palette[i].offset_y ?? 0) : 0
-      })));
+      setSegmentImageOffsets(Array.from({ length: 8 }).map((_, i) => {
+        const p = theme.segment_palette[i] || {};
+        return {
+          radial: p.icon_radial_offset ?? (p.offset_x ? p.offset_x / NORM_RADIUS : 0),
+          perp: p.icon_perp_offset ?? (p.offset_y ? p.offset_y / NORM_RADIUS : 0)
+        };
+      }));
     }
 
     const c = theme.config as any;
@@ -688,14 +769,18 @@ export default function ThemeTesterPage() {
       outer_ring_color:        outerRingColor,
       inner_ring_color:        innerRingColor,
       rim_tick_color:          rimTickColor,
-      label_font_size:   fontSize,
+      label_font_scale:  labelFontScale,
       label_font_weight: fontWeight,
       label_position:    labelPosition,
+      label_radial_offset: labelRadialOffset,
+      label_perp_offset:   labelPerpOffset,
+      icon_radial_offset:  iconRadialOffset,
+      icon_perp_offset:    iconPerpOffset,
       show_segment_labels: showLabels,
-      outer_ring_width:  faceInfo ? 0 : 20,
       premium_frame_url: frameInfo?.url ?? null,
       premium_pointer_url: pointerInfo?.url ?? null,
-      ...(faceInfo ? { inner_ring_enabled: false, rim_tick_style: 'none' } : {}),
+      // Note: outer_ring_width, inner_ring_enabled, rim_tick_style are computed dynamically
+      // based on whether premium images are present - they should NOT be saved as fixed values
     };
   }
   
@@ -879,7 +964,19 @@ export default function ThemeTesterPage() {
               </div>
               <SliderRow label="Content Scale"  value={contentScale}  min={0.2} max={1.2} step={0.05} onChange={setContentScale} />
               <SliderRow label="Center Offset Y" value={centerOffsetY} min={-80} max={80}  step={1}    unit="px" onChange={setCenterOffsetY} />
-              <SliderRow label="Font Size"        value={fontSize}      min={7}   max={22}  step={1}    unit="px" onChange={setFontSize} />
+              <SliderRow label="Font Size (Scale)" value={labelFontScale} min={0.02} max={0.2} step={0.005} onChange={setLabelFontScale} />
+              
+              <div className="pt-2 pb-1 border-t border-white/5">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Label Context Offsets (Relative)</p>
+                <SliderRow label="Radial Offset" value={labelRadialOffset} min={-0.5} max={0.5} step={0.01} onChange={setLabelRadialOffset} />
+                <SliderRow label="Perp Offset"   value={labelPerpOffset} min={-0.5} max={0.5} step={0.01} onChange={setLabelPerpOffset} />
+              </div>
+
+              <div className="pt-2 pb-1 border-t border-white/5">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider mb-3">Icon Context Offsets (Relative)</p>
+                <SliderRow label="Radial Offset" value={iconRadialOffset} min={-0.5} max={0.5} step={0.01} onChange={setIconRadialOffset} />
+                <SliderRow label="Perp Offset"   value={iconPerpOffset} min={-0.5} max={0.5} step={0.01} onChange={setIconPerpOffset} />
+              </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
@@ -938,10 +1035,43 @@ export default function ThemeTesterPage() {
                   </div>
                   <div className="space-y-2">
                     <Label className="text-xs font-bold text-foreground">Center Hub Image</Label>
-                    <DropZone 
+                    <DropZone
                       label="Logo Upload" hint="(Direct crop, any size)"
                       info={hubInfo ?? undefined} onFile={handleHubUpload} onRemove={() => setHubInfo(null)} isLoading={hubUploading}
                     />
+                    {/* Hub offset controls */}
+                    {hubInfo && (
+                      <div className="space-y-3 pt-2 border-t border-white/10">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="text-[11px] font-semibold text-muted-foreground">Radial Offset (In/Out)</label>
+                            <span className="text-[10px] font-mono text-primary">{hubOffsetX}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={hubOffsetX}
+                            onChange={(e) => setHubOffsetX(parseInt(e.target.value))}
+                            className="w-full h-1.5 accent-emerald-500 rounded-full appearance-none bg-white/10"
+                          />
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <label className="text-[11px] font-semibold text-muted-foreground">Lateral Offset (Left/Right)</label>
+                            <span className="text-[10px] font-mono text-primary">{hubOffsetY}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min={-100}
+                            max={100}
+                            value={hubOffsetY}
+                            onChange={(e) => setHubOffsetY(parseInt(e.target.value))}
+                            className="w-full h-1.5 accent-emerald-500 rounded-full appearance-none bg-white/10"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -1119,20 +1249,20 @@ export default function ThemeTesterPage() {
                          <div className="flex flex-col gap-1 px-2 border-l border-white/10 w-[90px] shrink-0">
                            <div className="flex items-center gap-1" title="Radial Offset (In/Out)">
                              <span className="text-[9px] text-muted-foreground w-2">R</span>
-                             <input type="range" min={-100} max={100} value={segmentImageOffsets[i].x} 
+                             <input type="range" min={-0.5} max={0.5} step={0.01} value={segmentImageOffsets[i].radial} 
                                onChange={(e) => {
-                                 const val = parseInt(e.target.value);
-                                 setSegmentImageOffsets(prev => prev.map((item, idx) => idx === i ? { ...item, x: val } : item));
+                                 const val = parseFloat(e.target.value);
+                                 setSegmentImageOffsets(prev => prev.map((item, idx) => idx === i ? { ...item, radial: val } : item));
                                  setCacheKey(`segimg-off-${Date.now()}`);
                                }}
                                className="w-full h-1 accent-emerald-500 rounded-full appearance-none bg-white/10" />
                            </div>
                            <div className="flex items-center gap-1" title="Lateral Offset (Left/Right)">
                              <span className="text-[9px] text-muted-foreground w-2">L</span>
-                             <input type="range" min={-50} max={50} value={segmentImageOffsets[i].y} 
+                             <input type="range" min={-0.5} max={0.5} step={0.01} value={segmentImageOffsets[i].perp} 
                                onChange={(e) => {
-                                 const val = parseInt(e.target.value);
-                                 setSegmentImageOffsets(prev => prev.map((item, idx) => idx === i ? { ...item, y: val } : item));
+                                 const val = parseFloat(e.target.value);
+                                 setSegmentImageOffsets(prev => prev.map((item, idx) => idx === i ? { ...item, perp: val } : item));
                                  setCacheKey(`segimg-off-${Date.now()}`);
                                }}
                                className="w-full h-1 accent-emerald-500 rounded-full appearance-none bg-white/10" />
@@ -1376,6 +1506,7 @@ export default function ThemeTesterPage() {
                         label="Your Custom Theme"
                         frameInfo={frameInfo} hubInfo={hubInfo} pointerInfo={pointerInfo}
                         frameOffsetX={frameOffsetX} frameOffsetY={frameOffsetY}
+                        hubOffsetX={hubOffsetX} hubOffsetY={hubOffsetY}
                       />
                     </div>
                     {/* Compare */}
@@ -1399,7 +1530,8 @@ export default function ThemeTesterPage() {
                     {([
                       ['Face Image',     faceInfo  ? '✓ custom' : '— none',  compareTemplate!.branding.premium_face_url  ? '✓ image' : '— none'],
                       ['Stand Image',    standInfo ? '✓ custom' : '— none',  compareTemplate!.branding.premium_stand_url ? '✓ image' : '— none'],
-                      ['Font Size',      `${fontSize}px`,                    `${compareTemplate!.branding.label_font_size ?? 'auto'}px`],
+                      ['Font Scale',     labelFontScale.toFixed(3),          (compareTemplate!.branding.label_font_size ? (compareTemplate!.branding.label_font_size / 138).toFixed(3) : 'auto')],
+                      ['Label Radial',   labelRadialOffset.toFixed(2),        '0.00'],
                       ['Font Weight',    fontWeight,                          compareTemplate!.branding.label_font_weight ?? '700'],
                       ['Label Position', labelPosition,                       compareTemplate!.branding.label_position ?? 'outer'],
                       ['Ring Width',     `${faceInfo ? 0 : 20}px`,           `${compareTemplate!.branding.outer_ring_width ?? 20}px`],
@@ -1420,6 +1552,7 @@ export default function ThemeTesterPage() {
                     isSpinning={isSpinning} spinSpeed={spinSpeed} cacheKey={customCacheKey}
                     frameInfo={frameInfo} hubInfo={hubInfo} pointerInfo={pointerInfo}
                     frameOffsetX={frameOffsetX} frameOffsetY={frameOffsetY}
+                    hubOffsetX={hubOffsetX} hubOffsetY={hubOffsetY}
                   />
 
                   {/* Status */}
@@ -1439,7 +1572,8 @@ export default function ThemeTesterPage() {
                     {([
                       ['Content Scale', contentScale],
                       ['Center Offset Y', `${centerOffsetY}px`],
-                      ['Font Size', `${fontSize}px`],
+                      ['Font Scale', labelFontScale.toFixed(3)],
+                      ['Label Radial', labelRadialOffset.toFixed(2)],
                       ['Font Weight', fontWeight],
                       ['Label Position', labelPosition],
                     ] as [string, string|number][]).map(([k, v]) => (

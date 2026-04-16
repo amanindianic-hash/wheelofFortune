@@ -107,7 +107,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             icon_offset_x        = ${seg.icon_offset_x ?? null},
             icon_offset_y        = ${seg.icon_offset_y ?? null},
             label_rotation_angle = ${seg.label_rotation_angle ?? null},
-            icon_rotation_angle  = ${seg.icon_rotation_angle ?? null}
+            icon_rotation_angle  = ${seg.icon_rotation_angle ?? null},
+            icon_radial_offset   = ${seg.icon_radial_offset ?? null},
+            icon_perp_offset     = ${seg.icon_perp_offset ?? null},
+            label_radial_offset  = ${seg.label_radial_offset ?? null},
+            label_perp_offset    = ${seg.label_perp_offset ?? null},
+            label_font_scale     = ${seg.label_font_scale ?? null}
           WHERE id = ${existingId}
         `;
       } else {
@@ -117,7 +122,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             wheel_id, position, label, bg_color, text_color, icon_url,
             weight, prize_id, is_no_prize, consolation_message, win_cap_daily, win_cap_total,
             label_offset_x, label_offset_y, icon_offset_x, icon_offset_y,
-            label_rotation_angle, icon_rotation_angle
+            label_rotation_angle, icon_rotation_angle,
+            icon_radial_offset, icon_perp_offset, label_radial_offset, label_perp_offset, label_font_scale
           ) VALUES (
             ${id}, ${i}, ${seg.label}, ${seg.bg_color ?? '#cccccc'}, ${seg.text_color ?? '#FFFFFF'},
             ${seg.icon_url ?? null}, ${seg.weight ?? 1.0},
@@ -125,7 +131,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             ${seg.consolation_message ?? null}, ${seg.win_cap_daily ?? null}, ${seg.win_cap_total ?? null},
             ${seg.label_offset_x ?? null}, ${seg.label_offset_y ?? null},
             ${seg.icon_offset_x ?? null}, ${seg.icon_offset_y ?? null},
-            ${seg.label_rotation_angle ?? null}, ${seg.icon_rotation_angle ?? null}
+            ${seg.label_rotation_angle ?? null}, ${seg.icon_rotation_angle ?? null},
+            ${seg.icon_radial_offset ?? null}, ${seg.icon_perp_offset ?? null},
+            ${seg.label_radial_offset ?? null}, ${seg.label_perp_offset ?? null}, ${seg.label_font_scale ?? null}
           )
         `;
       }

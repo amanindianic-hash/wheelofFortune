@@ -29,6 +29,12 @@ export interface WheelSegment {
   // Per-segment rotation overrides (degrees)
   label_rotation_angle?: number | null;
   icon_rotation_angle?: number | null;
+  // Relative placement (0-1 based on wheel radius)
+  label_radial_offset?: number | null;
+  label_perp_offset?: number | null;
+  icon_radial_offset?: number | null;
+  icon_perp_offset?: number | null;
+  label_font_scale?: number | null;
 }
 
 export interface WheelConfig {
@@ -83,6 +89,12 @@ export interface WheelBranding {
   premium_center_offset_y?: number;
   segment_image_offset_x?: number;
   segment_image_offset_y?: number;
+  // Relative placement (0-1 based on wheel radius)
+  label_font_scale?: number;
+  label_radial_offset?: number;
+  label_perp_offset?: number;
+  icon_radial_offset?: number;
+  icon_perp_offset?: number;
 }
 
 // ─── Image cache ──────────────────────────────────────────────────────────────
@@ -201,13 +213,21 @@ export function drawWheel(
     let cx = cssWidth / 2;
     let cy = cssHeight / 2;
 
-    const outerRingWidth = branding.outer_ring_width ?? 20;
-    const outerRadius = Math.min(cx, cy) - 2;
+    const intendsPremiumFace = !!branding.premium_face_url;
+    const intendsPremiumStand = !!branding.premium_stand_url;
+
+    const hasPremiumFace = branding.premium_face_url ? !!imageCache?.has(branding.premium_face_url) : false;
+    const hasPremiumStand = branding.premium_stand_url ? !!imageCache?.has(branding.premium_stand_url) : false;
+
+    // ── 1. Calculate Dimensions ──
+    // If we intend premium mode but don't have the image yet, use a small fallback ring width
+    // so the wheel doesn't look "naked" while loading.
+    const requestedRingWidth = branding.outer_ring_width ?? 20;
+    const outerRingWidth = (intendsPremiumStand && !hasPremiumStand) ? 4 : requestedRingWidth;
+
+    const outerRadius = Math.min(cx, cy) - 2.5; // Slightly more padding (from 2) for clipping safety
     let innerRadius = outerRadius - outerRingWidth;
     
-    const hasPremiumFace = branding.premium_face_url && imageCache?.has(branding.premium_face_url);
-    const hasPremiumStand = branding.premium_stand_url && imageCache?.has(branding.premium_stand_url);
-
     // Apply premium scaling and offsets for labels
     if (hasPremiumFace) {
       if (branding.premium_content_scale) {
@@ -229,10 +249,6 @@ export function drawWheel(
     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
     // ── 0. Premium Stand Layer (STATIC BACKGROUND — drawn first so wheel spins on top) ──
-    // Stand.png contains the ring frame + pedestal. It is fully opaque, including the
-    // disc area. By drawing it FIRST, the spinning Wheel.png (Layer 1) overlaps it in
-    // the disc zone, while the transparent outer area of Wheel.png lets the ring and
-    // pedestal show through. Labels (Layer 2) then appear on top of the spinning disc.
     if (hasPremiumStand) {
       const standImg = imageCache!.get(branding.premium_stand_url!);
       if (standImg) {
@@ -366,10 +382,21 @@ export function drawWheel(
       const positionRatio = branding.label_position === 'inner' ? 0.28
         : branding.label_position === 'center' ? 0.44
         : 0.58; // outer (default)
-      const autoSize = segments.length > 12 ? 9 : segments.length > 8 ? 11 : 13;
-      const fontSize = branding.label_font_size ?? autoSize;
       const fontWeight = branding.label_font_weight ?? '700';
       const letterSpacing = branding.label_letter_spacing ?? 0;
+
+      // ── Calculate dynamic Font Size ──
+      // Priority: Segment override (relative) -> Branding (relative) -> Branding (absolute px) -> auto
+      let fontSize: number;
+      if (seg.label_font_scale != null) {
+        fontSize = innerRadius * seg.label_font_scale;
+      } else if (branding.label_font_scale != null) {
+        fontSize = innerRadius * branding.label_font_scale;
+      } else {
+        const autoSize = segments.length > 12 ? 9 : segments.length > 8 ? 11 : 13;
+        fontSize = branding.label_font_size ?? autoSize;
+      }
+
       const maxChars = segments.length > 8 ? 8 : 13;
       let displayLabel = seg.label.length > maxChars
         ? seg.label.slice(0, maxChars - 1) + '…'
@@ -387,11 +414,33 @@ export function drawWheel(
         : iconPositionSetting === 'overlay' ? innerRadius * positionRatio
         : outerIconDist;
 
-      // Per-segment offsets in local coordinate system (X=radial, Y=perpendicular)
-      const ioxRaw = Number(seg.icon_offset_x ?? 0) || 0;
-      const ioyRaw = Number(seg.icon_offset_y ?? 0) || 0;
-      const loxRaw = Number(seg.label_offset_x ?? 0) || 0;
-      const loyRaw = Number(seg.label_offset_y ?? 0) || 0;
+      // ── Determine Offsets (Relative vs Absolute) ──
+      // Local segment offsets: Priority: Relative -> Absolute px
+      const ioxRawArr = [
+        seg.icon_radial_offset != null ? seg.icon_radial_offset * innerRadius : null,
+        seg.icon_offset_x
+      ].filter(v => v != null);
+      const ioxRaw = ioxRawArr.length > 0 ? Number(ioxRawArr[0]) : 0;
+
+      const ioyRawArr = [
+        seg.icon_perp_offset != null ? seg.icon_perp_offset * innerRadius : null,
+        seg.icon_offset_y
+      ].filter(v => v != null);
+      const ioyRaw = ioyRawArr.length > 0 ? Number(ioyRawArr[0]) : 0;
+
+      const loxRawArr = [
+        seg.label_radial_offset != null ? seg.label_radial_offset * innerRadius : null,
+        branding.label_radial_offset != null ? branding.label_radial_offset * innerRadius : null,
+        seg.label_offset_x
+      ].filter(v => v != null);
+      const loxRaw = loxRawArr.length > 0 ? Number(loxRawArr[0]) : 0;
+
+      const loyRawArr = [
+        seg.label_perp_offset != null ? seg.label_perp_offset * innerRadius : null,
+        branding.label_perp_offset != null ? branding.label_perp_offset * innerRadius : null,
+        seg.label_offset_y
+      ].filter(v => v != null);
+      const loyRaw = loyRawArr.length > 0 ? Number(loyRawArr[0]) : 0;
 
       if (hasIcon) {
         // Apply icon offset: transform local (X,Y) → canvas coords
@@ -679,21 +728,9 @@ export function drawWheel(
         const scale = (outerRadius * 2.5) / Math.max(frameImg.width, frameImg.height);
         const w = frameImg.width * scale;
         const h = frameImg.height * scale;
-
-        // DEBUG: Draw a colored rectangle to show where frame will be drawn
-        ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(-w / 2, -h / 2, w, h);
-
         ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
         ctx.restore();
-
-        console.log('Frame rendering:', { frameLoaded: true, w, h, scale, imgDim: `${frameImg.width}x${frameImg.height}` });
-      } else {
-        console.log('Frame not ready:', { hasImg: !!frameImg, width: frameImg?.width, height: frameImg?.height });
       }
-    } else {
-      console.log('No premium frame URL or not in cache');
     }
 
     // ── 6. Center hub with gloss ──────────────────────────────────────────────

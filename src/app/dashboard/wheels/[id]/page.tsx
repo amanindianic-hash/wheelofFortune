@@ -28,7 +28,7 @@ import {
   ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
   Palette, Type, Globe, Users, Code, QrCode,
   Share2, Monitor, Link, Camera, Search, CreditCard,
-  Dices, Circle as CircleIcon, Play, Pause, ImageIcon, X, BookMarked,
+  Dices, Circle as CircleIcon, Play, Pause, ImageIcon, X, BookMarked, Lock,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
@@ -69,24 +69,27 @@ function loadGoogleFont(fontValue: string) {
 }
 
 
-function OffsetSlider({ label, value, onChange }: {
-  label: string; value: number | null; onChange: (v: number | null) => void;
+function RelativeSlider({ label, value, min = -0.5, max = 0.5, step = 0.01, unit = '', onChange }: {
+  label: string; value: number | null; min?: number; max?: number; step?: number; unit?: string; onChange: (v: number | null) => void;
 }) {
   const v = value ?? 0;
-  const pct = ((v + 100) / 200) * 100;
+  const range = max - min;
+  const pct = ((v - min) / range) * 100;
   return (
     <div className="space-y-0.5">
       <div className="flex items-center justify-between gap-1">
         <span className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</span>
         <div className="flex items-center gap-0.5">
-          <button type="button" onClick={() => onChange(Math.max(-100, v - 1))}
+          <button type="button" onClick={() => onChange(Math.max(min, v - step))}
             className="w-4 h-4 text-[10px] rounded border border-border/50 flex items-center justify-center hover:bg-accent">−</button>
-          <span className="text-[10px] font-mono w-7 text-center tabular-nums">{v}</span>
-          <button type="button" onClick={() => onChange(Math.min(100, v + 1))}
+          <span className="text-[10px] font-mono w-9 text-center tabular-nums">
+            {v.toFixed(step < 0.1 ? 2 : 1)}{unit}
+          </span>
+          <button type="button" onClick={() => onChange(Math.min(max, v + step))}
             className="w-4 h-4 text-[10px] rounded border border-border/50 flex items-center justify-center hover:bg-accent">+</button>
         </div>
       </div>
-      <input type="range" min={-100} max={100} step={1} value={v}
+      <input type="range" min={min} max={max} step={step} value={v}
         onChange={(e) => onChange(parseFloat(e.target.value))}
         className="w-full h-1 rounded-full appearance-none cursor-pointer accent-violet-500"
         style={{ background: `linear-gradient(to right, oklch(0.55 0.22 264) ${pct}%, oklch(1 0 0 / 10%) ${pct}%)` }}
@@ -177,8 +180,23 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     const wData = await wRes.json();
     const pData = await pRes.json();
     if (!wRes.ok) { toast.error('Wheel not found'); router.push('/dashboard/wheels'); return; }
+    
+    // Normalization Layer for Legacy Data
+    const NORM_RADIUS = 138;
+    const normalizedSegments = (wData.segments ?? []).map((s: Segment) => {
+      const norm = normalizeSegment(s);
+      return {
+        ...norm,
+        label_radial_offset: norm.label_radial_offset ?? (norm.label_offset_x ? (norm.label_offset_x / NORM_RADIUS) : null),
+        label_perp_offset:   norm.label_perp_offset   ?? (norm.label_offset_y ? (norm.label_offset_y / NORM_RADIUS) : null),
+        icon_radial_offset:  norm.icon_radial_offset  ?? (norm.icon_offset_x  ? (norm.icon_offset_x  / NORM_RADIUS) : null),
+        icon_perp_offset:    norm.icon_perp_offset    ?? (norm.icon_offset_y  ? (norm.icon_offset_y  / NORM_RADIUS) : null),
+        label_font_scale:    norm.label_font_scale    ?? (wData.wheel.branding.label_font_size ? (wData.wheel.branding.label_font_size / NORM_RADIUS) : 0.08),
+      };
+    });
+
     setWheel(wData.wheel);
-    setSegments((wData.segments ?? []).map(normalizeSegment));
+    setSegments(normalizedSegments);
     setPrizes(pData.prizes ?? []);
     if (tRes.ok) { const tData = await tRes.json(); setSavedThemes(tData.themes ?? []); }
   }
@@ -295,6 +313,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   }
 
   function addSegment() {
+    if (isSegmentLocked) return; // Locked by custom theme
     if (segments.length >= 24) { toast.error('Maximum 24 segments allowed'); return; }
     const color = PLAN_COLORS[segments.length % PLAN_COLORS.length];
     const firstSeg = segments[0];
@@ -310,6 +329,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   }
 
   function removeSegment(idx: number) {
+    if (isSegmentLocked) return; // Locked by custom theme
     if (segments.length <= 2) { toast.error('Minimum 2 segments required'); return; }
     setSegments((prev) => prev.filter((_, i) => i !== idx));
   }
@@ -346,6 +366,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   if (!wheel) {
     return <div className="p-8 text-muted-foreground">Loading…</div>;
   }
+
+  // Derived: Lock segment editing when a custom theme is applied
+  const isSegmentLocked = appliedTheme?.type === 'custom';
 
   return (
     <div className="p-8 space-y-6 max-w-5xl">
@@ -405,9 +428,33 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 </div>
               )}
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">{segments.length} segments (min 2, max 24)</p>
+                <div>
+                  <p className="text-sm text-muted-foreground">{segments.length} segments (min 2, max 24)</p>
+                  {isSegmentLocked && (
+                    <p className="text-[11px] text-amber-400/80 flex items-center gap-1 mt-0.5">
+                      <Lock className="w-3 h-3" />
+                      Segment count is locked for custom themes.
+                    </p>
+                  )}
+                </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={addSegment}>+ Add Segment</Button>
+                  <div className="relative group">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={addSegment}
+                      disabled={isSegmentLocked}
+                      className={isSegmentLocked ? 'opacity-40 cursor-not-allowed' : ''}
+                    >
+                      {isSegmentLocked && <Lock className="w-3 h-3 mr-1" />}
+                      + Add Segment
+                    </Button>
+                    {isSegmentLocked && (
+                      <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-black/80 px-2 py-1 text-[10px] text-white opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50">
+                        Cannot modify segments in custom themes.
+                      </span>
+                    )}
+                  </div>
                   <Button size="sm" className="bg-violet-600 hover:bg-violet-500 shadow-[0_0_0_1px_rgb(124_58_237/0.4),0_4px_8px_-2px_rgb(124_58_237/0.3)] transition-all duration-200" onClick={saveSegments} disabled={saving}>
                     <Save className="w-3 h-3 mr-1" />
                     {saving ? 'Saving…' : 'Save Segments'}
@@ -440,7 +487,15 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                               className="h-8 text-sm" />
                           </div>
                         </div>
-                        <Button variant="ghost" size="sm" className="text-red-500 shrink-0" onClick={() => removeSegment(idx)}>✕</Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className={`shrink-0 ${isSegmentLocked ? 'text-muted-foreground opacity-30 cursor-not-allowed' : 'text-red-500'}`}
+                          onClick={() => !isSegmentLocked && removeSegment(idx)}
+                          title={isSegmentLocked ? 'Cannot modify segments in custom themes.' : 'Remove segment'}
+                        >
+                          {isSegmentLocked ? <Lock className="w-3 h-3" /> : '✕'}
+                        </Button>
                       </div>
                       {/* Icon URL */}
                       <div className="space-y-1">
@@ -468,20 +523,22 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                         </div>
                         <div className="space-y-1.5">
                           <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Label</span>
-                          <OffsetSlider label="X  (radial — outward)" value={seg.label_offset_x ?? null}
-                            onChange={(v) => updateSegment(idx, 'label_offset_x', v)} />
-                          <OffsetSlider label="Y  (perpendicular)" value={seg.label_offset_y ?? null}
-                            onChange={(v) => updateSegment(idx, 'label_offset_y', v)} />
+                          <RelativeSlider label="Radial Offset" value={seg.label_radial_offset ?? null} min={0} max={1}
+                            onChange={(v) => updateSegment(idx, 'label_radial_offset', v)} />
+                          <RelativeSlider label="Lateral Offset" value={seg.label_perp_offset ?? null}
+                            onChange={(v) => updateSegment(idx, 'label_perp_offset', v)} />
+                          <RelativeSlider label="Font Scale" value={seg.label_font_scale ?? null} min={0.02} max={0.2} step={0.005}
+                            onChange={(v) => updateSegment(idx, 'label_font_scale', v)} />
                           <AngleSlider label="Rotation" value={seg.label_rotation_angle ?? null}
                             onChange={(v) => updateSegment(idx, 'label_rotation_angle', v)} />
                         </div>
                         {seg.icon_url && (
                           <div className="space-y-1.5">
                             <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Icon</span>
-                            <OffsetSlider label="X  (radial — outward)" value={seg.icon_offset_x ?? null}
-                              onChange={(v) => updateSegment(idx, 'icon_offset_x', v)} />
-                            <OffsetSlider label="Y  (perpendicular)" value={seg.icon_offset_y ?? null}
-                              onChange={(v) => updateSegment(idx, 'icon_offset_y', v)} />
+                            <RelativeSlider label="Radial Offset" value={seg.icon_radial_offset ?? null} min={0} max={1}
+                              onChange={(v) => updateSegment(idx, 'icon_radial_offset', v)} />
+                            <RelativeSlider label="Lateral Offset" value={seg.icon_perp_offset ?? null}
+                              onChange={(v) => updateSegment(idx, 'icon_perp_offset', v)} />
                             <AngleSlider label="Rotation" value={seg.icon_rotation_angle ?? null}
                               onChange={(v) => updateSegment(idx, 'icon_rotation_angle', v)} />
                           </div>
@@ -771,6 +828,29 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                       </Select>
                     </div>
                   </div>
+
+                  {/* Relative Placement Overrides */}
+                  <div className="pt-2 pb-1 border-t border-white/5 space-y-3">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Global Label Placement (Relative)</p>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                       <RelativeSlider label="Font Scale" value={wheel.branding.label_font_scale ?? null} min={0.02} max={0.2} step={0.005}
+                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, label_font_scale: v ?? undefined } })} />
+                       <RelativeSlider label="Radial Offset" value={wheel.branding.label_radial_offset ?? null} min={0} max={1}
+                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, label_radial_offset: v ?? undefined } })} />
+                       <RelativeSlider label="Lateral Offset" value={wheel.branding.label_perp_offset ?? null}
+                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, label_perp_offset: v ?? undefined } })} />
+                    </div>
+                  </div>
+
+                  <div className="pt-2 pb-1 border-t border-white/5 space-y-3">
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Global Icon Placement (Relative)</p>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                       <RelativeSlider label="Radial Offset" value={wheel.branding.icon_radial_offset ?? null} min={0} max={1}
+                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, icon_radial_offset: v ?? undefined } })} />
+                       <RelativeSlider label="Lateral Offset" value={wheel.branding.icon_perp_offset ?? null}
+                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, icon_perp_offset: v ?? undefined } })} />
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -942,6 +1022,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                       ...(cfg.premium_stand_url       !== undefined ? { premium_stand_url:       cfg.premium_stand_url       } : {}),
                                       ...(cfg.premium_content_scale   !== undefined ? { premium_content_scale:   cfg.premium_content_scale   } : {}),
                                       ...(cfg.premium_center_offset_y !== undefined ? { premium_center_offset_y: cfg.premium_center_offset_y } : {}),
+                                      ...(cfg.label_font_scale        !== undefined ? { label_font_scale:        cfg.label_font_scale        } : {}),
+                                      ...(cfg.label_radial_offset     !== undefined ? { label_radial_offset:     cfg.label_radial_offset     } : {}),
+                                      ...(cfg.label_perp_offset       !== undefined ? { label_perp_offset:       cfg.label_perp_offset       } : {}),
+                                      ...(cfg.icon_radial_offset      !== undefined ? { icon_radial_offset:      cfg.icon_radial_offset      } : {}),
+                                      ...(cfg.icon_perp_offset        !== undefined ? { icon_perp_offset:        cfg.icon_perp_offset        } : {}),
                                       ...(cfg.label_font_size         !== undefined ? { label_font_size:         cfg.label_font_size         } : {}),
                                       ...(cfg.label_font_weight       !== undefined ? { label_font_weight:       cfg.label_font_weight       } : {}),
                                       ...(cfg.label_position          !== undefined ? { label_position:          cfg.label_position          } : {}),
@@ -1678,10 +1763,10 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                   premium_pointer_url: tb.premium_pointer_url ?? null,
                                 },
                               });
-                              if (theme.segment_palette.length > 0) {
+                              if (theme.segment_palette && theme.segment_palette.length > 0) {
                                 setSegments((prev) => {
-                                  // Sync segment count and properties to theme
-                                  return theme.segment_palette.map((palette: any, i: number) => {
+                                  // Create segments array with EXACTLY the length of the saved palette
+                                  const newSegments = theme.segment_palette.map((palette: any, i: number) => {
                                     const existing = prev[i];
                                     return {
                                       id: existing?.id ?? `temp-${Date.now()}-${i}`,
@@ -1692,9 +1777,16 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                       text_color: palette.text_color,
                                       // Explicitly clear or set icons and offsets from the theme
                                       // to prevent "state leak" from previously applied themes.
-                                      icon_url:      palette.image_url ?? null,
-                                      icon_offset_x: palette.offset_x  ?? null,
-                                      icon_offset_y: palette.offset_y  ?? null,
+                                      icon_url: palette.image_url ?? null,
+                                      // Relative offset fields (saved by theme-tester)
+                                      icon_radial_offset:  palette.icon_radial_offset  ?? null,
+                                      icon_perp_offset:    palette.icon_perp_offset    ?? null,
+                                      label_radial_offset: palette.label_radial_offset ?? null,
+                                      label_perp_offset:   palette.label_perp_offset   ?? null,
+                                      label_font_scale:    palette.label_font_scale     ?? null,
+                                      // Explicitly null legacy absolute-px fields to prevent stale values
+                                      icon_offset_x: null,
+                                      icon_offset_y: null,
                                       weight: existing?.weight ?? 1.0,
                                       prize_id: existing?.prize_id ?? null,
                                       is_no_prize: existing?.is_no_prize ?? true,
@@ -1702,9 +1794,12 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                       wins_total: existing?.wins_total ?? 0,
                                     };
                                   });
+                                  // Log segment count for debugging
+                                  console.log(`Applying theme with ${newSegments.length} segments from palette`);
+                                  return newSegments;
                                 });
                                 setAppliedTheme({ id: theme.id, name: theme.name, emoji: theme.emoji, type: 'custom' });
-                                toast.success(`"${theme.name}" applied — save to persist`);
+                                toast.success(`"${theme.name}" applied (${theme.segment_palette.length} segments) — save to persist`);
                               } else {
                                 setAppliedTheme({ id: theme.id, name: theme.name, emoji: theme.emoji, type: 'custom' });
                                 toast.warning(`"${theme.name}" branding applied — this theme has no segment colors saved`);

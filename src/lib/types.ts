@@ -139,6 +139,12 @@ export interface WheelBranding {
   premium_center_offset_y?: number;   // e.g. 10 to shift rotation center down if image is not vertically centered
   segment_image_offset_x?: number;    // px offset for segment custom images (radial axis)
   segment_image_offset_y?: number;    // px offset for segment custom images (perpendicular axis)
+  // Relative placement (0-1 based on wheel radius)
+  label_font_scale?: number;          // font size relative to wheel radius (e.g. 0.08)
+  label_radial_offset?: number;       // relative radial offset (0-1)
+  label_perp_offset?: number;         // relative perpendicular offset (-1 to 1)
+  icon_radial_offset?: number;        // relative radial offset (0-1)
+  icon_perp_offset?: number;          // relative perpendicular offset (-1 to 1)
 }
 
 export interface WheelFormConfig {
@@ -208,6 +214,12 @@ export interface Segment {
   // Per-segment rotation overrides (degrees, applied on top of the radial rotation)
   label_rotation_angle?: number | null; // degrees: 180 = flip, 90 = sideways
   icon_rotation_angle?: number | null;  // degrees: rotates image inside its circle
+  // Relative placement overrides (priority over absolute px offsets)
+  label_radial_offset?: number | null;
+  label_perp_offset?: number | null;
+  icon_radial_offset?: number | null;
+  icon_perp_offset?: number | null;
+  label_font_scale?: number | null;
 }
 
 export interface Prize {

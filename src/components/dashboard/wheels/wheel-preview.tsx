@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { drawWheel, preloadSegmentImages } from '@/lib/utils/wheel-renderer';
 import type { WheelSegment, WheelConfig, WheelBranding, ImageCache } from '@/lib/utils/wheel-renderer';
 
@@ -14,14 +14,28 @@ interface WheelPreviewProps {
 export function WheelPreview({ segments, config, branding, rotation = 0 }: WheelPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageCacheRef = useRef<ImageCache>(new Map());
+  // Use a state to force re-render once images are preloaded
+  const [loadTrigger, setLoadTrigger] = useState(0);
 
   useEffect(() => {
-    async function draw() {
+    let active = true;
+    async function updatePreview() {
       if (!canvasRef.current) return;
+      
+      // Preload images (this is async)
       await preloadSegmentImages(segments, config, branding, imageCacheRef.current);
+      
+      if (!active) return;
+      
+      // Draw to canvas
       drawWheel(canvasRef.current, segments, rotation, config, branding, imageCacheRef.current);
+      
+      // Slightly delay a secondary trigger to ensure all cache hits are accounted for
+      // in case of race conditions with the browser's image loading
+      setLoadTrigger(prev => prev + 1);
     }
-    draw();
+    updatePreview();
+    return () => { active = false; };
   }, [segments, config, branding, rotation]);
 
   const pointerColor = branding.primary_color || '#7C3AED';
@@ -30,7 +44,7 @@ export function WheelPreview({ segments, config, branding, rotation = 0 }: Wheel
     <div className="flex flex-col items-center justify-center gap-4 bg-muted/30 rounded-xl p-8 border border-dashed border-muted-foreground/20">
       <div className="relative isolate pt-4">
         {/* Premium 3D Pointer */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none">
           {/* Base Mount */}
           <div className="w-8 h-4 bg-gradient-to-b from-[#f8f9fa] to-[#d1d5db] rounded-t-md shadow-sm border border-b-0 border-black/10 relative z-10" />
           {/* Arrow */}
@@ -48,21 +62,29 @@ export function WheelPreview({ segments, config, branding, rotation = 0 }: Wheel
           </div>
         </div>
 
-        <canvas
-          ref={canvasRef}
-          width={720} // Rendering at 2x internally for crisp graphics
-          height={720}
-          className="rounded-full shadow-2xl w-[360px] h-[360px]"
+        {/* 
+            Container for the canvas. We use the container for clipping/shadow 
+            to prevent the canvas element's rounded-full from clipping 
+            high-fidelity premium rims drawn near the edge.
+        */}
+        <div 
+          className="rounded-full shadow-2xl overflow-hidden w-[360px] h-[360px] z-10"
           style={{
-            // Use the theme's background colour so premium transparent wheels
-            // don't show a white canvas. Fall back to transparent.
             background:
               branding.background_value &&
               branding.background_value !== 'rgba(0, 0, 0, 0)'
                 ? branding.background_value
                 : 'transparent',
           }}
-        />
+        >
+          <canvas
+            ref={canvasRef}
+            width={720}
+            height={720}
+            className="w-full h-full"
+            style={{ display: 'block' }}
+          />
+        </div>
       </div>
 
       <div className="text-center">

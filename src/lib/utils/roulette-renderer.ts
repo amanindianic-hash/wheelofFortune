@@ -119,36 +119,46 @@ export function drawRoulette(
 
     // Icon + Label — radial, readable from outside
     const midA      = startA + segAngle / 2;
-    const labelDist = wheelR * 0.62;
-    const fontSize  = Math.max(7, Math.min(13, 170 / n));
+    const fontSize  = ((branding.label_font_scale ?? 0.07) * wheelR) || Math.max(7, Math.min(13, 170 / n));
     const img       = seg.icon_url ? imageCache[seg.icon_url] : null;
 
+    // Use relative offsets if available, otherwise fallback to defaults
+    const labelRadOffset = (branding.label_radial_offset ?? 0.62) * wheelR;
+    const labelPerpOffset = (branding.label_perp_offset ?? 0) * wheelR;
+    const iconRadOffset = (branding.icon_radial_offset ?? 0.8) * wheelR;
+    const iconPerpOffset = (branding.icon_perp_offset ?? 0) * wheelR;
+
+    // Label Draw
     ctx.save();
     ctx.translate(
-      cx + Math.cos(midA) * labelDist,
-      cy + Math.sin(midA) * labelDist,
+      cx + Math.cos(midA) * labelRadOffset + Math.cos(midA + Math.PI / 2) * labelPerpOffset,
+      cy + Math.sin(midA) * labelRadOffset + Math.sin(midA + Math.PI / 2) * labelPerpOffset,
     );
     ctx.rotate(midA + Math.PI / 2);
 
-    if (img) {
-      const iconSize = Math.min(fontSize * 2.2, 20);
-      const labelOffset = iconSize * 0.6 + 2;
-      ctx.drawImage(img, -iconSize / 2, -iconSize - 2, iconSize, iconSize);
-      ctx.fillStyle = seg.text_color;
-      ctx.font = `bold ${fontSize * 0.85}px Inter, system-ui, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const lbl = seg.label.length > 5 ? seg.label.slice(0, 4) + '…' : seg.label;
-      ctx.fillText(lbl, 0, labelOffset);
-    } else {
-      ctx.fillStyle = seg.text_color;
-      ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      const lbl = seg.label.length > 7 ? seg.label.slice(0, 6) + '…' : seg.label;
-      ctx.fillText(lbl, 0, 0);
-    }
+    ctx.fillStyle = seg.text_color;
+    ctx.font = `bold ${fontSize}px Inter, system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Auto-truncate long labels for roulette
+    const labelLimit = n > 12 ? 4 : 7;
+    const lbl = seg.label.length > labelLimit ? seg.label.slice(0, labelLimit - 1) + '…' : seg.label;
+    ctx.fillText(lbl, 0, 0);
     ctx.restore();
+
+    // Icon Draw (if exists)
+    if (img) {
+      ctx.save();
+      ctx.translate(
+        cx + Math.cos(midA) * iconRadOffset + Math.cos(midA + Math.PI / 2) * iconPerpOffset,
+        cy + Math.sin(midA) * iconRadOffset + Math.sin(midA + Math.PI / 2) * iconPerpOffset,
+      );
+      ctx.rotate(midA + Math.PI / 2);
+      const iconSize = Math.min(fontSize * 2.2, 20);
+      ctx.drawImage(img, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+      ctx.restore();
+    }
   }
 
   // ── Pocket divider ticks on the track inner wall ───────────────────────────
