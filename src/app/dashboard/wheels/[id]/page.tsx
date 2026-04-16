@@ -325,6 +325,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       label_offset_y: firstSeg?.label_offset_y ?? null,
       icon_offset_x:  firstSeg?.icon_offset_x  ?? null,
       icon_offset_y:  firstSeg?.icon_offset_y  ?? null,
+      label_radial_offset: firstSeg?.label_radial_offset ?? null,
+      label_perp_offset:   firstSeg?.label_perp_offset   ?? null,
+      icon_radial_offset:  firstSeg?.icon_radial_offset  ?? null,
+      icon_perp_offset:    firstSeg?.icon_perp_offset    ?? null,
+      label_font_scale:    firstSeg?.label_font_scale    ?? null,
     }]);
   }
 
@@ -342,6 +347,11 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       label_offset_y:       src.label_offset_y       ?? null,
       icon_offset_x:        src.icon_offset_x        ?? null,
       icon_offset_y:        src.icon_offset_y        ?? null,
+      label_radial_offset:  src.label_radial_offset  ?? null,
+      label_perp_offset:    src.label_perp_offset    ?? null,
+      icon_radial_offset:   src.icon_radial_offset   ?? null,
+      icon_perp_offset:     src.icon_perp_offset     ?? null,
+      label_font_scale:     src.label_font_scale     ?? null,
       label_rotation_angle: src.label_rotation_angle ?? null,
       icon_rotation_angle:  src.icon_rotation_angle  ?? null,
     })));

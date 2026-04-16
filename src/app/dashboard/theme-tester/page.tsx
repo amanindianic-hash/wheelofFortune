@@ -1317,7 +1317,7 @@ export default function ThemeTesterPage() {
                           setNumSegments(prev => prev - 1);
                           setSegmentPalette(prev => prev.filter((_, idx) => idx !== i).concat([{bg_color: '#5B21B6', text_color: '#FFFFFF'}]));
                           setSegmentImages(prev => prev.filter((_, idx) => idx !== i).concat([null]));
-                          setSegmentImageOffsets(prev => prev.filter((_, idx) => idx !== i).concat([{x: 0, y: 0}]));
+                          setSegmentImageOffsets(prev => prev.filter((_, idx) => idx !== i).concat([{ radial: 0, perp: 0 }]));
                           setCacheKey(`segm-del-${Date.now()}`);
                         }}
                         disabled={numSegments <= 2}
