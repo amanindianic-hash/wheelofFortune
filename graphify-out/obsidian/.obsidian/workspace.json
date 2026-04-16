@@ -176,8 +176,44 @@
       "bases:Create new base": false
     }
   },
-  "active": "f3a08dec58a1b029",
+  "floating": {
+    "id": "31acc8814873eee1",
+    "type": "floating",
+    "children": [
+      {
+        "id": "7eee657ba90c5889",
+        "type": "window",
+        "children": [
+          {
+            "id": "afa6f42d70eb923c",
+            "type": "tabs",
+            "children": [
+              {
+                "id": "1d2026647aed7178",
+                "type": "leaf",
+                "state": {
+                  "type": "empty",
+                  "state": {},
+                  "icon": "lucide-file",
+                  "title": "New tab"
+                }
+              }
+            ]
+          }
+        ],
+        "direction": "vertical",
+        "x": 244,
+        "y": 33,
+        "width": 1024,
+        "height": 800,
+        "maximize": false,
+        "zoom": 0
+      }
+    ]
+  },
+  "active": "1d2026647aed7178",
   "lastOpenFiles": [
+    "makeGetRequest()_1.md",
     "route.ts_5.md",
     "Untitled"
   ]

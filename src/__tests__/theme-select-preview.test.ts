@@ -327,7 +327,9 @@ describe('Live preview state simulation', () => {
       segmentPalette: [{ bg_color: '#CCCCCC', text_color: '#000000' }],
     };
     const { branding } = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, configOnlyTheme);
-    expect(branding.primary_color).toBe('#123456'); // base preserved
-    expect(branding.background_value).toBe('#ffffff'); // base preserved
+    // Note: Applying a theme now forces a branding reset to prevent data leaks.
+    // Core brand colors are reset to platform defaults if not specified by the theme.
+    expect(branding.primary_color).toBe('#7C3AED'); // platform default
+    expect(branding.background_value).toBe('#FFFFFF'); // platform default
   });
 });
