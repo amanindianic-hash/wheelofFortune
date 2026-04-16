@@ -46,25 +46,45 @@ interface SavedTheme {
   description: string;
   branding: Partial<WheelBranding>;
   config: Partial<WheelConfig>;
-  segment_palette: Array<{ bg_color: string; text_color: string }>;
+  segment_palette: Array<{
+    bg_color: string;
+    text_color: string;
+    image_url?: string | null;
+    icon_radial_offset?: number | null;
+    icon_perp_offset?: number | null;
+    offset_x?: number | null;
+    offset_y?: number | null;
+  }>;
   created_at: string;
   updated_at: string;
 }
 
 // ── Build segments from a template palette ───────────────────────────────────
 function buildSegmentsFromPalette(
-  palette: Array<{ bg_color: string; text_color: string }>,
+  palette: Array<{
+    bg_color: string;
+    text_color: string;
+    image_url?: string | null;
+    icon_radial_offset?: number | null;
+    icon_perp_offset?: number | null;
+  }>,
   labels = PREVIEW_LABELS,
 ): WheelSegment[] {
-  return labels.map((label, i) => ({
-    id: String(i + 1),
-    position: i,
-    label,
-    bg_color:   palette[i % palette.length].bg_color,
-    text_color: palette[i % palette.length].text_color,
-    weight: 1,
-    is_no_prize: false,
-  }));
+  return labels.map((label, i) => {
+    const p = palette[i % palette.length];
+    return {
+      id: String(i + 1),
+      position: i,
+      label,
+      bg_color:   p.bg_color,
+      text_color: p.text_color,
+      icon_url:   p.image_url ?? null,
+      icon_radial_offset: p.icon_radial_offset ?? null,
+      icon_perp_offset: p.icon_perp_offset ?? null,
+      weight: 1,
+      is_no_prize: false,
+    };
+  });
 }
 
 // ── Spinning Canvas ──────────────────────────────────────────────────────────
