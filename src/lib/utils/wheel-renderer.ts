@@ -35,6 +35,7 @@ export interface WheelSegment {
   icon_radial_offset?: number | null;
   icon_perp_offset?: number | null;
   label_font_scale?: number | null;
+  [key: string]: any;
 }
 
 export interface WheelConfig {
@@ -49,6 +50,7 @@ export interface WheelConfig {
   kiosk_mode?: boolean;
   kiosk_reset_delay_ms?: number;
   shopify_store_url?: string | null;
+  [key: string]: any;
 }
 
 export interface WheelBranding {
@@ -95,6 +97,7 @@ export interface WheelBranding {
   label_perp_offset?: number;
   icon_radial_offset?: number;
   icon_perp_offset?: number;
+  [key: string]: any;
 }
 
 // ─── Image cache ──────────────────────────────────────────────────────────────

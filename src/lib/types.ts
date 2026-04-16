@@ -86,6 +86,7 @@ export interface WheelConfig {
 
   // ── Shopify integration ───────────────────────────────────────────────────
   shopify_store_url?: string | null;                               // e.g. https://mystore.myshopify.com
+  [key: string]: any;
 }
 
 export interface SlotConfig {
@@ -98,6 +99,7 @@ export interface SlotConfig {
   slot_win_line_color?: string;
   sound_enabled?: boolean;
   sound_url?: string | null;
+  [key: string]: any;
 }
 
 export interface WheelBranding {
@@ -160,6 +162,7 @@ export interface WheelFormConfig {
   gdpr_text?: string;
   privacy_policy_url?: string | null;
   terms_url?: string | null;
+  [key: string]: any;
 }
 
 export interface WheelTriggerRules {
@@ -170,6 +173,7 @@ export interface WheelTriggerRules {
     mode: 'allow' | 'block';        // 'allow' = only show to these countries, 'block' = hide from them
     countries: string[];             // ISO 3166-1 alpha-2 codes, e.g. ['IN','US','GB']
   } | null;
+  [key: string]: any;
 }
 
 export interface Wheel {
@@ -189,6 +193,7 @@ export interface Wheel {
   form_config: WheelFormConfig;
   created_at: string;
   deleted_at?: string | null;
+  [key: string]: any;
 }
 
 export interface Segment {

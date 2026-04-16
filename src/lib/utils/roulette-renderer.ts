@@ -12,6 +12,12 @@ export interface RouletteSegment {
 export interface RouletteBranding {
   primary_color?: string;
   roulette_pocket_style?: 'classic' | 'modern' | 'neon';
+  label_font_scale?: number;
+  label_radial_offset?: number;
+  label_perp_offset?: number;
+  icon_radial_offset?: number;
+  icon_perp_offset?: number;
+  [key: string]: any;
 }
 
 /**
