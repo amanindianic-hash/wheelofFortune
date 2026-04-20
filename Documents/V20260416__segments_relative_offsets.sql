@@ -6,8 +6,8 @@
 -- =============================================================================
 
 ALTER TABLE segments
-  ADD COLUMN IF NOT EXISTS icon_radial_offset  NUMERIC(8,4) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS icon_perp_offset    NUMERIC(8,4) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS label_radial_offset NUMERIC(8,4) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS label_perp_offset   NUMERIC(8,4) DEFAULT NULL,
-  ADD COLUMN IF NOT EXISTS label_font_scale    NUMERIC(8,4) DEFAULT NULL;
+  ADD COLUMN IF NOT EXISTS icon_radial_offset     NUMERIC(8,4) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS icon_tangential_offset NUMERIC(8,4) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS label_radial_offset    NUMERIC(8,4) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS label_tangential_offset NUMERIC(8,4) DEFAULT NULL,
+  ADD COLUMN IF NOT EXISTS label_font_scale       NUMERIC(8,4) DEFAULT NULL;
