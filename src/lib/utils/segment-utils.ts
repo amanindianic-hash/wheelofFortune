@@ -18,9 +18,10 @@ export function normalizeSegment<T>(s: T): T {
     label_rotation_angle: input.label_rotation_angle != null ? parseFloat(input.label_rotation_angle as string) : null,
     icon_rotation_angle:  input.icon_rotation_angle  != null ? parseFloat(input.icon_rotation_angle  as string) : null,
     icon_radial_offset:   input.icon_radial_offset   != null ? parseFloat(input.icon_radial_offset   as string) : null,
-    icon_perp_offset:     input.icon_perp_offset     != null ? parseFloat(input.icon_perp_offset     as string) : null,
+    icon_tangential_offset: input.icon_tangential_offset     != null ? parseFloat(input.icon_tangential_offset     as string) : null,
     label_radial_offset:  input.label_radial_offset  != null ? parseFloat(input.label_radial_offset  as string) : null,
-    label_perp_offset:    input.label_perp_offset    != null ? parseFloat(input.label_perp_offset    as string) : null,
+    label_tangential_offset:    input.label_tangential_offset    != null ? parseFloat(input.label_tangential_offset    as string) : null,
     label_font_scale:     input.label_font_scale     != null ? parseFloat(input.label_font_scale     as string) : null,
+    icon_scale:           input.icon_scale           != null ? parseFloat(input.icon_scale           as string) : null,
   } as T;
 }

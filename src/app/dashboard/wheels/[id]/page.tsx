@@ -188,9 +188,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       return {
         ...norm,
         label_radial_offset: norm.label_radial_offset ?? (norm.label_offset_x ? (norm.label_offset_x / NORM_RADIUS) : null),
-        label_perp_offset:   norm.label_perp_offset   ?? (norm.label_offset_y ? (norm.label_offset_y / NORM_RADIUS) : null),
+        label_tangential_offset: norm.label_tangential_offset ?? (norm.label_offset_y ? (norm.label_offset_y / NORM_RADIUS) : null),
         icon_radial_offset:  norm.icon_radial_offset  ?? (norm.icon_offset_x  ? (norm.icon_offset_x  / NORM_RADIUS) : null),
-        icon_perp_offset:    norm.icon_perp_offset    ?? (norm.icon_offset_y  ? (norm.icon_offset_y  / NORM_RADIUS) : null),
+        icon_tangential_offset: norm.icon_tangential_offset ?? (norm.icon_offset_y  ? (norm.icon_offset_y  / NORM_RADIUS) : null),
         label_font_scale:    norm.label_font_scale    ?? (wData.wheel.branding.label_font_size ? (wData.wheel.branding.label_font_size / NORM_RADIUS) : 0.08),
       };
     });
@@ -326,9 +326,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       icon_offset_x:  firstSeg?.icon_offset_x  ?? null,
       icon_offset_y:  firstSeg?.icon_offset_y  ?? null,
       label_radial_offset: firstSeg?.label_radial_offset ?? null,
-      label_perp_offset:   firstSeg?.label_perp_offset   ?? null,
+      label_tangential_offset: firstSeg?.label_tangential_offset ?? null,
       icon_radial_offset:  firstSeg?.icon_radial_offset  ?? null,
-      icon_perp_offset:    firstSeg?.icon_perp_offset    ?? null,
+      icon_tangential_offset: firstSeg?.icon_tangential_offset ?? null,
       label_font_scale:    firstSeg?.label_font_scale    ?? null,
     }]);
   }
@@ -348,9 +348,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       icon_offset_x:        src.icon_offset_x        ?? null,
       icon_offset_y:        src.icon_offset_y        ?? null,
       label_radial_offset:  src.label_radial_offset  ?? null,
-      label_perp_offset:    src.label_perp_offset    ?? null,
+      label_tangential_offset: src.label_tangential_offset ?? null,
       icon_radial_offset:   src.icon_radial_offset   ?? null,
-      icon_perp_offset:     src.icon_perp_offset     ?? null,
+      icon_tangential_offset: src.icon_tangential_offset ?? null,
       label_font_scale:     src.label_font_scale     ?? null,
       label_rotation_angle: src.label_rotation_angle ?? null,
       icon_rotation_angle:  src.icon_rotation_angle  ?? null,
@@ -535,8 +535,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                           <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Label</span>
                           <RelativeSlider label="Radial Offset" value={seg.label_radial_offset ?? null} min={0} max={1}
                             onChange={(v) => updateSegment(idx, 'label_radial_offset', v)} />
-                          <RelativeSlider label="Lateral Offset" value={seg.label_perp_offset ?? null}
-                            onChange={(v) => updateSegment(idx, 'label_perp_offset', v)} />
+                          <RelativeSlider label="Lateral Offset" value={seg.label_tangential_offset ?? null}
+                            onChange={(v) => updateSegment(idx, 'label_tangential_offset', v)} />
                           <RelativeSlider label="Font Scale" value={seg.label_font_scale ?? null} min={0.02} max={0.2} step={0.005}
                             onChange={(v) => updateSegment(idx, 'label_font_scale', v)} />
                           <AngleSlider label="Rotation" value={seg.label_rotation_angle ?? null}
@@ -547,8 +547,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                             <span className="text-[10px] text-muted-foreground/60 uppercase tracking-wider">Icon</span>
                             <RelativeSlider label="Radial Offset" value={seg.icon_radial_offset ?? null} min={0} max={1}
                               onChange={(v) => updateSegment(idx, 'icon_radial_offset', v)} />
-                            <RelativeSlider label="Lateral Offset" value={seg.icon_perp_offset ?? null}
-                              onChange={(v) => updateSegment(idx, 'icon_perp_offset', v)} />
+                            <RelativeSlider label="Lateral Offset" value={seg.icon_tangential_offset ?? null}
+                              onChange={(v) => updateSegment(idx, 'icon_tangential_offset', v)} />
                             <AngleSlider label="Rotation" value={seg.icon_rotation_angle ?? null}
                               onChange={(v) => updateSegment(idx, 'icon_rotation_angle', v)} />
                           </div>
@@ -847,8 +847,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                          onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, label_font_scale: v ?? undefined } })} />
                        <RelativeSlider label="Radial Offset" value={wheel.branding.label_radial_offset ?? null} min={0} max={1}
                          onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, label_radial_offset: v ?? undefined } })} />
-                       <RelativeSlider label="Lateral Offset" value={wheel.branding.label_perp_offset ?? null}
-                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, label_perp_offset: v ?? undefined } })} />
+                       <RelativeSlider label="Lateral Offset" value={wheel.branding.label_tangential_offset ?? null}
+                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, label_tangential_offset: v ?? undefined } })} />
                     </div>
                   </div>
 
@@ -857,8 +857,8 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
                        <RelativeSlider label="Radial Offset" value={wheel.branding.icon_radial_offset ?? null} min={0} max={1}
                          onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, icon_radial_offset: v ?? undefined } })} />
-                       <RelativeSlider label="Lateral Offset" value={wheel.branding.icon_perp_offset ?? null}
-                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, icon_perp_offset: v ?? undefined } })} />
+                       <RelativeSlider label="Lateral Offset" value={wheel.branding.icon_tangential_offset ?? null}
+                         onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, icon_tangential_offset: v ?? undefined } })} />
                     </div>
                   </div>
                 </CardContent>
@@ -1034,9 +1034,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                       ...(cfg.premium_center_offset_y !== undefined ? { premium_center_offset_y: cfg.premium_center_offset_y } : {}),
                                       ...(cfg.label_font_scale        !== undefined ? { label_font_scale:        cfg.label_font_scale        } : {}),
                                       ...(cfg.label_radial_offset     !== undefined ? { label_radial_offset:     cfg.label_radial_offset     } : {}),
-                                      ...(cfg.label_perp_offset       !== undefined ? { label_perp_offset:       cfg.label_perp_offset       } : {}),
+                                      ...(cfg.label_tangential_offset !== undefined ? { label_tangential_offset: cfg.label_tangential_offset } : {}),
                                       ...(cfg.icon_radial_offset      !== undefined ? { icon_radial_offset:      cfg.icon_radial_offset      } : {}),
-                                      ...(cfg.icon_perp_offset        !== undefined ? { icon_perp_offset:        cfg.icon_perp_offset        } : {}),
+                                      ...(cfg.icon_tangential_offset !== undefined ? { icon_tangential_offset:  cfg.icon_tangential_offset  } : {}),
                                       ...(cfg.label_font_size         !== undefined ? { label_font_size:         cfg.label_font_size         } : {}),
                                       ...(cfg.label_font_weight       !== undefined ? { label_font_weight:       cfg.label_font_weight       } : {}),
                                       ...(cfg.label_position          !== undefined ? { label_position:          cfg.label_position          } : {}),
@@ -1790,9 +1790,9 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                                       icon_url: palette.image_url ?? null,
                                       // Relative offset fields (saved by theme-tester)
                                       icon_radial_offset:  palette.icon_radial_offset  ?? null,
-                                      icon_perp_offset:    palette.icon_perp_offset    ?? null,
+                                      icon_tangential_offset: palette.icon_tangential_offset ?? null,
                                       label_radial_offset: palette.label_radial_offset ?? null,
-                                      label_perp_offset:   palette.label_perp_offset   ?? null,
+                                      label_tangential_offset: palette.label_tangential_offset ?? null,
                                       label_font_scale:    palette.label_font_scale     ?? null,
                                       // Explicitly null legacy absolute-px fields to prevent stale values
                                       icon_offset_x: null,

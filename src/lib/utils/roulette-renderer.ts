@@ -14,9 +14,9 @@ export interface RouletteBranding {
   roulette_pocket_style?: 'classic' | 'modern' | 'neon';
   label_font_scale?: number;
   label_radial_offset?: number;
-  label_perp_offset?: number;
+  label_tangential_offset?: number;
   icon_radial_offset?: number;
-  icon_perp_offset?: number;
+  icon_tangential_offset?: number;
   [key: string]: any;
 }
 
@@ -130,15 +130,15 @@ export function drawRoulette(
 
     // Use relative offsets if available, otherwise fallback to defaults
     const labelRadOffset = (branding.label_radial_offset ?? 0.62) * wheelR;
-    const labelPerpOffset = (branding.label_perp_offset ?? 0) * wheelR;
+    const labelTangentialOffset = (branding.label_tangential_offset ?? 0) * wheelR;
     const iconRadOffset = (branding.icon_radial_offset ?? 0.8) * wheelR;
-    const iconPerpOffset = (branding.icon_perp_offset ?? 0) * wheelR;
+    const iconTangentialOffset = (branding.icon_tangential_offset ?? 0) * wheelR;
 
     // Label Draw
     ctx.save();
     ctx.translate(
-      cx + Math.cos(midA) * labelRadOffset + Math.cos(midA + Math.PI / 2) * labelPerpOffset,
-      cy + Math.sin(midA) * labelRadOffset + Math.sin(midA + Math.PI / 2) * labelPerpOffset,
+      cx + Math.cos(midA) * labelRadOffset + Math.cos(midA + Math.PI / 2) * labelTangentialOffset,
+      cy + Math.sin(midA) * labelRadOffset + Math.sin(midA + Math.PI / 2) * labelTangentialOffset,
     );
     ctx.rotate(midA + Math.PI / 2);
 
@@ -157,8 +157,8 @@ export function drawRoulette(
     if (img) {
       ctx.save();
       ctx.translate(
-        cx + Math.cos(midA) * iconRadOffset + Math.cos(midA + Math.PI / 2) * iconPerpOffset,
-        cy + Math.sin(midA) * iconRadOffset + Math.sin(midA + Math.PI / 2) * iconPerpOffset,
+        cx + Math.cos(midA) * iconRadOffset + Math.cos(midA + Math.PI / 2) * iconTangentialOffset,
+        cy + Math.sin(midA) * iconRadOffset + Math.sin(midA + Math.PI / 2) * iconTangentialOffset,
       );
       ctx.rotate(midA + Math.PI / 2);
       const iconSize = Math.min(fontSize * 2.2, 20);

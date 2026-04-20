@@ -5,7 +5,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { drawWheel, preloadSegmentImages, type WheelSegment, type WheelConfig, type WheelBranding, type ImageCache, easeOutQuart } from '@/lib/utils/wheel-renderer';
+import { UniversalWheelRenderer } from '@/components/shared/universal-wheel-renderer';
+import { type WheelSegment, type WheelConfig, type WheelBranding, easeOutQuart } from '@/lib/utils/wheel-renderer';
 
 interface FormConfig { enabled?: boolean; fields?: Array<{ key: string; label: string; type: string; required?: boolean }>; gdpr_enabled?: boolean; gdpr_text?: string; privacy_policy_url?: string | null; }
 interface SpinResult { is_winner: boolean; segment: { id: string; label: string }; prize?: { display_title: string; display_description?: string; type: string; custom_message_html?: string; redirect_url?: string } | null; coupon_code?: string | null; consolation_message?: string | null; }
@@ -13,7 +14,6 @@ interface SpinResult { is_winner: boolean; segment: { id: string; label: string 
 type Phase = 'loading' | 'form' | 'ready' | 'spinning' | 'result' | 'error';
 
 export function SpinWidget({ embedToken, isPreview = false }: { embedToken: string; isPreview?: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [phase, setPhase] = useState<Phase>('loading');
   const [sessionId, setSessionId] = useState('');
   const [segments, setSegments] = useState<WheelSegment[]>([]);
@@ -27,7 +27,6 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
   const [errorMsg, setErrorMsg] = useState('');
   const spinningRef = useRef(false);
   const currentRotRef = useRef(0);
-  const imageCacheRef = useRef<ImageCache>(new Map());
 
   // Load session on mount
   useEffect(() => {
@@ -60,15 +59,6 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
     init();
   }, [embedToken]);
 
-  // Draw wheel on canvas — also depends on `phase` so it fires when canvas first mounts
-  useEffect(() => {
-    async function draw() {
-      if (segments.length === 0 || !canvasRef.current) return;
-      await preloadSegmentImages(segments, config, branding, imageCacheRef.current);
-      drawWheel(canvasRef.current, segments, rotation, config, branding, imageCacheRef.current);
-    }
-    draw();
-  }, [segments, rotation, config, branding, phase]);
 
   async function handleSpin() {
     if (spinningRef.current) return;
@@ -281,42 +271,25 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4"
       style={{ backgroundColor: bgColor, fontFamily }}>
       {/* Wheel canvas */}
-      <div className="relative isolate pt-4 w-[340px]">
-        {/* Premium Frame Overlay */}
-        {branding.premium_frame_url && (
-          <img src={branding.premium_frame_url} className="absolute top-4 left-0 w-[340px] h-[340px] object-contain pointer-events-none drop-shadow-xl z-10" alt="" />
-        )}
-
-        {/* Premium 3D Pointer */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none">
-          {branding.premium_pointer_url ? (
-            <img src={branding.premium_pointer_url} className="w-[340px] h-[340px] max-w-none object-contain -translate-x-1/2 -translate-y-[2px]" alt="Pointer" />
-          ) : (
-            <>
-              {/* Base Mount */}
-              <div className="w-8 h-4 bg-gradient-to-b from-[#f8f9fa] to-[#d1d5db] rounded-t-md shadow-sm border border-b-0 border-black/10 relative z-10" />
-              {/* Arrow */}
-              <div className="relative -mt-0.5 drop-shadow-xl filter">
-                <svg width="28" height="38" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M16 38L2 14V2C2 2 12 4 16 4C20 4 30 2 30 2V14L16 38Z" fill={branding.pointer_color || branding.primary_color || '#7C3AED'} stroke="rgba(255,255,255,0.6)" strokeWidth="2" />
-                  <path d="M16 34L4 15V5C7 6.5 11 7.5 16 7.5C21 7.5 25 6.5 28 5V15L16 34Z" fill="url(#arrow-grad-widget)" />
-                  <defs>
-                    <linearGradient id="arrow-grad-widget" x1="16" y1="5" x2="16" y2="34" gradientUnits="userSpaceOnUse">
-                      <stop stopColor="white" stopOpacity="0.3" />
-                      <stop offset="1" stopColor="black" stopOpacity="0.25" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
-            </>
-          )}
+      <div className="relative isolate pt-4">
+        <div 
+          className="rounded-full shadow-2xl z-10"
+          style={{
+            background:
+              branding.background_value &&
+              branding.background_value !== 'rgba(0, 0, 0, 0)'
+                ? branding.background_value
+                : 'transparent',
+          }}
+        >
+          <UniversalWheelRenderer
+            segments={segments}
+            config={config}
+            branding={branding}
+            rotation={rotation}
+            size={340}
+          />
         </div>
-        <canvas
-          ref={canvasRef}
-          width={680} // 2x internally for crisp rendering
-          height={680}
-          className="rounded-full shadow-2xl bg-white w-[340px] h-[340px]"
-        />
       </div>
 
       <Button

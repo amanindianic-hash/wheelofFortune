@@ -31,11 +31,11 @@ export interface WheelSegment {
   icon_rotation_angle?: number | null;
   // Relative placement (0-1 based on wheel radius)
   label_radial_offset?: number | null;
-  label_perp_offset?: number | null;
+  label_tangential_offset?: number | null;
   icon_radial_offset?: number | null;
-  icon_perp_offset?: number | null;
+  icon_tangential_offset?: number | null;
   label_font_scale?: number | null;
-  [key: string]: any;
+  icon_scale?: number | null;
 }
 
 export interface WheelConfig {
@@ -50,7 +50,6 @@ export interface WheelConfig {
   kiosk_mode?: boolean;
   kiosk_reset_delay_ms?: number;
   shopify_store_url?: string | null;
-  [key: string]: any;
 }
 
 export interface WheelBranding {
@@ -94,10 +93,9 @@ export interface WheelBranding {
   // Relative placement (0-1 based on wheel radius)
   label_font_scale?: number;
   label_radial_offset?: number;
-  label_perp_offset?: number;
+  label_tangential_offset?: number;
   icon_radial_offset?: number;
-  icon_perp_offset?: number;
-  [key: string]: any;
+  icon_tangential_offset?: number;
 }
 
 // ─── Image cache ──────────────────────────────────────────────────────────────
@@ -167,16 +165,16 @@ function lightenHex(color: string, amount: number): string {
   if (!color || typeof color !== 'string') return '#7c3aed';
   // Allow native passthrough for rgba(), rgb(), hsla(), hsl(), or transparent
   if (!color.startsWith('#')) return color;
-  
+
   const [r, g, b] = hexToRgb(color);
   const blend = (c: number) => Math.min(255, Math.round(c + amount));
-  
+
   // If it's an 8-character hex (#rrggbbaa), preserve its alpha channel at the end
   if (color.replace('#', '').length === 8) {
     const alphaHex = color.slice(-2);
     return `rgba(${blend(r)},${blend(g)},${blend(b)},${parseInt(alphaHex, 16)/255})`;
   }
-  
+
   return `rgb(${blend(r)},${blend(g)},${blend(b)})`;
 }
 
@@ -228,9 +226,9 @@ export function drawWheel(
     const requestedRingWidth = branding.outer_ring_width ?? 20;
     const outerRingWidth = (intendsPremiumStand && !hasPremiumStand) ? 4 : requestedRingWidth;
 
-    const outerRadius = Math.min(cx, cy) - 2.5; // Slightly more padding (from 2) for clipping safety
+    const outerRadius = Math.min(cx, cy) - 10; // Increased padding from 2.5 to 10 for clipping safety
     let innerRadius = outerRadius - outerRingWidth;
-    
+
     // Apply premium scaling and offsets for labels
     if (hasPremiumFace) {
       if (branding.premium_content_scale) {
@@ -322,25 +320,25 @@ export function drawWheel(
           // Draw the segment image
           const img = imageCache!.get(seg.segment_image_url!)!;
           const imgSize = innerRadius * 2;
-          
+
           // Move context origin to wheel center
           ctx.translate(cx, cy);
           const segMidAngle = (startAngle + endAngle) / 2;
           // Rotate context so the Y axis aligns with the outward midpoint vector (standard upright orientation)
           // We add Math.PI / 2 because native canvas images point upward (negative Y), but segMidAngle has X pointing outward.
           ctx.rotate(segMidAngle + Math.PI / 2);
-          
+
           // Draw the image halfway outwards
           // Because of our +90deg rotation matrices, negative Y is directly outwards from center matching the slice.
           // The image's top (which points to negative Y) will face exactly outward toward the rim.
           const imgBaseX = -imgSize / 2;
           const imgBaseY = -imgSize / 2 - (innerRadius / 2);
-          
+
           // Apply custom user offsets if provided in branding (Global) or segment (Local)
           // Local segment offsets override global offsets
           const userOffsetX = seg.icon_offset_x ?? branding.segment_image_offset_x ?? 0;
           const userOffsetY = seg.icon_offset_y ?? branding.segment_image_offset_y ?? 0;
-          
+
           ctx.drawImage(img, imgBaseX + userOffsetX, imgBaseY + userOffsetY, imgSize, imgSize);
           ctx.restore();
         } else {
@@ -426,7 +424,7 @@ export function drawWheel(
       const ioxRaw = ioxRawArr.length > 0 ? Number(ioxRawArr[0]) : 0;
 
       const ioyRawArr = [
-        seg.icon_perp_offset != null ? seg.icon_perp_offset * innerRadius : null,
+        seg.icon_tangential_offset != null ? seg.icon_tangential_offset * innerRadius : null,
         seg.icon_offset_y
       ].filter(v => v != null);
       const ioyRaw = ioyRawArr.length > 0 ? Number(ioyRawArr[0]) : 0;
@@ -439,8 +437,8 @@ export function drawWheel(
       const loxRaw = loxRawArr.length > 0 ? Number(loxRawArr[0]) : 0;
 
       const loyRawArr = [
-        seg.label_perp_offset != null ? seg.label_perp_offset * innerRadius : null,
-        branding.label_perp_offset != null ? branding.label_perp_offset * innerRadius : null,
+        seg.label_tangential_offset != null ? seg.label_tangential_offset * innerRadius : null,
+        branding.label_tangential_offset != null ? branding.label_tangential_offset * innerRadius : null,
         seg.label_offset_y
       ].filter(v => v != null);
       const loyRaw = loyRawArr.length > 0 ? Number(loyRawArr[0]) : 0;
@@ -584,11 +582,11 @@ export function drawWheel(
     }
 
     // ── 4. Outer decorative ring with 3D metallic/gloss gradient ──────────────
-    // To match Freepik premium designs, the ring gets a rich, dark metallic rim 
+    // To match Freepik premium designs, the ring gets a rich, dark metallic rim
     // instead of flat colors. We create a dual lighting linear gradient.
     const metallicOuterGrad = ctx.createLinearGradient(cx, cy - outerRadius, cx, cy + outerRadius);
     const [br, bg, bb] = hexToRgb(outerRingColor);
-    
+
     // Create a metallic specular reflection by layering stops
     const safeOuter = lightenHex(outerRingColor, 0);
     metallicOuterGrad.addColorStop(0, `rgb(${Math.min(br+80, 255)},${Math.min(bg+80, 255)},${Math.min(bb+80, 255)})`);
@@ -627,7 +625,7 @@ export function drawWheel(
     globalGloss.addColorStop(0.3, 'rgba(255,255,255,0.06)');
     globalGloss.addColorStop(0.6, 'rgba(0,0,0,0.15)');
     globalGloss.addColorStop(1, 'rgba(0,0,0,0.45)');
-    
+
     ctx.beginPath();
     ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
     ctx.fillStyle = globalGloss;
@@ -675,7 +673,7 @@ export function drawWheel(
           );
           ctx.fillStyle = rimTickColor;
           ctx.fill();
-          
+
           // Bulb Core
           ctx.shadowBlur = 0;
           ctx.beginPath();
@@ -711,7 +709,7 @@ export function drawWheel(
     ctx.strokeStyle = 'rgba(255,255,255,0.45)';
     ctx.lineWidth = 1.5;
     ctx.stroke();
-    
+
     ctx.beginPath();
     ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
     ctx.strokeStyle = 'rgba(0,0,0,0.5)';
@@ -728,7 +726,7 @@ export function drawWheel(
         ctx.translate(cx, cy);
         ctx.rotate(rotation);
         // Scale frame to match the wheel size
-        const scale = (outerRadius * 2.5) / Math.max(frameImg.width, frameImg.height);
+        const scale = (outerRadius * 2.1) / Math.max(frameImg.width, frameImg.height);
         const w = frameImg.width * scale;
         const h = frameImg.height * scale;
         ctx.drawImage(frameImg, -w / 2, -h / 2, w, h);
@@ -798,7 +796,7 @@ export function drawWheel(
     hubGloss.addColorStop(0.35, 'rgba(255,255,255,0.15)');
     hubGloss.addColorStop(0.8, 'rgba(0,0,0,0.4)');
     hubGloss.addColorStop(1, 'rgba(0,0,0,0.7)');
-    
+
     ctx.beginPath();
     ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
     ctx.fillStyle = hubGloss;

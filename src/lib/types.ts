@@ -144,9 +144,10 @@ export interface WheelBranding {
   // Relative placement (0-1 based on wheel radius)
   label_font_scale?: number;          // font size relative to wheel radius (e.g. 0.08)
   label_radial_offset?: number;       // relative radial offset (0-1)
-  label_perp_offset?: number;         // relative perpendicular offset (-1 to 1)
+  label_tangential_offset?: number;   // relative tangential offset (-1 to 1)
   icon_radial_offset?: number;        // relative radial offset (0-1)
-  icon_perp_offset?: number;          // relative perpendicular offset (-1 to 1)
+  icon_tangential_offset?: number;    // relative tangential offset (-1 to 1)
+  icon_scale?: number;                // relative icon size (0-1)
   [key: string]: any;
 }
 
@@ -204,6 +205,7 @@ export interface Segment {
   bg_color: string;
   text_color: string;
   icon_url?: string | null;
+  segment_image_url?: string | null;
   weight: number;
   prize_id?: string | null;
   is_no_prize: boolean;
@@ -222,10 +224,11 @@ export interface Segment {
   icon_rotation_angle?: number | null;  // degrees: rotates image inside its circle
   // Relative placement overrides (priority over absolute px offsets)
   label_radial_offset?: number | null;
-  label_perp_offset?: number | null;
+  label_tangential_offset?: number | null;
   icon_radial_offset?: number | null;
-  icon_perp_offset?: number | null;
+  icon_tangential_offset?: number | null;
   label_font_scale?: number | null;
+  icon_scale?: number | null;
   [key: string]: any;
 }
 

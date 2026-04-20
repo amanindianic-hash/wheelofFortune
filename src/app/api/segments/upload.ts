@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // Verify theme exists
     const themeCheck = (await sql`
-      SELECT id FROM custom_themes WHERE id = ${themeId} LIMIT 1
+      SELECT id FROM wheel_themes WHERE id = ${themeId} LIMIT 1
     `) as any[];
 
     if (themeCheck.length === 0) {
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
       // Mark theme as having custom segments
       await sql`
-        UPDATE custom_themes
+        UPDATE wheel_themes
         SET has_custom_segments = true, updated_at = NOW()
         WHERE id = ${themeId}
       `;

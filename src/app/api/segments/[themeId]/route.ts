@@ -56,7 +56,7 @@ export async function DELETE(
 
     // Mark theme as not having custom segments
     await sql`
-      UPDATE custom_themes
+      UPDATE wheel_themes
       SET has_custom_segments = false, updated_at = NOW()
       WHERE id = ${themeId}
     `;
