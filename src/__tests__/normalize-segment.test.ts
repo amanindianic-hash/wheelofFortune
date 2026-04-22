@@ -46,7 +46,7 @@ describe('normalizeSegment', () => {
   });
 
   it('passes through undefined offsets as null', () => {
-    const raw = { id: 'seg-3', label: 'No offset fields' };
+    const raw: any = { id: 'seg-3', label: 'No offset fields' };
     const result = normalizeSegment(raw);
     // undefined != null so the condition is false → stored as null
     expect(result.label_offset_x).toBeNull();

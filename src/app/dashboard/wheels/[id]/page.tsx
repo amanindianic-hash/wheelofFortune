@@ -20,9 +20,11 @@ import { ScratchPreview } from '@/components/dashboard/wheels/scratch-preview';
 import { SlotPreview } from '@/components/dashboard/wheels/slot-preview';
 import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview';
 import { ThemeDialog } from '@/components/theme-dialog';
+import { RGBAPicker } from '@/components/dashboard/wheels/rgba-picker';
+import { isTransparent } from '@/lib/utils/wheel-renderer';
 import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
-import { applyTemplateToWheel, BRANDING_RESET_BASE } from '@/lib/utils/theme-utils';
+import { getFinalVisualConfig, applyTemplateToWheel, BRANDING_RESET_BASE } from '@/lib/utils/theme-utils';
 import { normalizeSegment } from '@/lib/utils/segment-utils';
 import {
   ArrowLeft, Save, Lightbulb, Layers, Zap, Trophy,
@@ -139,7 +141,13 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   const [savedThemes, setSavedThemes] = useState<Array<{
     id: string; name: string; emoji: string; description: string;
     branding: Record<string, unknown>; config: Record<string, unknown>;
-    segment_palette: Array<{ bg_color: string; text_color: string }>;
+    segment_palette: Array<{
+      bg_color?: string; text_color: string;
+      background?: { color: string; imageUrl: string | null };
+      segment_image_url?: string | null;
+      image_url?: string | null;
+      icon_url?: string | null;
+    }>;
   }>>([]);
 
   // ── Save-as-theme dialog ───────────────────────────────────────────────────
@@ -180,13 +188,33 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     const wData = await wRes.json();
     const pData = await pRes.json();
     if (!wRes.ok) { toast.error('Wheel not found'); router.push('/dashboard/wheels'); return; }
-    
+
+    // ═══ DEBUG: FETCHED FROM API — raw data before any processing ═══
+    console.log('🟡 [Frontend] FETCHED FROM API:', {
+      applied_theme_id: (wData.wheel?.config as any)?.applied_theme_id ?? '(none)',
+      segmentCount:     (wData.segments ?? []).length,
+      rawSegments:      (wData.segments ?? []).map((s: any) => ({
+        id:                  s.id,
+        label:               s.label,
+        bg_color:            s.bg_color,
+        text_color:          s.text_color,
+        segment_image_url:   s.segment_image_url,
+        icon_url:            s.icon_url,
+        label_radial_offset: s.label_radial_offset,
+        label_rotation_angle:s.label_rotation_angle,
+      })),
+    });
+
     // Normalization Layer for Legacy Data
     const NORM_RADIUS = 138;
     const normalizedSegments = (wData.segments ?? []).map((s: Segment) => {
       const norm = normalizeSegment(s);
       return {
         ...norm,
+        background: {
+          color: norm.bg_color || '#7c3aed',
+          imageUrl: norm.segment_image_url || null,
+        },
         label_radial_offset: norm.label_radial_offset ?? (norm.label_offset_x ? (norm.label_offset_x / NORM_RADIUS) : null),
         label_tangential_offset: norm.label_tangential_offset ?? (norm.label_offset_y ? (norm.label_offset_y / NORM_RADIUS) : null),
         icon_radial_offset:  norm.icon_radial_offset  ?? (norm.icon_offset_x  ? (norm.icon_offset_x  / NORM_RADIUS) : null),
@@ -195,53 +223,182 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
       };
     });
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // AUTO-APPLY THEME ON LOAD (synchronous — no user action required)
+    // Source of truth: wheel.config.applied_theme_id (persisted to DB by saveWheel).
+    // SAFE MERGE: only bg_color, text_color, background image, icon are taken from
+    // the theme palette. ALL label/icon positions from DB segments are preserved.
+    // ─────────────────────────────────────────────────────────────────────────
+    // ── AUTO-APPLY THEME ON LOAD ─────────────────────────────────────────────
+    const tData = tRes.ok ? await tRes.json() : { themes: [] };
+    const allThemes: any[] = tData.themes ?? [];
+    
+    // Theme Resolution Logic: DB is Source of Truth; LS is legacy fallback.
+    const applied_theme_id = (wData.wheel.config as any)?.applied_theme_id as string | undefined;
+    const lsThemeStr = localStorage.getItem(`wheel-${id}-theme`);
+    const lsThemeId = lsThemeStr ? (() => { try { return JSON.parse(lsThemeStr).id; } catch { return null; } })() : null;
+    let finalThemeId = applied_theme_id ?? lsThemeId;
+
+    let matchedTheme: any = allThemes.find((t: any) => t.id === finalThemeId)
+      ?? (WHEEL_TEMPLATES as any[]).find(t => t.id === finalThemeId);
+
+    const themeExists = !!matchedTheme;
+
+    // [ThemeFix] Mandatory Audit Logs
+    console.log('[ThemeFix] applied_theme_id:', applied_theme_id);
+    console.log('[ThemeFix] finalThemeId (initial):', finalThemeId);
+    console.log('[ThemeFix] themeExists:', themeExists);
+
+    // ── STALE THEME CLEANUP & HARD FALLBACK ──────────────────────────────────
+    if (finalThemeId && !themeExists) {
+      console.warn(`⚠️ [ThemeFix] Invalid theme "${finalThemeId}" → falling back to Luxury Gold.`);
+      toast.warning('The previously selected theme is no longer available. A default theme has been applied.');
+      
+      // Sanitization: Purge invalid ID from all sources immediately
+      localStorage.removeItem(`wheel-${id}-theme`);
+      setAppliedTheme(null);
+      
+      matchedTheme = WHEEL_TEMPLATES[0]; // Fallback
+      finalThemeId = matchedTheme.id;      // Establish the new TRUTH
+
+      // CRITICAL: Mutate the fetched payload before it enters state
+      if (wData.wheel.config) {
+        (wData.wheel.config as any).applied_theme_id = finalThemeId;
+      }
+    }
+
+    console.log('[ThemeFix] finalThemeId (sanitized):', finalThemeId);
+
+    let finalSegments: any[] = normalizedSegments;
+    if (matchedTheme) {
+      const palette: any[] = matchedTheme.segment_palette ?? matchedTheme.segmentPalette ?? [];
+      if (palette.length > 0) {
+        console.log('[Load] Theme palette is AUTHORITATIVE — generating', palette.length, 'segments (DB had', normalizedSegments.length, ')');
+        // THEME IS THE SOURCE OF TRUTH for segment count and visuals.
+        // Wheel DB segments supply label/weight/prize data only.
+        finalSegments = palette.map((p: any, i: number) => {
+          const bgColor = p.background?.color || p.bg_color || '#7c3aed';
+          const bgImage = p.background?.imageUrl || p.segment_image_url || null;
+          // Icon: only use explicit palette icon — never inherit from wheel
+          const themeIcon = (p.icon_url && p.icon_url.length > 4 && !p.icon_url.startsWith('#')) ? p.icon_url : null;
+          const dbSeg = normalizedSegments[i]; // may be undefined if palette > DB count
+          return {
+            ...(dbSeg ?? {}),
+            bg_color:          bgColor,
+            text_color:        p.text_color ?? dbSeg?.text_color ?? '#FFFFFF',
+            segment_image_url: bgImage,
+            background:        { color: bgColor, imageUrl: bgImage },
+            icon_url:          themeIcon,  // theme icon or null — no wheel fallback
+            id:                dbSeg?.id ?? `new-${i}`,
+            position:          dbSeg?.position ?? i,
+            label:             dbSeg?.label ?? `Segment ${i + 1}`,
+            weight:            dbSeg?.weight ?? 1,
+            is_no_prize:       dbSeg?.is_no_prize ?? false,
+          };
+        });
+      }
+    }
+
+    // ── DEBUG: RELOAD DATA LOG ────────────────────────────────────────────────
+    console.log('🖼️ [Load] RELOAD DATA (final state):', {
+      segmentCount: finalSegments.length,
+      finalThemeId,
+      segments: finalSegments.map(s => ({ id: s.id, label: s.label, bg: s.bg_color }))
+    });
+
+    setSavedThemes(allThemes);
     setWheel(wData.wheel);
-    setSegments(normalizedSegments);
+    setSegments(finalSegments);
+
+    // ═══ DEBUG: FINAL SEGMENTS SENT TO STATE (what renderer will receive) ═══
+    console.log('🟠 [Frontend] FINAL SEGMENTS TO RENDERER:', finalSegments.map((s: any) => ({
+      id:                  s.id,
+      label:               s.label,
+      bg_color:            s.bg_color,
+      text_color:          s.text_color,
+      segment_image_url:   s.segment_image_url ?? s.background?.imageUrl,
+      icon_url:            s.icon_url,
+      label_radial_offset: s.label_radial_offset,
+      label_rotation_angle:s.label_rotation_angle,
+      label_font_scale:    s.label_font_scale,
+    })));
+    console.log('🟠 [Frontend] THEME APPLIED?', finalThemeId ? `YES — ${finalThemeId}` : 'NO');
+
     setPrizes(pData.prizes ?? []);
-    if (tRes.ok) { const tData = await tRes.json(); setSavedThemes(tData.themes ?? []); }
   }
 
-  // Apply saved theme on load if exists — runs only once after both wheel and themes are loaded
+  // Apply saved theme on load if exists — runs only once after both wheel and themes are loaded.
+  // SOURCE OF TRUTH for theme identity: wheel.config.applied_theme_id (persisted to DB via saveWheel).
+  // localStorage is a SECONDARY fallback for backwards compatibility.
+  // IMPORTANT: we only restore BRANDING here. Segment data is already correct from DB.
+  // Re-applying segment palette here would overwrite user edits saved in segments table.
   useEffect(() => {
     if (!wheel || !savedThemes.length || themeRestoredRef.current) return;
-    const savedThemeStr = localStorage.getItem(`wheel-${id}-theme`);
-    if (!savedThemeStr) return;
 
-    let themeToApply: { id: string; name: string; emoji: string; type: 'custom' | 'built-in'; config?: Record<string, unknown>; branding?: Record<string, unknown>; segmentPalette?: Array<{ bg_color: string; text_color: string }> } | null = null;
+    // ── THEME RESOLUTION LOGIC (STRICT VALIDATION) ──────────────────────────
+    const applied_theme_id = (wheel.config as any)?.applied_theme_id as string | undefined;
+    const lsThemeStr  = localStorage.getItem(`wheel-${id}-theme`);
+    const lsThemeId   = lsThemeStr ? (() => { try { return JSON.parse(lsThemeStr).id; } catch { return null; } })() : null;
+    
+    let finalThemeId = applied_theme_id ?? lsThemeId;
+    let themeToApply: any = null;
 
+    if (finalThemeId) {
+      themeToApply = savedThemes.find(t => t.id === finalThemeId)
+        ?? WHEEL_TEMPLATES.find(t => t.id === finalThemeId);
+    }
+
+    // [ThemeFix] ThemeRestore Required Logs
+    console.log('[ThemeFix] applied_theme_id:', applied_theme_id);
+    console.log('[ThemeFix] finalThemeId:', finalThemeId);
+    console.log('[ThemeFix] themeExists:', !!themeToApply);
+
+    // ── STALE THEME BLOCK & FALLBACK REHYDRATION ────────────────────────────
+    if (finalThemeId && !themeToApply) {
+      console.warn(`⚠️ [ThemeFix] [ThemeRestore] Invalid theme "${finalThemeId}" blocked. Forcing fallback branding.`);
+      localStorage.removeItem(`wheel-${id}-theme`);
+      
+      // RE-ROUTE TO FALLBACK
+      themeToApply = WHEEL_TEMPLATES[0];
+      finalThemeId = themeToApply.id;
+    }
+
+    if (!themeToApply) {
+      themeRestoredRef.current = true;
+      return;
+    }
+
+    // ── APPLY BRANDING RESTORATION (CLEAN SLATE) ───────────────────────────
     try {
-      const savedTheme = JSON.parse(savedThemeStr);
-      // Check custom themes
-      const customTheme = savedThemes.find(t => t.id === savedTheme.id);
-      if (customTheme) {
-        themeToApply = { id: customTheme.id, name: customTheme.name, emoji: customTheme.emoji, type: 'custom', config: customTheme.config, branding: customTheme.branding, segmentPalette: customTheme.segment_palette };
-      } else {
-        // Check built-in templates
-        const builtIn = WHEEL_TEMPLATES.find(t => t.id === savedTheme.id);
-        if (builtIn) {
-          themeToApply = { id: builtIn.id, name: builtIn.name, emoji: builtIn.emoji, type: 'built-in', config: builtIn.config, branding: builtIn.branding, segmentPalette: builtIn.segmentPalette };
-        }
-      }
+      themeRestoredRef.current = true; // prevent re-running
+      console.log('[ThemeRestore] Restoring branding [Baseline Reset] for theme:', themeToApply.id);
+      
+      const tb = themeToApply.branding as Record<string, unknown>;
 
-      if (themeToApply) {
-        themeRestoredRef.current = true; // prevent re-running when setWheel triggers re-render
-        const tb = themeToApply.branding as Record<string, unknown>;
-        setWheel({ ...wheel, config: { ...wheel.config, ...themeToApply.config }, branding: {
-          ...wheel.branding,
-          // Clear premium URLs when the restored theme doesn't carry them.
+      const safeConfig = {
+        ...wheel.config,
+        ...(themeToApply.config ?? {}),
+        center_image_url: wheel.config.center_image_url ?? (wheel.config as any)?.config?.center_image_url ?? null,
+        applied_theme_id: themeToApply.id,
+      };
+
+      // Theme is the COMPLETE visual snapshot — no wheel.branding merge.
+      // BRANDING_RESET_BASE provides safe defaults; theme overwrites all visual fields.
+      setWheel({
+        ...wheel,
+        config: safeConfig,
+        branding: {
+          ...BRANDING_RESET_BASE,    // clean slate (clears old premium_face_url etc.)
+          ...themeToApply.branding,  // theme is the sole source of truth for all visual props
           premium_face_url: (tb.premium_face_url as string) ?? null,
           premium_stand_url: (tb.premium_stand_url as string) ?? null,
-          ...themeToApply.branding,
-        } });
-        if (themeToApply.segmentPalette?.length) {
-          setSegments(prev => prev.map((seg, i) => ({ ...seg, bg_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].bg_color, text_color: themeToApply!.segmentPalette![i % themeToApply!.segmentPalette!.length].text_color })));
         }
-        setAppliedTheme({ id: themeToApply.id, name: themeToApply.name, emoji: themeToApply.emoji, type: themeToApply.type });
-      } else {
-        themeRestoredRef.current = true; // no matching theme found, stop checking
-      }
+      });
+
+      setAppliedTheme({ id: themeToApply.id, name: themeToApply.name, emoji: themeToApply.emoji, type: themeToApply.type });
     } catch (e) {
-      themeRestoredRef.current = true; // invalid JSON, stop checking
+      console.error('[ThemeRestore] Failed to rehydrate theme:', e);
+      themeRestoredRef.current = true;
     }
   }, [wheel, savedThemes, id]);
 
@@ -262,7 +419,21 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
         emoji: saveThemeEmoji,
         branding: wheel.branding,
         config: { ...wheel.config, game_type: gameType },
-        segment_palette: segments.map((s) => ({ bg_color: s.bg_color, text_color: s.text_color })),
+        segment_palette: segments.map((s, i) => {
+          const entry = {
+            background: {
+              color: s.background?.color || s.bg_color || '#7c3aed',
+              imageUrl: s.background?.imageUrl || s.segment_image_url || null,
+            },
+            text_color: s.text_color,
+            icon_url: s.icon_url || null,
+            // Legacy fields for mapping
+            bg_color: s.background?.color || s.bg_color || '#7c3aed',
+            segment_image_url: s.background?.imageUrl || s.segment_image_url || null,
+          };
+          console.log(`[DashboardSaveTheme] Segment ${i}:`, { background: entry.background.imageUrl, icon: entry.icon_url });
+          return entry;
+        }),
       });
       if (!res.ok) { toast.error('Failed to save theme'); return; }
       toast.success(`Theme "${saveThemeName.trim()}" saved`);
@@ -282,6 +453,34 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     if (!wheel) return;
     setSaving(true);
     try {
+      // ── STEP 1: UI STATE ──────────────────────────────────────────────────
+      console.log('STEP 1 UI STATE (Wheel):', {
+        id: wheel.id,
+        branding: {
+          primary: wheel.branding.primary_color,
+          outer_ring: wheel.branding.outer_ring_color,
+          inner_ring: wheel.branding.inner_ring_color,
+          face_url: wheel.branding.premium_face_url
+        },
+        config: wheel.config
+      });
+
+      // ── STEP 2: API REQUEST (Payload) ───────────────────────────────────────
+      console.log('STEP 2 API REQUEST (Wheel PUT):', {
+        url: `/api/wheels/${id}`,
+        payload: { 
+          name: wheel.name, 
+          config: wheel.config, 
+          branding: wheel.branding,
+          trigger_rules: wheel.trigger_rules,
+          frequency_rules: wheel.frequency_rules,
+          form_config: wheel.form_config,
+          active_from: wheel.active_from,
+          active_until: wheel.active_until,
+          total_spin_cap: wheel.total_spin_cap
+        }
+      });
+
       const res = await api.put(`/api/wheels/${id}`, {
         name: wheel.name,
         config: wheel.config,
@@ -299,17 +498,81 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
   async function saveSegments() {
     setSaving(true);
     try {
+      // ── DEEP DEBUG: PRE-SAVE VALIDATION ────────────────────────────────────
+      const finalSegments = segments;
+      console.log('💾 [Save] FINAL SEGMENTS BEFORE SAVE:', {
+        count: finalSegments.length,
+        appliedTheme: appliedTheme?.id ?? 'none',
+        labels: finalSegments.map(s => s.label)
+      });
+      
+      // ASSERTION: Segment count MUST be exactly what the user sees in UI
+      console.assert(finalSegments.length > 1, 'Cannot save fewer than 2 segments');
+      // ────────────────────────────────────────────────────────────────────────
+
+      // RULE 3: Log save payload before API call to verify all label fields are present
+      console.log('[SaveSegments] PAYLOAD:', finalSegments.map(s => ({
+        id: s.id,
+        label: s.label,
+        label_radial_offset:     (s as any).label_radial_offset,
+        label_tangential_offset: (s as any).label_tangential_offset,
+        label_rotation_angle:    (s as any).label_rotation_angle,
+        label_font_scale:        (s as any).label_font_scale,
+        label_offset_x:          (s as any).label_offset_x,
+        label_offset_y:          (s as any).label_offset_y,
+      })));
       const res = await api.put(`/api/wheels/${id}/segments`, { segments });
       const data = await res.json();
-      if (res.ok) { setSegments(data.segments.map(normalizeSegment)); toast.success('Segments saved'); }
-      else toast.error(data.error?.message ?? 'Save failed');
+      if (res.ok) {
+        // Re-map the flat DB rows back into the nested background structure
+        // normalizeSegment only parses numeric strings — it does NOT add background object.
+        // We must reconstruct background from the flat columns the API returns.
+        const normalized = (data.segments as any[]).map(s => {
+          const n = normalizeSegment(s);
+          // Explicitly verify icon_url is preserved from the API response.
+          // The DB stores and returns icon_url as a separate column — it must never
+          // be overwritten by background data or silently dropped here.
+          const iconUrl = (n as any).icon_url ?? null;
+          if (iconUrl === null || iconUrl === undefined) {
+            // Not an error — segments without icons are valid
+            console.log('[SaveSegments] Segment has no icon_url (id:', (n as any).id, ')- this is OK if no icon was set');
+          }
+          return {
+            ...n,
+            icon_url: iconUrl,   // explicit — never silently dropped
+            background: {
+              color: (n as any).bg_color || '#7c3aed',
+              imageUrl: (n as any).segment_image_url || null,
+            },
+          };
+        });
+
+        console.log('[SaveSegments] Response re-mapped:', normalized.map(s => ({ bg: (s as any).background?.imageUrl, icon: (s as any).icon_url })));
+        setSegments(normalized);
+        console.log('✅ [SaveSegments] SAVED TO DB & RE-FETCHED:', normalized);
+        toast.success('Segments saved');
+      } else {
+        toast.error(data.error?.message ?? 'Save failed');
+      }
     } finally {
       setSaving(false);
     }
   }
 
   function updateSegment(idx: number, field: string, value: unknown) {
-    setSegments((prev) => prev.map((s, i) => i === idx ? { ...s, [field]: value } : s));
+    setSegments((prev) => prev.map((s, i) => {
+      if (i !== idx) return s;
+      
+      // Handle nested background updates
+      if (field === 'bg_color') {
+        return { ...s, background: { ...s.background, color: value as string }, bg_color: value as string };
+      }
+      if (field === 'segment_image_url') {
+        return { ...s, background: { ...s.background, imageUrl: value as string | null }, segment_image_url: value as string | null };
+      }
+      
+      return { ...s, [field]: value };
+    }));
   }
 
   function addSegment() {
@@ -319,7 +582,13 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     const firstSeg = segments[0];
     setSegments((prev) => [...prev, {
       id: `new-${Date.now()}`, wheel_id: id, position: prev.length,
-      label: `Segment ${prev.length + 1}`, bg_color: color, text_color: '#FFFFFF',
+      label: `Segment ${prev.length + 1}`,
+      background: {
+        color: color,
+        imageUrl: null
+      },
+      bg_color: color,
+      text_color: '#FFFFFF',
       weight: 1.0, is_no_prize: true, wins_today: 0, wins_total: 0,
       label_offset_x: firstSeg?.label_offset_x ?? null,
       label_offset_y: firstSeg?.label_offset_y ?? null,
@@ -379,6 +648,15 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
 
   // Derived: Lock segment editing when a custom theme is applied
   const isSegmentLocked = appliedTheme?.type === 'custom';
+
+  // ── [ThemeFix] ABSOLUTE GLOBAL SAFETY (Hard Block) ───────────────────────
+  const currentId = (wheel.config as any)?.applied_theme_id;
+  const exists = savedThemes.some(t => t.id === currentId) || WHEEL_TEMPLATES.some(t => t.id === currentId);
+  const sanitizedConfig = exists ? wheel.config : { ...wheel.config, applied_theme_id: WHEEL_TEMPLATES[0].id };
+  if (currentId && !exists) {
+    console.error(`[ThemeFix] [RENDER GUARD] Invalid theme "${currentId}" blocked. Forcing fallback.`);
+  }
+  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <div className="p-8 space-y-6 max-w-5xl">
@@ -478,10 +756,10 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     <CardContent className="pt-4 space-y-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full border-2 border-white shadow shrink-0 relative overflow-hidden"
-                          style={{ backgroundColor: seg.bg_color === 'transparent' ? undefined : seg.bg_color }}>
-                          {seg.bg_color === 'transparent' && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-amber-500/30 to-amber-700/30">
-                              <span className="text-[8px] text-amber-300 font-bold leading-none">IMG</span>
+                          style={{ backgroundColor: isTransparent(seg.bg_color) ? undefined : seg.bg_color }}>
+                          {isTransparent(seg.bg_color) && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-violet-500/30 to-violet-700/30">
+                              <span className="text-[8px] text-violet-300 font-bold leading-none">ALPHA</span>
                             </div>
                           )}
                         </div>
@@ -507,16 +785,28 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                           {isSegmentLocked ? <Lock className="w-3 h-3" /> : '✕'}
                         </Button>
                       </div>
-                      {/* Icon URL */}
-                      <div className="space-y-1">
-                        <Label className="text-xs">Icon Image URL (optional)</Label>
-                        <Input
-                          type="url"
-                          placeholder="https://example.com/icon.png"
-                          value={seg.icon_url ?? ''}
-                          onChange={(e) => updateSegment(idx, 'icon_url', e.target.value || null)}
-                          className="h-8 text-sm"
-                        />
+                      {/* Imagery Layout */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label className="text-xs">Background Image URL</Label>
+                          <Input
+                            type="url"
+                            placeholder="Wedge fill image…"
+                            value={seg.background?.imageUrl || seg.segment_image_url || ''}
+                            onChange={(e) => updateSegment(idx, 'segment_image_url', e.target.value || null)}
+                            className="h-8 text-sm"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs">Icon Image URL</Label>
+                          <Input
+                            type="url"
+                            placeholder="Prize icon…"
+                            value={seg.icon_url ?? ''}
+                            onChange={(e) => updateSegment(idx, 'icon_url', e.target.value || null)}
+                            className="h-8 text-sm"
+                          />
+                        </div>
                       </div>
 
                       {/* Position Controls */}
@@ -559,13 +849,10 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                         {!wheel?.branding.premium_face_url && (
                           <div>
                             <Label className="text-xs">Background Color</Label>
-                            <div className="flex gap-2 items-center">
-                              <input type="color"
-                                value={seg.bg_color.startsWith('#') ? seg.bg_color : '#7C3AED'}
-                                onChange={(e) => updateSegment(idx, 'bg_color', e.target.value)}
-                                className="w-8 h-8 rounded cursor-pointer border" />
-                              <Input value={seg.bg_color} onChange={(e) => updateSegment(idx, 'bg_color', e.target.value)} className="h-8 text-sm font-mono" />
-                            </div>
+                            <RGBAPicker
+                              value={seg.bg_color ?? '#7C3AED'}
+                              onChange={(v) => updateSegment(idx, 'bg_color', v)}
+                            />
                           </div>
                         )}
                         <div>
@@ -779,28 +1066,18 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Primary Color</Label>
-                      <div className="flex gap-2 items-center">
-                        <input type="color"
-                          value={wheel.branding.primary_color ?? '#7C3AED'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, primary_color: e.target.value } })}
-                          className="w-8 h-8 rounded cursor-pointer border" />
-                        <Input value={wheel.branding.primary_color ?? '#7C3AED'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, primary_color: e.target.value } })}
-                          className="h-8 text-sm font-mono" />
-                      </div>
+                      <RGBAPicker
+                        value={wheel.branding.primary_color ?? '#7C3AED'}
+                        onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, primary_color: v } })}
+                      />
                       <p className="text-xs text-muted-foreground">Button, borders, accents</p>
                     </div>
                     <div className="space-y-2">
                       <Label>Background Color</Label>
-                      <div className="flex gap-2 items-center">
-                        <input type="color"
-                          value={wheel.branding.background_value ?? '#F3E8FF'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, background_value: e.target.value } })}
-                          className="w-8 h-8 rounded cursor-pointer border" />
-                        <Input value={wheel.branding.background_value ?? '#F3E8FF'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, background_value: e.target.value } })}
-                          className="h-8 text-sm font-mono" />
-                      </div>
+                      <RGBAPicker
+                        value={wheel.branding.background_value ?? '#F3E8FF'}
+                        onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, background_value: v } })}
+                      />
                       <p className="text-xs text-muted-foreground">Page background</p>
                     </div>
                   </div>
@@ -1087,20 +1364,10 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                       <Label className="text-sm">Outer Ring Color</Label>
-                      <div className="flex gap-2 items-center">
-                        <input
-                          type="color"
-                          value={wheel.branding.outer_ring_color ?? wheel.branding.primary_color ?? '#7C3AED'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, outer_ring_color: e.target.value } })}
-                          className="w-8 h-8 rounded cursor-pointer border"
-                        />
-                        <Input
-                          value={wheel.branding.outer_ring_color ?? ''}
-                          placeholder={wheel.branding.primary_color ?? '#7C3AED'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, outer_ring_color: e.target.value } })}
-                          className="h-8 text-sm font-mono"
-                        />
-                      </div>
+                      <RGBAPicker
+                        value={wheel.branding.outer_ring_color ?? wheel.branding.primary_color ?? '#7C3AED'}
+                        onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, outer_ring_color: v } })}
+                      />
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-sm">Ring Width (px)</Label>
@@ -1131,19 +1398,10 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     </div>
                     <div className="space-y-1.5">
                       <Label className="text-sm">Tick Color</Label>
-                      <div className="flex gap-2 items-center">
-                        <input
-                          type="color"
-                          value={wheel.branding.rim_tick_color ?? '#FFFFFF'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, rim_tick_color: e.target.value } })}
-                          className="w-8 h-8 rounded cursor-pointer border"
-                        />
-                        <Input
-                          value={wheel.branding.rim_tick_color ?? '#FFFFFF'}
-                          onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, rim_tick_color: e.target.value } })}
-                          className="h-8 text-sm font-mono"
-                        />
-                      </div>
+                      <RGBAPicker
+                        value={wheel.branding.rim_tick_color ?? '#FFFFFF'}
+                        onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, rim_tick_color: v } })}
+                      />
                     </div>
                   </div>
 
@@ -1159,20 +1417,10 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                     {wheel.branding.inner_ring_enabled && (
                       <div className="space-y-1.5">
                         <Label className="text-sm">Inner Ring Color</Label>
-                        <div className="flex gap-2 items-center">
-                          <input
-                            type="color"
-                            value={wheel.branding.inner_ring_color ?? '#ffffff'}
-                            onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, inner_ring_color: e.target.value } })}
-                            className="w-8 h-8 rounded cursor-pointer border"
-                          />
-                          <Input
-                            value={wheel.branding.inner_ring_color ?? ''}
-                            placeholder="rgba(255,255,255,0.18)"
-                            onChange={(e) => setWheel({ ...wheel, branding: { ...wheel.branding, inner_ring_color: e.target.value } })}
-                            className="h-8 text-sm font-mono"
-                          />
-                        </div>
+                        <RGBAPicker
+                          value={wheel.branding.inner_ring_color ?? 'rgba(255,255,255,0.18)'}
+                          onChange={(v) => setWheel({ ...wheel, branding: { ...wheel.branding, inner_ring_color: v } })}
+                        />
                       </div>
                     )}
                   </div>
@@ -1756,9 +2004,18 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                             onClick={() => {
                               if (!wheel) return;
                               const tb = theme.branding as Record<string, any>;
+                              
+                              // SAFE CONFIG MERGE: Preserve center_image_url while applying theme
+                              const safeConfig = {
+                                ...wheel.config,
+                                ...theme.config,
+                                center_image_url: wheel.config.center_image_url ?? (wheel.config as any)?.config?.center_image_url ?? null,
+                                applied_theme_id: theme.id,
+                              };
+
                               setWheel({
                                 ...wheel,
-                                config: { ...wheel.config, ...theme.config },
+                                config: safeConfig,
                                 // Start from a clean baseline (BRANDING_RESET_BASE), then stamp the
                                 // saved theme on top. This prevents properties from a previously
                                 // applied theme from "leaking" into this one.
@@ -1775,37 +2032,34 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                               });
                               if (theme.segment_palette && theme.segment_palette.length > 0) {
                                 setSegments((prev) => {
-                                  // Create segments array with EXACTLY the length of the saved palette
-                                  const newSegments = theme.segment_palette.map((palette: any, i: number) => {
-                                    const existing = prev[i];
+                                  // ── THEME IS PAINT: apply palette colors to EXISTING segments ─────
+                                  const paletteCount = theme.segment_palette.length;
+                                  const newSegments = prev.map((existing, i) => {
+                                    const palette = theme.segment_palette[i % paletteCount];
+
+                                    // Extract background data — NEVER assign this to icon_url
+                                    const bgColor = palette.background?.color || palette.bg_color || '#7c3aed';
+                                    const bgImage = palette.background?.imageUrl || palette.segment_image_url || null;
+                                    const bgImageLegacy = bgImage || palette.image_url || null;
+
+                                    // Extract icon — NO fallback to existing segment icon
+                                    const paletteHasIcon = palette.icon_url
+                                      && palette.icon_url.length > 4
+                                      && !palette.icon_url.startsWith('#');
+                                    const iconUrl = paletteHasIcon ? palette.icon_url : null;
+
                                     return {
-                                      id: existing?.id ?? `temp-${Date.now()}-${i}`,
-                                      wheel_id: id,
-                                      position: i,
-                                      label: existing?.label ?? `Segment ${i + 1}`,
-                                      bg_color: palette.bg_color,
+                                      ...existing,
+                                      bg_color: bgColor,
+                                      segment_image_url: bgImageLegacy,
+                                      background: { color: bgColor, imageUrl: bgImageLegacy },
                                       text_color: palette.text_color,
-                                      // Explicitly clear or set icons and offsets from the theme
-                                      // to prevent "state leak" from previously applied themes.
-                                      icon_url: palette.image_url ?? null,
-                                      // Relative offset fields (saved by theme-tester)
-                                      icon_radial_offset:  palette.icon_radial_offset  ?? null,
-                                      icon_tangential_offset: palette.icon_tangential_offset ?? null,
-                                      label_radial_offset: palette.label_radial_offset ?? null,
-                                      label_tangential_offset: palette.label_tangential_offset ?? null,
-                                      label_font_scale:    palette.label_font_scale     ?? null,
-                                      // Explicitly null legacy absolute-px fields to prevent stale values
-                                      icon_offset_x: null,
-                                      icon_offset_y: null,
-                                      weight: existing?.weight ?? 1.0,
-                                      prize_id: existing?.prize_id ?? null,
-                                      is_no_prize: existing?.is_no_prize ?? true,
-                                      wins_today: existing?.wins_today ?? 0,
-                                      wins_total: existing?.wins_total ?? 0,
+                                      icon_url: iconUrl,
+                                      // NEVER touch labels, weights, or positions when applying a theme
                                     };
                                   });
-                                  // Log segment count for debugging
-                                  console.log(`Applying theme with ${newSegments.length} segments from palette`);
+
+                                  console.log(`[ApplyCustomTheme] Painted ${newSegments.length} segments with ${paletteCount} colors`);
                                   return newSegments;
                                 });
                                 setAppliedTheme({ id: theme.id, name: theme.name, emoji: theme.emoji, type: 'custom' });
@@ -1860,13 +2114,28 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                               return;
                             }
                             
-                            const { newConfig, newBranding, newSegments } = applyTemplateToWheel(tpl, segments);
+                            // ── 1. DEBUG LOG: BEFORE ──────────────────────────────
+                            console.log("[ThemeApply] BEFORE (Config):", { ...wheel.config });
+                            console.log("[ThemeApply] BEFORE (Branding):", { ...wheel.branding });
                             
-                            // `newBranding` already starts from BRANDING_RESET_BASE (inside applyTemplateToWheel),
-                            // so we do NOT merge wheel.branding — that would re-introduce the old theme's stale values.
+                            // ── 2. HARD RESET BEFORE APPLYING THEME ──────────────────────────
+                            // We completely flush the state to guarantee no ghosting/merging
+                            setSegments([]);
+                            const baseWheel = { ...wheel };
+
+                            // ── 3. CALCULATE NEW STATE ────────────────────────────
+                            // applyTemplateToWheel now runs a deep copy and normalizes purely from the theme
+                            const { newConfig, newBranding, newSegments } = applyTemplateToWheel(tpl);
+                            
+                            // ── 4. DEBUG LOG: THEME & AFTER ────────────────────────
+                            console.log("[ThemeApply] THEME (Template):", tpl.id);
+                            console.log("[ThemeApply] AFTER (Config):", newConfig);
+                            console.log("[ThemeApply] AFTER (Branding):", newBranding);
+
+                            // ── 5. APPLY FRESH STATE ────────────────────────────────
                             setWheel({
-                              ...wheel,
-                              config: { ...wheel.config, ...newConfig },
+                              ...baseWheel,
+                              config: newConfig,
                               branding: newBranding,
                             });
                             setSegments(newSegments);
@@ -2249,35 +2518,64 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                 <span className="text-[10px] text-muted-foreground/60">1:1 simulation</span>
               </div>
               <CardContent className="p-5">
-                {wheel.config.game_type === 'scratch_card' ? (
-                  <ScratchPreview
-                    key={appliedTheme?.id ?? 'default'}
-                    segments={segments as unknown as WheelSegment[]}
-                    branding={wheel.branding}
-                    config={wheel.config}
-                  />
-                ) : wheel.config.game_type === 'slot_machine' ? (
-                  <SlotPreview
-                    key={appliedTheme?.id ?? 'default'}
-                    segments={segments as unknown as WheelSegment[]}
-                    branding={wheel.branding}
-                    config={wheel.config}
-                  />
-                ) : wheel.config.game_type === 'roulette' ? (
-                  <RoulettePreview
-                    key={appliedTheme?.id ?? 'default'}
-                    segments={segments as unknown as WheelSegment[]}
-                    branding={wheel.branding}
-                    config={wheel.config}
-                  />
-                ) : (
-                  <WheelPreview
-                    key={appliedTheme?.id ?? 'default'}
-                    segments={segments as unknown as WheelSegment[]}
-                    config={wheel.config}
-                    branding={wheel.branding}
-                  />
-                )}
+                  {(() => {
+                  // Resolve the active template object for deterministic visual config.
+                  // This ensures the preview uses palette-authoritative segment count,
+                  // not whatever is currently in the wheel.segments state.
+                  const activeTemplateObj =
+                    appliedTheme?.id
+                      ? (WHEEL_TEMPLATES.find(t => t.id === appliedTheme.id)
+                          ?? savedThemes.find((t: any) => t.id === appliedTheme.id)
+                          ?? null)
+                      : null;
+
+                  const { branding: finalBranding, config: finalConfig, segments: resolvedSegments } = getFinalVisualConfig(
+                    { ...wheel, segments },
+                    activeTemplateObj as any
+                  );
+
+                  console.log('SEGMENTS BEFORE RENDER', resolvedSegments.length);
+                  console.log('HAS LOGO', (finalBranding as any).center_logo);
+
+                  if (finalConfig.game_type === 'scratch_card') {
+                    return (
+                      <ScratchPreview
+                        key={finalConfig.applied_theme_id ?? 'default'}
+                        segments={resolvedSegments as unknown as WheelSegment[]}
+                        branding={finalBranding}
+                        config={finalConfig}
+                      />
+                    );
+                  }
+                  if (finalConfig.game_type === 'slot_machine') {
+                    return (
+                      <SlotPreview
+                        key={finalConfig.applied_theme_id ?? 'default'}
+                        segments={resolvedSegments as unknown as WheelSegment[]}
+                        branding={finalBranding}
+                        config={finalConfig}
+                      />
+                    );
+                  }
+                  if (finalConfig.game_type === 'roulette') {
+                    return (
+                      <RoulettePreview
+                        key={finalConfig.applied_theme_id ?? 'default'}
+                        segments={resolvedSegments as unknown as WheelSegment[]}
+                        branding={finalBranding}
+                        config={finalConfig}
+                      />
+                    );
+                  }
+                  return (
+                    <WheelPreview
+                      key={finalConfig.applied_theme_id ?? 'default'}
+                      segments={resolvedSegments as unknown as WheelSegment[]}
+                      branding={finalBranding}
+                      config={finalConfig}
+                    />
+                  );
+                })()}
 
                 <div className="mt-5">
                   <Button

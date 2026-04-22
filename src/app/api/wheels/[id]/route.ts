@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server';
 import { sql } from '@/lib/db';
 import { requireAuth, okResponse, errorResponse } from '@/lib/middleware-utils';
 import { logAuditAction } from '@/lib/audit';
+import { normalizeSegmentForResponse, assertSegments } from '@/lib/utils/segment-normalizer';
 
 async function getWheel(wheelId: string, clientId: string) {
   const wheelResults = await sql`
@@ -30,7 +31,30 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       ORDER BY s.position ASC
     `;
 
-    return okResponse({ wheel, segments });
+    // ── Normalize + assert data contract before sending to client ──────────────
+    const normalizedSegments = (segments as any[]).map((s, i) => normalizeSegmentForResponse(s, i));
+    assertSegments(normalizedSegments, 'GET /api/wheels/:id');
+
+    // ═══ DEBUG: API RESPONSE — compare against frontend state after reload ═══
+    console.log('🔵 [API /wheels/:id] RESPONSE DEBUG:', {
+      wheelId:          wheel.id,
+      applied_theme_id: (wheel as any).config?.applied_theme_id ?? '(none)',
+      segmentCount:     normalizedSegments.length,
+      segments: normalizedSegments.map((s) => ({
+        id:                  s.id,
+        label:               s.label,
+        bg_color:            s.bg_color,
+        text_color:          s.text_color,
+        segment_image_url:   s.segment_image_url,
+        icon_url:            s.icon_url,
+        label_radial_offset: s.label_radial_offset,
+        label_rotation_angle:s.label_rotation_angle,
+        label_font_scale:    s.label_font_scale,
+        weight_type:         typeof s.weight,
+      })),
+    });
+
+    return okResponse({ wheel, segments: normalizedSegments });
   } catch (err) {
     console.error('Get wheel error:', err);
     return errorResponse('INTERNAL_ERROR', 'Failed to fetch wheel.', 500);
@@ -57,6 +81,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const hasActiveFrom  = 'active_from'  in body;
     const hasActiveUntil = 'active_until' in body;
     const { name, config, branding, trigger_rules, frequency_rules, form_config, active_from, active_until, total_spin_cap } = body;
+
+    // ── DEBUG: BRANDING COLORS ──
+    if (branding) {
+      console.log("[API /wheels PUT] branding colors:", {
+        primary: branding.primary_color,
+        outer_ring: branding.outer_ring_color,
+        inner_ring: branding.inner_ring_color,
+      });
+    }
 
     // Update the main (non-date) fields first using COALESCE pattern
     await sql`

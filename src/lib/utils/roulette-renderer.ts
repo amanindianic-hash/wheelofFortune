@@ -4,7 +4,11 @@
 export interface RouletteSegment {
   id: string;
   label: string;
-  bg_color: string;
+  bg_color?: string;
+  background?: {
+    color: string;
+    imageUrl: string | null;
+  };
   text_color: string;
   icon_url?: string | null;
 }
@@ -117,7 +121,7 @@ export function drawRoulette(
     ctx.moveTo(cx, cy);
     ctx.arc(cx, cy, wheelR, startA, endA);
     ctx.closePath();
-    ctx.fillStyle = seg.bg_color;
+    ctx.fillStyle = seg.background?.color || seg.bg_color || '#7c3aed';
     ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,0.22)';
     ctx.lineWidth = 1.5;

@@ -5,10 +5,10 @@ import type { Segment } from '@/lib/types';
 
 describe('Theme Application Utility', () => {
   const dummySegments: Segment[] = [
-    { id: '1', wheel_id: 'w1', position: 0, label: 'Prize 1', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 },
-    { id: '2', wheel_id: 'w1', position: 1, label: 'Prize 2', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 },
-    { id: '3', wheel_id: 'w1', position: 2, label: 'Prize 3', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 },
-    { id: '4', wheel_id: 'w1', position: 3, label: 'Prize 4', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 },
+    { id: '1', wheel_id: 'w1', position: 0, label: 'Prize 1', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 } as any,
+    { id: '2', wheel_id: 'w1', position: 1, label: 'Prize 2', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 } as any,
+    { id: '3', wheel_id: 'w1', position: 2, label: 'Prize 3', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 } as any,
+    { id: '4', wheel_id: 'w1', position: 3, label: 'Prize 4', bg_color: '#000000', text_color: '#ffffff', weight: 1, is_no_prize: false, wins_today: 0, wins_total: 0 } as any,
   ];
 
   it('INTERNAL: correctly applies a built-in wheel template config and branding', () => {
@@ -16,7 +16,7 @@ describe('Theme Application Utility', () => {
     const festivalTheme = WHEEL_TEMPLATES.find((t) => t.id === 'festival');
     expect(festivalTheme).toBeDefined();
 
-    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(festivalTheme!, dummySegments);
+    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(festivalTheme!);
 
     // Should merge the config
     expect(newConfig.confetti_enabled).toBe(true);
@@ -24,7 +24,7 @@ describe('Theme Application Utility', () => {
     
     // Should map the segment colors onto our dummy segments
     expect(newSegments.length).toBe(dummySegments.length);
-    newSegments.forEach((seg, i) => {
+    newSegments.forEach((seg: any, i: number) => {
       const expectedPaletteColor = festivalTheme!.segmentPalette[i % festivalTheme!.segmentPalette.length];
       expect(seg.bg_color).toBe(expectedPaletteColor.bg_color);
       expect(seg.text_color).toBe(expectedPaletteColor.text_color);
@@ -53,7 +53,7 @@ describe('Theme Application Utility', () => {
       ]
     };
 
-    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(customTheme, dummySegments);
+    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(customTheme);
 
     expect(newConfig.animation_speed).toBe('slow');
     expect(newBranding.primary_color).toBe('#123456');

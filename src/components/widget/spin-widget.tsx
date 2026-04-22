@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { UniversalWheelRenderer } from '@/components/shared/universal-wheel-renderer';
+import { getFinalVisualConfig } from '@/lib/utils/theme-utils';
+import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
 import { type WheelSegment, type WheelConfig, type WheelBranding, easeOutQuart } from '@/lib/utils/wheel-renderer';
 
 interface FormConfig { enabled?: boolean; fields?: Array<{ key: string; label: string; type: string; required?: boolean }>; gdpr_enabled?: boolean; gdpr_text?: string; privacy_policy_url?: string | null; }
@@ -47,11 +49,98 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
         const data = await res.json();
         if (!res.ok) { setErrorMsg(data.error?.message ?? 'Wheel unavailable'); setPhase('error'); return; }
         setSessionId(data.session_id);
-        setSegments(data.segments ?? []);
-        setConfig(data.wheel?.config ?? {});
-        setBranding(data.wheel?.branding ?? {});
+        const receivedSegments: WheelSegment[] = data.segments ?? [];
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // TASK 1 — LIVE WIDGET: full segment dump (compare with API SEGMENTS RESPONSE)
+        // ═══════════════════════════════════════════════════════════════════════
+        console.log('LIVE WIDGET SEGMENTS:', JSON.stringify(receivedSegments, null, 2));
+
+        // TASK 4 — PER-SEGMENT FIELD VALIDATION (frontend mirror of API check)
+        receivedSegments.forEach((s: any) => {
+          console.log('CHECK SEGMENT:', {
+            id:    s.id,
+            label: s.label,
+            // Background
+            hasBackground:       !!(s.background?.imageUrl),
+            background_imageUrl: s.background?.imageUrl ?? '(null)',
+            // Icon
+            hasIcon:  !!(s.icon_url),
+            icon_url: s.icon_url ?? '(null)',
+            // Label positioning
+            labelOffsets: [
+              `label_radial_offset     = ${s.label_radial_offset     ?? '(null)'}`,
+              `label_tangential_offset = ${s.label_tangential_offset ?? '(null)'}`,
+              `label_rotation_angle    = ${s.label_rotation_angle    ?? '(null)'}`,
+              `label_font_scale        = ${s.label_font_scale        ?? '(null)'}`,
+              `label_offset_x          = ${s.label_offset_x          ?? '(null)'}`,
+              `label_offset_y          = ${s.label_offset_y          ?? '(null)'}`,
+            ],
+            // Icon positioning
+            iconOffsets: [
+              `icon_radial_offset      = ${s.icon_radial_offset      ?? '(null)'}`,
+              `icon_tangential_offset  = ${s.icon_tangential_offset  ?? '(null)'}`,
+              `icon_rotation_angle     = ${s.icon_rotation_angle     ?? '(null)'}`,
+            ],
+            // Key field presence (true = key exists in object, even if value is null)
+            allLabelFieldsPresent: [
+              'label_radial_offset','label_tangential_offset','label_rotation_angle',
+              'label_font_scale','label_offset_x','label_offset_y',
+            ].every(k => k in s),
+            allIconFieldsPresent: [
+              'icon_radial_offset','icon_tangential_offset','icon_rotation_angle',
+            ].every(k => k in s),
+          });
+        });
+
+        // ── UNIFIED DATA PIPELINE: RESOLVE VISUALS ──────────────────────────────
+        // Resolve the active template so getFinalVisualConfig can use the palette
+        // as the authoritative segment count — theme is the COMPLETE visual snapshot.
+        const wheelConfig = data.wheel?.config ?? {};
+        const appliedThemeId = wheelConfig.applied_theme_id as string | undefined;
+        const activeTemplate = appliedThemeId
+          ? (WHEEL_TEMPLATES.find((t: any) => t.id === appliedThemeId) ?? null)
+          : null;
+
+        const {
+          branding: resolvedBranding,
+          config: resolvedConfig,
+          segments: resolvedSegments
+        } = getFinalVisualConfig(
+          { ...data.wheel, segments: receivedSegments },
+          activeTemplate
+        );
+
+        console.log('SEGMENTS BEFORE RENDER', resolvedSegments.length);
+        console.log('CENTER LOGO STATUS (Widget):', {
+          centerLogo: (resolvedBranding as any).centerLogo,
+          center_logo: (resolvedBranding as any).center_logo
+        });
+
+        setBranding(resolvedBranding);
+        setConfig(resolvedConfig);
+        setSegments(resolvedSegments as unknown as WheelSegment[]);
+        
         setFormConfig(data.wheel?.form_config ?? {});
         setPhase(data.wheel?.form_config?.enabled ? 'form' : 'ready');
+
+        // ── STEP 5: FRONTEND STATE ──────────────────────────────────────────
+        console.log('STEP 5 FRONTEND STATE (Spin Widget):', {
+          sessionId: data.session_id,
+          branding: {
+            primary: data.wheel?.branding?.primary_color,
+            outer_ring: data.wheel?.branding?.outer_ring_color,
+            face_url: data.wheel?.branding?.premium_face_url
+          },
+          segmentCount: receivedSegments.length,
+          sampleSegment: receivedSegments[0] ? {
+            label: receivedSegments[0].label,
+            lro: (receivedSegments[0] as any).label_radial_offset,
+            bg: (receivedSegments[0] as any).bg_color
+          } : null
+        });
+
+        // CENTER LOGO DEBUG — confirm widget receives center_image_url
       } catch {
         setErrorMsg('Failed to load wheel. Please try again.'); setPhase('error');
       }
@@ -272,24 +361,13 @@ export function SpinWidget({ embedToken, isPreview = false }: { embedToken: stri
       style={{ backgroundColor: bgColor, fontFamily }}>
       {/* Wheel canvas */}
       <div className="relative isolate pt-4">
-        <div 
-          className="rounded-full shadow-2xl z-10"
-          style={{
-            background:
-              branding.background_value &&
-              branding.background_value !== 'rgba(0, 0, 0, 0)'
-                ? branding.background_value
-                : 'transparent',
-          }}
-        >
-          <UniversalWheelRenderer
-            segments={segments}
-            config={config}
-            branding={branding}
-            rotation={rotation}
-            size={340}
-          />
-        </div>
+        <UniversalWheelRenderer
+          segments={segments}
+          config={config}
+          branding={branding}
+          rotation={rotation}
+          size={340}
+        />
       </div>
 
       <Button

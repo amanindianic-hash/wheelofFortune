@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
       return errorResponse('VALIDATION_ERROR', 'name is required.', 400);
     }
 
+    // ── DEBUG: THEME COLORS ──
+    console.log("[API] theme colors (Branding Tags):", {
+      outer_ring_color: branding.outer_ring_color,
+      inner_ring_color: branding.inner_ring_color,
+      rim_tick_color:   branding.rim_tick_color,
+    });
+
     const results = await sql`
       INSERT INTO wheel_themes (client_id, name, emoji, description, branding, config, segment_palette)
       VALUES (

@@ -66,6 +66,22 @@ export function WheelRenderer({
   // ── 2. Draw whenever props or readiness change ────────────────────────────
   useEffect(() => {
     if (!canvasRef.current || !isReady) return;
+    // ── STEP 6: RENDER INPUT ──────────────────────────────────────────────
+    console.log('STEP 6 RENDER INPUT (Universal Renderer):', {
+      segmentCount: segments.length,
+      branding: {
+        primary: branding.primary_color,
+        face_url: branding.premium_face_url,
+        outer_ring_width: branding.outer_ring_width,
+      },
+      firstSegment: segments[0] ? {
+        label: segments[0].label,
+        lro: (segments[0] as any).label_radial_offset,
+        bg: (segments[0] as any).bg_color || segments[0].background?.color,
+        icon: (segments[0] as any).icon_url
+      } : null,
+      centerLogo: (branding as any).centerLogo || (branding as any).center_logo
+    });
     drawWheel(canvasRef.current, segments, rotation, config, branding, imageCacheRef.current);
   }, [segments, config, branding, rotation, isReady, loadTrigger]);
 

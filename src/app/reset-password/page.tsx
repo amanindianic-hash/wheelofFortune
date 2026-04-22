@@ -83,7 +83,16 @@ function ResetPasswordForm() {
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-xl">
         <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center text-2xl">🔑</div>
+          <Link 
+            href="/" 
+            className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-[0_0_0_1px_rgb(124_58_237/0.3),0_8px_24_px_-4px_rgb(124_58_237/0.5)] mb-2 hover:scale-105 transition-transform"
+          >
+            <svg viewBox="0 0 24 24" className="h-7 w-7 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2v10l4 4" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+            </svg>
+          </Link>
           <CardTitle className="text-2xl">Set new password</CardTitle>
           <CardDescription>Choose a strong password for your account</CardDescription>
         </CardHeader>

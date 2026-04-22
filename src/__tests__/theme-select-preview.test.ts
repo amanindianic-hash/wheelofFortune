@@ -29,7 +29,7 @@ function makeSegment(overrides: Partial<Segment> = {}): Segment {
     wins_today: 0,
     wins_total: 0,
     ...overrides,
-  };
+  } as any;
 }
 
 const FOUR_SEGMENTS: Segment[] = [
@@ -68,15 +68,15 @@ describe('applyTemplateToWheel — core apply logic', () => {
 
   it('does NOT mutate original segments', () => {
     const t = WHEEL_TEMPLATES.find((t) => t.id === 'neon-night')!;
-    const origColors = FOUR_SEGMENTS.map((s) => s.bg_color);
+    const origColors = FOUR_SEGMENTS.map((s: any) => s.bg_color);
     applyTemplateToWheel(t, FOUR_SEGMENTS);
-    FOUR_SEGMENTS.forEach((s, i) => expect(s.bg_color).toBe(origColors[i]));
+    FOUR_SEGMENTS.forEach((s: any, i: number) => expect(s.bg_color).toBe(origColors[i]));
   });
 
   it('preserves segment id, wheel_id, label, weight, position after palette application', () => {
     const t = WHEEL_TEMPLATES.find((t) => t.id === 'luxury-gold')!;
     const { newSegments } = applyTemplateToWheel(t, FOUR_SEGMENTS);
-    newSegments.forEach((seg, i) => {
+    newSegments.forEach((seg: any, i: number) => {
       expect(seg.id).toBe(FOUR_SEGMENTS[i].id);
       expect(seg.wheel_id).toBe(FOUR_SEGMENTS[i].wheel_id);
       expect(seg.label).toBe(FOUR_SEGMENTS[i].label);
@@ -269,8 +269,8 @@ describe('Live preview state simulation', () => {
   it('segment label content is preserved through live preview apply', () => {
     const t = WHEEL_TEMPLATES.find((t) => t.id === 'pastel-spring')!;
     const { segments } = simulateLivePreview(baseConfig, baseBranding, FOUR_SEGMENTS, t);
-    const labels = segments.map((s) => s.label);
-    expect(labels).toEqual(FOUR_SEGMENTS.map((s) => s.label));
+    const labels = segments.map((s: any) => s.label);
+    expect(labels).toEqual(FOUR_SEGMENTS.map((s: any) => s.label));
   });
 
   it('applying a custom ad-hoc theme sets its branding and config on the preview', () => {

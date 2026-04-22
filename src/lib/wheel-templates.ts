@@ -10,7 +10,18 @@ export interface WheelTemplate {
   config: Partial<WheelConfig>;
   branding: Partial<WheelBranding>;
   /** Default segment colors (cycled for however many segments exist) */
-  segmentPalette: Array<{ bg_color: string; text_color: string }>;
+  segmentPalette: Array<{ 
+    background?: {
+      color: string;
+      imageUrl: string | null;
+    };
+    text_color: string;
+    // Legacy fields for ease of transition
+    bg_color?: string;
+    segment_image_url?: string | null;
+    image_url?: string | null; // old name
+    icon_url?: string | null;
+  }>;
 }
 
 // ─── Spin Wheel Templates ─────────────────────────────────────────────────────

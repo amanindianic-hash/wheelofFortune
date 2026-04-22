@@ -76,3 +76,7 @@ e2e-auth.json
 # Misc
 *.pem
 .cache/
+graphify-out/
+scratch/
+src/api key
+spinplatform-web/

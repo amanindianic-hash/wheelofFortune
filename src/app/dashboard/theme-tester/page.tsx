@@ -15,11 +15,13 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import {
-  type WheelSegment, type WheelConfig, type WheelBranding,
+import { 
+  type WheelSegment, type WheelConfig, type WheelBranding, isTransparent
 } from '@/lib/utils/wheel-renderer';
+import { RGBAPicker } from '@/components/dashboard/wheels/rgba-picker';
 import { UniversalWheelRenderer } from '@/components/shared/universal-wheel-renderer';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
+import { isImageUrl } from '@/lib/utils/validation';
 import { SegmentUploader } from '@/components/segment-uploader/segment-upload';
 import { SegmentPreview } from '@/components/segment-uploader/segment-preview';
 
@@ -49,7 +51,9 @@ interface SavedTheme {
   segment_palette: Array<{
     bg_color: string;
     text_color: string;
-    image_url?: string | null;
+    segment_image_url?: string | null; // renamed from image_url for clarity
+    icon_url?: string | null;          // newly explicit foreground icon
+    image_url?: string | null;         // kept as legacy fallback for existing data
     icon_radial_offset?: number | null;
     icon_tangential_offset?: number | null;
     offset_x?: number | null;
@@ -62,9 +66,12 @@ interface SavedTheme {
 // ── Build segments from a template palette ───────────────────────────────────
 function buildSegmentsFromPalette(
   palette: Array<{
-    bg_color: string;
+    background?: { color: string; imageUrl: string | null };
+    bg_color?: string;
     text_color: string;
-    image_url?: string | null;
+    segment_image_url?: string | null;
+    icon_url?: string | null;
+    image_url?: string | null; // legacy
     icon_radial_offset?: number | null;
     icon_tangential_offset?: number | null;
   }>,
@@ -76,9 +83,12 @@ function buildSegmentsFromPalette(
       id: String(i + 1),
       position: i,
       label,
-      bg_color:   p.bg_color,
+      background: {
+        color: p.background?.color || p.bg_color || '#7c3aed',
+        imageUrl: p.background?.imageUrl || p.segment_image_url || p.image_url || null,
+      },
       text_color: p.text_color,
-      icon_url:   p.image_url ?? null,
+      icon_url:          p.icon_url || null,
       icon_radial_offset: p.icon_radial_offset ?? null,
       icon_tangential_offset: p.icon_tangential_offset ?? null,
       weight: 1,
@@ -316,6 +326,7 @@ export default function ThemeTesterPage() {
 
   // ── Segment images for custom wheel segments ────────────────────────────────
   const [segmentImages, setSegmentImages] = useState<(string | null)[]>(Array(8).fill(null));
+  const [segmentIcons, setSegmentIcons] = useState<(string | null)[]>(Array(8).fill(null));
   const [segmentImageOffsets, setSegmentImageOffsets] = useState<Array<{radial: number, tangential: number}>>(
     Array(8).fill({ radial: 0, tangential: 0 })
   );
@@ -324,10 +335,13 @@ export default function ThemeTesterPage() {
   // ── Custom theme segments & branding ───────────────────────────────────────
   const customSegments: WheelSegment[] = Array.from({ length: numSegments }).map((_, i) => ({
     id: String(i + 1), position: i, label: PREVIEW_LABELS[i % PREVIEW_LABELS.length],
-    bg_color:   segmentPalette[i].bg_color,
+    background: {
+      color: segmentPalette[i].bg_color,
+      imageUrl: segmentImages[i] || null,
+    },
     text_color: segmentPalette[i].text_color,
     weight: 1, is_no_prize: false,
-    segment_image_url: segmentImages[i] ?? undefined,
+    icon_url: segmentIcons[i] ?? undefined,
     icon_radial_offset: segmentImageOffsets[i].radial !== 0 ? segmentImageOffsets[i].radial : undefined,
     icon_tangential_offset: segmentImageOffsets[i].tangential !== 0 ? segmentImageOffsets[i].tangential : undefined,
   }));
@@ -554,6 +568,32 @@ export default function ThemeTesterPage() {
     }
     setSaving(true);
     try {
+      const finalPalette = segmentPalette.map((p, i) => {
+        const bgUrl = isImageUrl(segmentImages[i]) ? segmentImages[i]! : null;
+        const iconUrl = isImageUrl(segmentIcons[i]) ? segmentIcons[i]! : null;
+
+        const entry = {
+          background: {
+            color: p.bg_color,
+            imageUrl: bgUrl,
+          },
+          text_color: p.text_color,
+          icon_url: iconUrl,
+          // Legacy/Mapping fields for system compatibility
+          bg_color: p.bg_color,
+          segment_image_url: bgUrl,
+          image_url: bgUrl,
+          label_radial_offset: labelRadialOffset,
+          label_tangential_offset: labelTangentialOffset,
+          icon_radial_offset: segmentImageOffsets[i].radial,
+          icon_tangential_offset: segmentImageOffsets[i].tangential,
+          label_font_scale: labelFontScale
+        };
+
+        console.log(`[SaveTheme] Segment ${i}:`, { background: entry.background.imageUrl, icon: entry.icon_url });
+        return entry;
+      }).slice(0, numSegments);
+
       const cfg = buildConfig();
       const res = await fetch('/api/themes', {
         method: 'POST',
@@ -563,15 +603,7 @@ export default function ThemeTesterPage() {
           emoji: saveEmoji,
           branding: cfg,
           config: buildFinalConfig(),
-          segment_palette: segmentPalette.map((p, i) => ({
-            ...p,
-            image_url: segmentImages[i] ?? null,
-            label_radial_offset: labelRadialOffset,
-            label_tangential_offset: labelTangentialOffset,
-            icon_radial_offset: segmentImageOffsets[i].radial,
-            icon_tangential_offset: segmentImageOffsets[i].tangential,
-            label_font_scale: labelFontScale
-          })).slice(0, numSegments),
+          segment_palette: finalPalette,
         }),
       });
       if (!res.ok) { toast.error('Failed to save theme'); return; }
@@ -586,6 +618,22 @@ export default function ThemeTesterPage() {
     try {
       const res = await fetch(`/api/themes/${theme.id}`, { method: 'DELETE' });
       if (!res.ok) { toast.error('Failed to delete theme'); return; }
+
+      // ── [ThemeFix] Clean stale localStorage across all wheel sessions ───────
+      const deletedThemeId = theme.id;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('wheel-') && key?.endsWith('-theme')) {
+          try {
+            const data = JSON.parse(localStorage.getItem(key) || '{}');
+            if (data.id === deletedThemeId) {
+              localStorage.removeItem(key);
+              console.log(`[ThemeFix] Cleared stale theme ${deletedThemeId} from ${key}`);
+            }
+          } catch { /* ignore parsing errors */ }
+        }
+      }
+
       toast.success(`"${theme.name}" deleted`);
       setSavedThemes((prev) => prev.filter((t) => t.id !== theme.id));
     } catch { toast.error('Failed to delete theme'); }
@@ -608,9 +656,18 @@ export default function ThemeTesterPage() {
   }
 
   function handleLoadTheme(theme: SavedTheme) {
+    // ── 1. DEBUG LOG: BEFORE ──────────────────────────────
+    console.log("[ThemeApply] BEFORE (Branding):", buildConfig());
+
+    // ── 2. RESET TO BASELINE (Hard Clear) ──────────────────
+    // We reset everything to defaults before applying theme values
+    // to ensure no stale layers from previous themes persist.
+    handleReset();
+
     const b = theme.branding as any;
     const NORM_RADIUS = 138; // Inner radius of 320px preview wheel
 
+    // ── 3. APPLY FRESH VALUES ──────────────────────────────
     if (b.premium_content_scale   !== undefined) setContentScale(b.premium_content_scale);
     if (b.premium_center_offset_y !== undefined) setCenterOffsetY(b.premium_center_offset_y);
     
@@ -644,14 +701,10 @@ export default function ThemeTesterPage() {
 
     if (b.premium_face_url) {
       setFaceInfo({ url: b.premium_face_url, name: 'face-from-db', size: '—', width: 800, height: 800 });
-    } else {
-      setFaceInfo(null);
     }
 
     if (b.premium_stand_url) {
       setStandInfo({ url: b.premium_stand_url, name: 'stand-from-db', size: '—', width: 800, height: 800 });
-    } else {
-      setStandInfo(null);
     }
     
     if (theme.segment_palette && theme.segment_palette.length > 0) {
@@ -663,12 +716,23 @@ export default function ThemeTesterPage() {
         text_color: theme.segment_palette[i % theme.segment_palette.length].text_color
       })));
       
-      setSegmentImages(Array.from({ length: 8 }).map((_, i) => 
-        (i < theme.segment_palette.length) ? (theme.segment_palette[i].image_url ?? null) : null
-      ));
+      const newImages = Array.from({ length: 8 }).map((_, i) => {
+        if (i >= theme.segment_palette.length) return null;
+        const p = theme.segment_palette[i] as any;
+        return p.background?.imageUrl || p.segment_image_url || p.image_url || null;
+      });
+      
+      const newIcons = Array.from({ length: 8 }).map((_, i) => {
+        if (i >= theme.segment_palette.length) return null;
+        const p = theme.segment_palette[i] as any;
+        return p.icon_url || null;
+      });
+
+      setSegmentImages(newImages);
+      setSegmentIcons(newIcons);
       
       setSegmentImageOffsets(Array.from({ length: 8 }).map((_, i) => {
-        const p = theme.segment_palette[i] || {};
+        const p = theme.segment_palette[i] as any || {};
         return {
           radial: p.icon_radial_offset ?? (p.offset_x ? p.offset_x / NORM_RADIUS : 0),
           tangential: p.icon_tangential_offset ?? (p.offset_y ? p.offset_y / NORM_RADIUS : 0)
@@ -678,23 +742,22 @@ export default function ThemeTesterPage() {
 
     const c = theme.config as any;
     if (c.show_segment_labels !== undefined) setShowLabels(c.show_segment_labels);
-    if (c.center_image_url) {
-      setHubInfo({ url: c.center_image_url, name: 'hub-from-db', size: '—', width: 800, height: 800 });
-    } else {
-      setHubInfo(null);
+    const centerImg = b.center_logo || c.center_image_url;
+    if (centerImg) {
+      setHubInfo({ url: centerImg, name: 'hub-from-db', size: '—', width: 800, height: 800 });
     }
     
     if (b.premium_frame_url) {
       setFrameInfo({ url: b.premium_frame_url, name: 'frame-from-db', size: '—', width: 800, height: 800 });
-    } else {
-      setFrameInfo(null);
     }
     
     if (b.premium_pointer_url) {
       setPointerInfo({ url: b.premium_pointer_url, name: 'pointer-from-db', size: '—', width: 800, height: 800 });
-    } else {
-      setPointerInfo(null);
     }
+
+    // ── 4. DEBUG LOG: AFTER ──────────────────────────────
+    console.log("[ThemeApply] THEME (ID):", theme.id);
+    console.log("[ThemeApply] AFTER (Branding):", buildConfig());
 
     toast.success(`Loaded "${theme.name}"`);
   }
@@ -720,6 +783,8 @@ export default function ThemeTesterPage() {
       show_segment_labels: showLabels,
       premium_frame_url: frameInfo?.url ?? null,
       premium_pointer_url: pointerInfo?.url ?? null,
+      // Standardized hub logo
+      center_logo: hubInfo?.url ?? null,
       // Note: outer_ring_width, inner_ring_enabled, rim_tick_style are computed dynamically
       // based on whether premium images are present - they should NOT be saved as fixed values
     };
@@ -728,7 +793,7 @@ export default function ThemeTesterPage() {
   function buildFinalConfig() {
     return {
       show_segment_labels: showLabels,
-      center_image_url: hubInfo?.url ?? null,
+      center_image_url: hubInfo?.url ?? null, // keep legacy as secondary signal
     };
   }
 
@@ -1043,34 +1108,26 @@ export default function ThemeTesterPage() {
                       
                       <div className="space-y-1">
                         <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Outer Edge</Label>
-                        <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
-                          <input type="color" value={outerRingColor} onChange={(e) => setOuterRingColor(e.target.value)}
-                            className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0 shrink-0" />
-                          <Input value={outerRingColor} onChange={(e) => setOuterRingColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
-                        </div>
+                        <RGBAPicker 
+                          value={outerRingColor} 
+                          onChange={(v) => setOuterRingColor(v)} 
+                        />
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Inner Band</Label>
-                        <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
-                          <div className="relative w-5 h-5 rounded overflow-hidden shrink-0 ring-1 ring-inset ring-white/20">
-                            <div className="absolute inset-0 bg-[repeating-conic-gradient(#80808033_0%_25%,_transparent_0%_50%)] bg-[length:8px_8px]"></div>
-                            <div className="absolute inset-0 pointer-events-none" style={{ backgroundColor: innerRingColor }}></div>
-                            <input type="color" value={innerRingColor.startsWith('#') ? innerRingColor.slice(0, 7) : '#ffffff'} 
-                              onChange={(e) => setInnerRingColor(e.target.value)}
-                              className="absolute inset-0 opacity-0 w-full h-full cursor-pointer" />
-                          </div>
-                          <Input value={innerRingColor} onChange={(e) => setInnerRingColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
-                        </div>
+                        <RGBAPicker 
+                          value={innerRingColor} 
+                          onChange={(v) => setInnerRingColor(v)} 
+                        />
                       </div>
 
                       <div className="space-y-1">
                         <Label className="text-[10px] text-muted-foreground uppercase font-semibold">Rim Ticks</Label>
-                        <div className="flex items-center gap-2 h-8 rounded-md border border-input bg-background px-2">
-                          <input type="color" value={rimTickColor} onChange={(e) => setRimTickColor(e.target.value)}
-                            className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0 shrink-0" />
-                          <Input value={rimTickColor} onChange={(e) => setRimTickColor(e.target.value)} className="h-6 w-full border-0 p-0 text-xs font-mono bg-transparent" />
-                        </div>
+                        <RGBAPicker 
+                          value={rimTickColor} 
+                          onChange={(v) => setRimTickColor(v)} 
+                        />
                       </div>
                     </div>
 
@@ -1140,49 +1197,68 @@ export default function ThemeTesterPage() {
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] w-3 text-muted-foreground">{i + 1}</span>
 
-                      {/* Segment Image Upload trigger */}
-                      <input type="file" id={`seg-img-${i}`} accept="image/png,image/jpeg,image/webp" className="hidden"
+                      {/* 1. Background Image (segment_image_url) */}
+                      <input type="file" id={`seg-bg-${i}`} accept="image/png,image/jpeg,image/webp" className="hidden"
                         onChange={async (e) => {
                           const file = e.target.files?.[0]; if (!file) return;
                           try {
                             const dataUrl = await fileToDataUrl(file);
                             setSegmentImages(prev => { const next = [...prev]; next[i] = dataUrl; return next; });
-                            setCacheKey(`segimg-${Date.now()}`);
-                            toast.success(`Segment ${i+1} image loaded`);
+                            setCacheKey(`segbg-${Date.now()}`);
+                            toast.success(`Segment ${i+1} background image loaded`);
                           } catch { toast.error('Failed to load image'); e.target.value = ''; }
                         }}
                       />
                       {segmentImages[i] ? (
-                        <button onClick={() => { setSegmentImages(prev => { const next = [...prev]; next[i] = null; return next; }); setCacheKey(`segimg-del-${Date.now()}`); }}
-                          className="h-7 w-7 rounded border border-emerald-500/50 bg-emerald-500/10 flex items-center justify-center relative overflow-hidden group shrink-0" title="Remove custom image">
+                        <button onClick={() => { setSegmentImages(prev => { const next = [...prev]; next[i] = null; return next; }); setCacheKey(`segbg-del-${Date.now()}`); }}
+                          className="h-7 w-7 rounded border border-emerald-500/50 bg-emerald-500/10 flex items-center justify-center relative overflow-hidden group shrink-0" title="Remove Background Image">
                           <img src={segmentImages[i]!} className="absolute inset-0 w-full h-full object-cover opacity-60" />
                           <X className="w-4 h-4 text-white drop-shadow-md relative z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                       ) : (
-                        <button onClick={() => document.getElementById(`seg-img-${i}`)?.click()} disabled={!!faceInfo}
-                          className="h-7 w-7 rounded border border-dashed border-white/20 hover:border-emerald-500/50 hover:bg-white/5 flex items-center justify-center text-muted-foreground hover:text-emerald-400 shrink-0 disabled:opacity-50 transition-colors" title="Upload custom segment image">
+                        <button onClick={() => document.getElementById(`seg-bg-${i}`)?.click()} disabled={!!faceInfo}
+                          className="h-7 w-7 rounded border border-dashed border-white/20 hover:border-emerald-500/50 hover:bg-white/5 flex items-center justify-center text-muted-foreground hover:text-emerald-400 shrink-0 disabled:opacity-50 transition-colors" title="Background Image URL (Full Wedge Fill)">
                           <ImageIcon className="w-3.5 h-3.5" />
                         </button>
                       )}
 
-                      <input 
-                        type="color" 
-                        value={segmentPalette[i].bg_color.startsWith('#') && segmentPalette[i].bg_color.length === 7 ? segmentPalette[i].bg_color : '#000000'} 
-                        disabled={!!faceInfo}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: val } : item));
+                      {/* 2. Foreground Icon (icon_url) */}
+                      <input type="file" id={`seg-icon-${i}`} accept="image/png,image/jpeg,image/webp" className="hidden"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0]; if (!file) return;
+                          try {
+                            const dataUrl = await fileToDataUrl(file);
+                            setSegmentIcons(prev => { const next = [...prev]; next[i] = dataUrl; return next; });
+                            setCacheKey(`segicon-${Date.now()}`);
+                            toast.success(`Segment ${i+1} prize icon loaded`);
+                          } catch { toast.error('Failed to load icon'); e.target.value = ''; }
                         }}
-                        className="w-6 h-6 rounded cursor-pointer border-0 p-0 disabled:opacity-50 shrink-0" 
                       />
-                      <Input value={segmentPalette[i].bg_color} disabled={!!faceInfo}
-                        onChange={(e) => setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: e.target.value } : item))}
-                        placeholder="rgba, hex8..."
-                        className="h-7 border border-input bg-background text-xs font-mono disabled:opacity-50 min-w-0" />
+                      {segmentIcons[i] ? (
+                        <button onClick={() => { setSegmentIcons(prev => { const next = [...prev]; next[i] = null; return next; }); setCacheKey(`segicon-del-${Date.now()}`); }}
+                          className="h-7 w-7 rounded border border-violet-500/50 bg-violet-500/10 flex items-center justify-center relative overflow-hidden group shrink-0" title="Remove Icon Image">
+                          <img src={segmentIcons[i]!} className="absolute inset-0 w-full h-full object-cover opacity-60" />
+                          <X className="w-4 h-4 text-white drop-shadow-md relative z-10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      ) : (
+                        <button onClick={() => document.getElementById(`seg-icon-${i}`)?.click()}
+                          className="h-7 w-7 rounded border border-dashed border-white/20 hover:border-violet-500/50 hover:bg-white/5 flex items-center justify-center text-muted-foreground hover:text-violet-400 shrink-0 transition-colors" title="Icon Image URL (Foreground Prize Icon)">
+                          <Plus className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+
+                      <div className="flex-1 min-w-0">
+                        <RGBAPicker
+                          value={segmentPalette[i].bg_color}
+                          onChange={(v) => {
+                            setSegmentPalette(prev => prev.map((item, idx) => idx === i ? { ...item, bg_color: v } : item));
+                          }}
+                        />
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                        {/* Per-segment image offset controls (inline) */}
-                       {segmentImages[i] !== null && (
+                       {(segmentImages[i] !== null || segmentIcons[i] !== null) && (
                          <div className="flex flex-col gap-1 px-2 border-l border-white/10 w-[90px] shrink-0">
                            <div className="flex items-center gap-1" title="Radial Offset (In/Out)">
                              <span className="text-[9px] text-muted-foreground w-2">R</span>
@@ -1234,6 +1310,7 @@ export default function ThemeTesterPage() {
                           setNumSegments(prev => prev - 1);
                           setSegmentPalette(prev => prev.filter((_, idx) => idx !== i).concat([{bg_color: '#5B21B6', text_color: '#FFFFFF'}]));
                           setSegmentImages(prev => prev.filter((_, idx) => idx !== i).concat([null]));
+                          setSegmentIcons(prev => prev.filter((_, idx) => idx !== i).concat([null]));
                           setSegmentImageOffsets(prev => prev.filter((_, idx) => idx !== i).concat([{ radial: 0, tangential: 0 }]));
                           setCacheKey(`segm-del-${Date.now()}`);
                         }}

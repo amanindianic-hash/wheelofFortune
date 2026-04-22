@@ -2,9 +2,12 @@ import { NextRequest } from 'next/server';
 import { createHash } from 'crypto';
 import { sql } from '@/lib/db';
 import { okResponse, errorResponse } from '@/lib/middleware-utils';
+import { normalizeSegmentForResponse, assertSegments } from '@/lib/utils/segment-normalizer';
 
 // POST /api/spin/session — create a spin session (public, authenticated by embed_token)
 export async function POST(req: NextRequest) {
+  // ★★★ VERSION CHECK — if you see this log the new code is running ★★★
+  console.log('[SpinSession] route.ts loaded — v2 (with positioning columns)');
   try {
     const body = await req.json();
     const { embed_token, fingerprint_data, page_url, referrer_url, preview, variant_id, ab_test_id } = body;
@@ -125,10 +128,33 @@ export async function POST(req: NextRequest) {
     `;
     const session = (sessionResults as any)[0];
 
+    // ── Auto-migrate: ensure all positioning columns exist (idempotent) ─────────
+    // Safe to run on every request — IF NOT EXISTS makes it a no-op when columns
+    // already exist. This guarantees the schema is always in sync with the code.
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_radial_offset     FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_tangential_offset  FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_rotation_angle     FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_font_scale         FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_x           FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_y           FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_radial_offset       FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_tangential_offset   FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_rotation_angle      FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_x            FLOAT`;
+    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_y            FLOAT`;
+    console.log('[SpinSession] DB column migration check complete.');
+
     // Fetch segments for the widget (use variant wheel if assigned)
     // Get all segments but filter to active_segment_count
+    // IMPORTANT: segment_image_url MUST be included — it powers background image rendering in the widget.
     const allSegments = await sql`
-      SELECT id, position, label, bg_color, text_color, icon_url, weight, is_no_prize
+      SELECT
+        id, position, label, bg_color, text_color, icon_url, segment_image_url, weight, is_no_prize,
+        label_offset_x, label_offset_y, icon_offset_x, icon_offset_y,
+        label_rotation_angle, icon_rotation_angle,
+        label_radial_offset, label_tangential_offset,
+        icon_radial_offset,  icon_tangential_offset,
+        label_font_scale
       FROM segments WHERE wheel_id = ${effectiveWheel.id} ORDER BY position ASC
     ` as any[];
 
@@ -138,8 +164,114 @@ export async function POST(req: NextRequest) {
     ` as any[];
     const activeCount = (wheelCountResults[0]?.active_segment_count ?? allSegments.length) as number;
 
-    // Return only active segments
-    const segments = allSegments.slice(0, activeCount);
+    // ── Normalize + assert via shared data-contract utility ──────────────────
+    // This replaces the inline normalization block and guarantees the same
+    // segment shape whether called from the widget or the dashboard editor.
+    const rawSegments = allSegments.slice(0, activeCount);
+    const segments = rawSegments.map((s: any, i: number) => normalizeSegmentForResponse(s, i));
+    assertSegments(segments, 'POST /api/spin/session');
+
+    // Dev-only snapshot log — diff this when something looks wrong
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[SpinSession] FINAL RENDER SNAPSHOT', JSON.stringify(segments.map(s => ({
+        id: s.id, label: s.label, bg: s.bg_color, weight: s.weight, weight_type: typeof s.weight,
+        label_radial_offset: s.label_radial_offset, label_font_scale: s.label_font_scale,
+      })), null, 2));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // TASK 2 — API SEGMENTS RESPONSE (full dump for comparison with frontend)
+    // ═══════════════════════════════════════════════════════════════════════════
+    console.log('API SEGMENTS RESPONSE:', JSON.stringify(segments, null, 2));
+
+    // TASK 4 — PER-SEGMENT FIELD VALIDATION
+    segments.forEach((s: any) => {
+      console.log('CHECK SEGMENT:', {
+        id:               s.id,
+        label:            s.label,
+        // Background
+        hasBackground:    !!(s.background?.imageUrl),
+        background_imageUrl: s.background?.imageUrl ?? '(null)',
+        // Icon
+        hasIcon:          !!(s.icon_url),
+        icon_url:         s.icon_url ?? '(null)',
+        // Label positioning
+        labelOffsets: [
+          `label_radial_offset    = ${s.label_radial_offset    ?? '(null)'}`, 
+          `label_tangential_offset= ${s.label_tangential_offset ?? '(null)'}`,
+          `label_rotation_angle   = ${s.label_rotation_angle   ?? '(null)'}`,
+          `label_font_scale       = ${s.label_font_scale       ?? '(null)'}`,
+          `label_offset_x         = ${s.label_offset_x         ?? '(null)'}`,
+          `label_offset_y         = ${s.label_offset_y         ?? '(null)'}`,
+        ],
+        // Icon positioning
+        iconOffsets: [
+          `icon_radial_offset     = ${s.icon_radial_offset     ?? '(null)'}`,
+          `icon_tangential_offset = ${s.icon_tangential_offset ?? '(null)'}`,
+          `icon_rotation_angle    = ${s.icon_rotation_angle    ?? '(null)'}`,
+        ],
+        // Field presence summary
+        allLabelFieldsPresent: [
+          'label_radial_offset', 'label_tangential_offset', 'label_rotation_angle',
+          'label_font_scale', 'label_offset_x', 'label_offset_y',
+        ].every(k => k in s),
+        allIconFieldsPresent: [
+          'icon_radial_offset', 'icon_tangential_offset', 'icon_rotation_angle',
+        ].every(k => k in s),
+      });
+    });
+
+    // ── Dev-only: warn if background image URL and icon URL are the same ───────
+    if (process.env.NODE_ENV === 'development') {
+      segments.forEach((s: any) => {
+        if (s.background.imageUrl && s.icon_url && s.background.imageUrl === s.icon_url) {
+          console.warn('⚠️ POSSIBLE FIELD MIX: background == icon for segment', s.id);
+        }
+      });
+    }
+
+    // ── Flatten wheel config/branding ──────────────────────────────────────────
+    // Guard against double-nesting: if the JSONB column was accidentally saved
+    // as { config: { spin_duration_ms: ... } } unwrap it to the inner object.
+    const rawConfig   = effectiveWheel.config   ?? {};
+    const rawBranding = effectiveWheel.branding ?? {};
+    const flatConfig   = (rawConfig.config   && typeof rawConfig.config   === 'object') ? rawConfig.config   : rawConfig;
+    const flatBranding = (rawBranding.branding && typeof rawBranding.branding === 'object') ? rawBranding.branding : rawBranding;
+
+    // ── CENTER LOGO DEBUG — trace the exact value reaching the widget ─────────
+    console.log('🖼️  [SpinSession] CENTER IMAGE DEBUG:', {
+      rawConfig_center_image_url:  rawConfig.center_image_url  ?? '(none in rawConfig)',
+      flatConfig_center_image_url: flatConfig.center_image_url ?? '(none in flatConfig)',
+      premium_face_url:            flatBranding.premium_face_url ?? '(none)',
+      rawBranding_premium_face_url:rawBranding.premium_face_url ?? '(none in rawBranding)',
+    });
+
+    // SAFE PASSTHROUGH: ensure center_image_url is never dropped by the flatten heuristic.
+    // If rawConfig has it at top-level but flatConfig (unwrapped inner) doesn't, restore it.
+    if (rawConfig.center_image_url && !flatConfig.center_image_url) {
+      (flatConfig as any).center_image_url = rawConfig.center_image_url;
+      console.warn('[SpinSession] center_image_url was in rawConfig but missing from flatConfig — restored.');
+    }
+
+    // ── STEP 4: API RESPONSE ──────────────────────────────────────────────
+    console.log('STEP 4 API RESPONSE (Spin Session):', {
+      sessionId: session.id,
+      wheel: {
+        id: effectiveWheel.id,
+        branding: {
+          primary: flatBranding.primary_color,
+          outer_ring: flatBranding.outer_ring_color,
+          outer_ring_width: flatBranding.outer_ring_width,
+          face_url: flatBranding.premium_face_url
+        }
+      },
+      segments: segments.slice(0, 3).map(s => ({
+        label: s.label,
+        lro: s.label_radial_offset,
+        bg: s.bg_color,
+        icon: s.icon_url
+      }))
+    });
 
     return okResponse({
       session_id: session.id,
@@ -147,10 +279,10 @@ export async function POST(req: NextRequest) {
       variant_id: assignedVariantId,
       ab_test_id: assignedAbTestId,
       wheel: {
-        config: effectiveWheel.config,
-        branding: effectiveWheel.branding,
-        form_config: effectiveWheel.form_config,
-        trigger_rules: effectiveWheel.trigger_rules,
+        config:       flatConfig,
+        branding:     flatBranding,
+        form_config:  effectiveWheel.form_config  ?? {},
+        trigger_rules: effectiveWheel.trigger_rules ?? {},
       },
       segments,
     }, 201);

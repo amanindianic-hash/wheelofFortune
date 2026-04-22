@@ -26,7 +26,7 @@ describe('WHEEL_TEMPLATES — required fields', () => {
 
     it(`template "${tpl.id}" segmentPalette has valid hex colors`, () => {
       for (const entry of tpl.segmentPalette) {
-        expect(isValidColor(entry.bg_color)).toBe(true);
+        expect(isValidColor(entry.bg_color || '')).toBe(true);
         expect(isValidColor(entry.text_color)).toBe(true);
       }
     });

@@ -9,7 +9,8 @@ export default defineConfig({
   reporter: 'html',
 
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
+    // Port 3001 matches the dev server started with: npm run dev -- -p 3001
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3001',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -34,8 +35,9 @@ export default defineConfig({
   ],
 
   webServer: {
-    command: 'npm run dev',
-    url: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
+    command: 'npm run dev -- -p 3001',
+    url: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3001',
+    // Always reuse the already-running dev server — never try to start a second instance
     reuseExistingServer: true,
     timeout: 120_000,
   },

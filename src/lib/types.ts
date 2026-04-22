@@ -56,6 +56,7 @@ export interface WheelConfig {
   guaranteed_win_every_n?: number | null;
   guaranteed_win_segment_id?: string | null;
   game_type?: GameType;
+  centerLogo?: string | null;                         // Normalized hub logo URL
 
   // ── Scratch Card options ──────────────────────────────────────────────────
   scratch_layer_color?: string;                                    // default '#B0B0B0'
@@ -148,6 +149,9 @@ export interface WheelBranding {
   icon_radial_offset?: number;        // relative radial offset (0-1)
   icon_tangential_offset?: number;    // relative tangential offset (-1 to 1)
   icon_scale?: number;                // relative icon size (0-1)
+  center_logo?: string | null;        // Hub image URL (standardized naming)
+  centerLogo?: string | null;         // Hub image URL (Normalized naming)
+  center_logo_scale?: number;         // Hub image scale (0-1)
   [key: string]: any;
 }
 
@@ -202,9 +206,13 @@ export interface Segment {
   wheel_id: string;
   position: number;
   label: string;
-  bg_color: string;
-  text_color: string;
+  background: {
+    color: string;
+    imageUrl: string | null;
+  };
   icon_url?: string | null;
+  // Legacy fields for DB mapping compatibility
+  bg_color?: string;
   segment_image_url?: string | null;
   weight: number;
   prize_id?: string | null;

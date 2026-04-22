@@ -14,12 +14,16 @@ export interface WheelSegment {
   id: string;
   position: number;
   label: string;
-  bg_color: string;
+  background: {
+    color: string;
+    imageUrl: string | null;
+  };
   text_color: string;
   weight: number;
   is_no_prize: boolean;
   icon_url?: string | null;
-  // NEW: Custom segment background image (replaces solid color)
+  // Legacy fields for backward compatibility
+  bg_color?: string;
   segment_image_url?: string | null;
   // Per-segment position overrides (local coords: X = radial outward, Y = perpendicular clockwise)
   label_offset_x?: number | null;
@@ -50,6 +54,7 @@ export interface WheelConfig {
   kiosk_mode?: boolean;
   kiosk_reset_delay_ms?: number;
   shopify_store_url?: string | null;
+  centerLogo?: string | null;
 }
 
 export interface WheelBranding {
@@ -63,7 +68,8 @@ export interface WheelBranding {
   button_color?: string;
   border_color?: string;
   border_width?: number;
-  logo_url?: string | null;
+  center_logo?: string | null;
+  centerLogo?: string | null;
   logo_position?: 'above' | 'center';
   // Ring customization
   outer_ring_color?: string;
@@ -96,6 +102,7 @@ export interface WheelBranding {
   label_tangential_offset?: number;
   icon_radial_offset?: number;
   icon_tangential_offset?: number;
+  icon_scale?: number;
 }
 
 // ─── Image cache ──────────────────────────────────────────────────────────────
@@ -109,10 +116,17 @@ export async function preloadSegmentImages(
   cache: ImageCache,
 ): Promise<void> {
   const urls = [
-    // Icon URLs (center icons on segments)
+    // 1. Foreground Icon URLs (Prizes)
     ...segments.filter((s) => s.icon_url).map((s) => s.icon_url!),
-    // NEW: Segment background images
-    ...segments.filter((s) => s.segment_image_url).map((s) => s.segment_image_url!),
+    
+    // 2. Background Segment Images (Fills)
+    ...segments.filter((s) => s.background?.imageUrl || s.segment_image_url)
+               .map((s) => (s.background?.imageUrl || s.segment_image_url)!),
+
+    // 3. Central Hub & Background Fills
+    ...(branding.centerLogo ? [branding.centerLogo] : []),
+    ...(branding.center_logo ? [branding.center_logo] : []),
+    ...(config.centerLogo ? [config.centerLogo] : []),
     ...(config.center_image_url ? [config.center_image_url] : []),
     ...(branding.premium_face_url ? [branding.premium_face_url] : []),
     ...(branding.premium_stand_url ? [branding.premium_stand_url] : []),
@@ -125,14 +139,30 @@ export async function preloadSegmentImages(
       (url) =>
         new Promise<void>((resolve) => {
           const img = new Image();
-          // Don't set crossOrigin for blob URLs (they don't need it and it can cause issues)
-          if (!url.startsWith('blob:')) {
+          // Don't set crossOrigin for data: or blob: URLs
+          const isBlobOrData = url.startsWith('blob:') || url.startsWith('data:');
+
+          if (!isBlobOrData) {
             img.crossOrigin = 'anonymous';
           }
+
           img.onload = () => { cache.set(url, img); resolve(); };
           img.onerror = () => {
-            console.warn(`Failed to load image: ${url}`);
-            resolve();
+            if (!isBlobOrData && img.crossOrigin === 'anonymous') {
+              // CORS failed — retry WITHOUT crossOrigin.
+              // The canvas will be tainted (no toDataURL) but the image will still RENDER visually.
+              console.warn(`[WheelRenderer] CORS blocked for: ${url} — retrying without crossOrigin`);
+              const fallbackImg = new Image();
+              fallbackImg.onload = () => { cache.set(url, fallbackImg); resolve(); };
+              fallbackImg.onerror = () => {
+                console.warn(`[WheelRenderer] Failed to load image even without crossOrigin: ${url}`);
+                resolve();
+              };
+              fallbackImg.src = url;
+            } else {
+              console.warn(`[WheelRenderer] Failed to load image: ${url}`);
+              resolve();
+            }
           };
           img.src = url;
         }),
@@ -142,8 +172,44 @@ export async function preloadSegmentImages(
 
 // ─── Color helpers ────────────────────────────────────────────────────────────
 
-/** Parse any CSS hex color (#RGB, #RRGGBB) into [r, g, b] 0-255. Falls back to provided default. */
+/** Detect if a color is fully transparent (rgba with alpha 0 or 'transparent' keyword) */
+export function isTransparent(color?: string | null): boolean {
+  if (!color || color === 'transparent') return true;
+  const c = color.toLowerCase().replace(/\s/g, '');
+  if (c === 'rgba(0,0,0,0)') return true;
+  // Match rgba(r,g,b,0) or rgba(r,g,b,0.0) or rgba(r,g,b,.0)
+  return c.includes('rgba') && (c.endsWith(',0)') || c.endsWith(',0.0)') || c.endsWith(',.0)'));
+}
+
+/** 
+ * Standardize any color input to a valid rgba() string.
+ * This ensures the alpha channel is never dropped during rendering.
+ */
+export function normalizeToRgba(color: string | null | undefined): string {
+  if (!color || color === 'transparent') return 'rgba(0,0,0,0)';
+  if (typeof color !== 'string') return 'rgba(0,0,0,1)';
+  
+  const c = color.trim().toLowerCase();
+  if (c.startsWith('rgba') || c.startsWith('rgb')) return c;
+  
+  if (c.startsWith('#')) {
+    const [r, g, b] = hexToRgb(color); // use original case for hexToRgb if needed
+    // Handle 8-char hex if present
+    if (c.length === 9) {
+      const alpha = parseInt(c.slice(7, 9), 16) / 255;
+      return `rgba(${r},${g},${b},${alpha.toFixed(3)})`;
+    }
+    return `rgba(${r},${g},${b},1)`;
+  }
+  
+  return color;
+}
+
+/** Parse any CSS hex color (#RGB, #RRGGBB) into [r, g, b] 0-255. */
 function hexToRgb(hex: string): [number, number, number] {
+  if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) {
+    return [0, 0, 0]; // return black if invalid, baseline should have prevented this
+  }
   const clean = hex.replace('#', '');
   if (clean.length === 3) {
     return [
@@ -155,14 +221,12 @@ function hexToRgb(hex: string): [number, number, number] {
   if (clean.length === 6) {
     return [parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16)];
   }
-  return [124, 58, 237]; // fallback violet
+  return [0, 0, 0];
 }
 
-/** Lighten a hex color by mixing toward white by `amount` (0-255).
- *  If it's an rgba or non-hex, returns it unmodified since native canvas gradients ingest them safely.
- */
+/** Lighten a hex color by mixing toward white by `amount` (0-255). */
 function lightenHex(color: string, amount: number): string {
-  if (!color || typeof color !== 'string') return '#7c3aed';
+  if (!color || typeof color !== 'string') return 'rgba(0,0,0,0)';
   // Allow native passthrough for rgba(), rgb(), hsla(), hsl(), or transparent
   if (!color.startsWith('#')) return color;
 
@@ -172,10 +236,10 @@ function lightenHex(color: string, amount: number): string {
   // If it's an 8-character hex (#rrggbbaa), preserve its alpha channel at the end
   if (color.replace('#', '').length === 8) {
     const alphaHex = color.slice(-2);
-    return `rgba(${blend(r)},${blend(g)},${blend(b)},${parseInt(alphaHex, 16)/255})`;
+    return `rgba(${blend(r)},${blend(g)},${blend(b)},${(parseInt(alphaHex, 16)/255).toFixed(3)})`;
   }
 
-  return `rgb(${blend(r)},${blend(g)},${blend(b)})`;
+  return `rgba(${blend(r)},${blend(g)},${blend(b)},1)`;
 }
 
 // ─── Main draw function ───────────────────────────────────────────────────────
@@ -191,6 +255,9 @@ export function drawWheel(
   try {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    // Mandatory Audit Logs
+    console.log("[FINAL SEGMENTS DATA]", segments);
 
     // ── High-quality rendering setup ──────────────────────────────────────────
     // Force minimum 2x so 1x displays also get crisp rendering
@@ -263,10 +330,11 @@ export function drawWheel(
       }
     }
 
-    // ── Pre-calculate shadow base ─────────────────────────────────────────────
     // To make it look like a physical 3D object on the screen, add a soft drop shadow
     // beneath the entire wheel to give depth before drawing anything.
-    if (!hasPremiumStand) {
+    // RULE: Only draw shadow if rim is visible or segments are opaque.
+    const isRimVisible = !isTransparent(outerRingColor) && (outerRingWidth || 0) > 0;
+    if (!hasPremiumStand && isRimVisible) {
       ctx.save();
       ctx.shadowColor = 'rgba(0,0,0,0.45)';
       ctx.shadowBlur = 25;
@@ -282,7 +350,7 @@ export function drawWheel(
     if (segments.length === 0) {
       ctx.beginPath();
       ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
-      ctx.fillStyle = '#f3f4f6';
+      ctx.fillStyle = normalizeToRgba('#f3f4f6');
       ctx.fill();
       return;
     }
@@ -305,8 +373,9 @@ export function drawWheel(
         const startAngle = rotation + i * segAngle - Math.PI / 2;
         const endAngle = startAngle + segAngle;
 
-        // Check if segment has custom image
-        const hasSegmentImage = !!(seg.segment_image_url && imageCache?.has(seg.segment_image_url));
+        // Check if segment has custom background image
+        const bgImgUrl = seg.background?.imageUrl || seg.segment_image_url;
+        const hasSegmentImage = !!(bgImgUrl && imageCache?.has(bgImgUrl));
 
         if (hasSegmentImage) {
           // ── Render segment with custom image ────────────────────────────────
@@ -318,7 +387,7 @@ export function drawWheel(
           ctx.clip();
 
           // Draw the segment image
-          const img = imageCache!.get(seg.segment_image_url!)!;
+          const img = imageCache!.get(bgImgUrl!)!;
           const imgSize = innerRadius * 2;
 
           // Move context origin to wheel center
@@ -343,23 +412,35 @@ export function drawWheel(
           ctx.restore();
         } else {
           // ── Render segment with solid color gradient (original logic) ────────
-          const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.05, cx, cy, innerRadius);
-          const safeBg = lightenHex(seg.bg_color || '#7c3aed', 0);
-          grad.addColorStop(0, '#000000'); // Deep dark core
-          grad.addColorStop(0.35, lightenHex(safeBg, 10)); // Darker mid
-          grad.addColorStop(0.85, safeBg); // Pure color
-          grad.addColorStop(1, lightenHex(safeBg, 25)); // Slightly lighter edge to catch light
+          const segmentColor = seg.background?.color || seg.bg_color || 'rgba(124, 58, 237, 1)';
+          
+          if (!isTransparent(segmentColor)) {
+            const grad = ctx.createRadialGradient(cx, cy, innerRadius * 0.05, cx, cy, innerRadius);
+            const safeBg = lightenHex(segmentColor, 0);
+            const c1 = 'rgba(0,0,0,1)';
+            const c2 = normalizeToRgba(lightenHex(safeBg, 10));
+            const c3 = normalizeToRgba(safeBg);
+            const c4 = normalizeToRgba(lightenHex(safeBg, 25));
 
-          ctx.beginPath();
-          ctx.moveTo(cx, cy);
-          ctx.arc(cx, cy, innerRadius, startAngle, endAngle);
-          ctx.closePath();
-          ctx.fillStyle = grad;
-          ctx.fill();
+            console.log(`[COLOR CHECK] Seg ${i} Gradient:`, { c1, c2, c3, c4 });
+
+            grad.addColorStop(0, c1);
+            grad.addColorStop(0.35, c2); // Darker mid
+            grad.addColorStop(0.85, c3); // Pure color
+            grad.addColorStop(1, c4); // Slightly lighter edge to catch light
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, innerRadius, startAngle, endAngle);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+          }
         }
 
-        // Crisp white divider
-        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+        // Divider stroke (respects theme/transparency)
+        // If segments are empty or user wants transparent dividers, we set to transparent
+        ctx.strokeStyle = 'transparent'; 
         ctx.lineWidth = 1.5;
         ctx.stroke();
       });
@@ -458,10 +539,14 @@ export function drawWheel(
         ctx.fill();
         ctx.restore();
 
+        // Base icon radius: priority is segment scale override -> branding scale override -> fixed math
+        const scale = seg.icon_scale ?? branding.icon_scale ?? 1.0;
+        const currentIconRadius = iconRadius * scale;
+
         // Clipped image (with optional per-segment icon rotation)
         ctx.save();
         ctx.beginPath();
-        ctx.arc(iconX, iconY, iconRadius, 0, 2 * Math.PI);
+        ctx.arc(iconX, iconY, currentIconRadius, 0, 2 * Math.PI);
         ctx.clip();
         const iRotRad = ((seg.icon_rotation_angle ?? 0) || 0) * Math.PI / 180;
         if (iRotRad !== 0) {
@@ -469,18 +554,18 @@ export function drawWheel(
           ctx.rotate(iRotRad);
           ctx.drawImage(
             imageCache!.get(seg.icon_url!)!,
-            -iconRadius,
-            -iconRadius,
-            iconRadius * 2,
-            iconRadius * 2,
+            -currentIconRadius,
+            -currentIconRadius,
+            currentIconRadius * 2,
+            currentIconRadius * 2,
           );
         } else {
           ctx.drawImage(
             imageCache!.get(seg.icon_url!)!,
-            iconX - iconRadius,
-            iconY - iconRadius,
-            iconRadius * 2,
-            iconRadius * 2,
+            iconX - currentIconRadius,
+            iconY - currentIconRadius,
+            currentIconRadius * 2,
+            currentIconRadius * 2,
           );
         }
         ctx.restore();
@@ -571,68 +656,71 @@ export function drawWheel(
     });
 
     // ── 3. Inner ring band ────────────────────────────────────────────────────
-    if (!hasPremiumFace) {
-      if (branding.inner_ring_enabled) {
+    if (!hasPremiumFace && branding.inner_ring_enabled && !isTransparent(branding.inner_ring_color)) {
       const bandWidth = Math.max(6, outerRingWidth * 0.3);
       ctx.beginPath();
       ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
       ctx.arc(cx, cy, innerRadius - bandWidth, 0, 2 * Math.PI, true);
-      ctx.fillStyle = branding.inner_ring_color ?? 'rgba(255,255,255,0.18)';
+      const innerCol = normalizeToRgba(branding.inner_ring_color ?? 'rgba(255,255,255,0.15)');
+      console.log("[COLOR CHECK] Inner Ring:", innerCol);
+      ctx.fillStyle = innerCol;
       ctx.fill();
     }
 
     // ── 4. Outer decorative ring with 3D metallic/gloss gradient ──────────────
-    // To match Freepik premium designs, the ring gets a rich, dark metallic rim
-    // instead of flat colors. We create a dual lighting linear gradient.
-    const metallicOuterGrad = ctx.createLinearGradient(cx, cy - outerRadius, cx, cy + outerRadius);
-    const [br, bg, bb] = hexToRgb(outerRingColor);
+    if (!hasPremiumFace && !isTransparent(outerRingColor)) {
+      // To match Freepik premium designs, the ring gets a rich, dark metallic rim
+      // instead of flat colors. We create a dual lighting linear gradient.
+      const metallicOuterGrad = ctx.createLinearGradient(cx, cy - outerRadius, cx, cy + outerRadius);
+      const [br, bg, bb] = hexToRgb(outerRingColor);
 
-    // Create a metallic specular reflection by layering stops
-    const safeOuter = lightenHex(outerRingColor, 0);
-    metallicOuterGrad.addColorStop(0, `rgb(${Math.min(br+80, 255)},${Math.min(bg+80, 255)},${Math.min(bb+80, 255)})`);
-    metallicOuterGrad.addColorStop(0.15, safeOuter);
-    metallicOuterGrad.addColorStop(0.4, `rgb(${Math.max(br-60, 0)},${Math.max(bg-60, 0)},${Math.max(bb-60, 0)})`);
-    metallicOuterGrad.addColorStop(0.8, `rgb(${Math.max(br-90, 0)},${Math.max(bg-90, 0)},${Math.max(bb-90, 0)})`);
-    metallicOuterGrad.addColorStop(0.95, safeOuter);
-    metallicOuterGrad.addColorStop(1, `rgb(${Math.min(br+50, 255)},${Math.min(bg+50, 255)},${Math.min(bb+50, 255)})`);
+      // Create a metallic specular reflection by layering stops
+      const safeOuter = lightenHex(outerRingColor, 0);
+      metallicOuterGrad.addColorStop(0, normalizeToRgba(`rgb(${Math.min(br+80, 255)},${Math.min(bg+80, 255)},${Math.min(bb+80, 255)})`));
+      metallicOuterGrad.addColorStop(0.15, normalizeToRgba(safeOuter));
+      metallicOuterGrad.addColorStop(0.4, normalizeToRgba(`rgb(${Math.max(br-60, 0)},${Math.max(bg-60, 0)},${Math.max(bb-60, 0)})`));
+      metallicOuterGrad.addColorStop(0.8, normalizeToRgba(`rgb(${Math.max(br-90, 0)},${Math.max(bg-90, 0)},${Math.max(bb-90, 0)})`));
+      metallicOuterGrad.addColorStop(0.95, normalizeToRgba(safeOuter));
+      metallicOuterGrad.addColorStop(1, normalizeToRgba(`rgb(${Math.min(br+50, 255)},${Math.min(bg+50, 255)},${Math.min(bb+50, 255)})`));
 
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
-    ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI, true);
-    ctx.fillStyle = metallicOuterGrad;
-    ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
+      ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI, true);
+      ctx.fillStyle = metallicOuterGrad;
+      ctx.fill();
 
-    // 3D Rim Inner Bevel
-    ctx.beginPath();
-    ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(0,0,0,0.6)';
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    // Inner bevel highlight
-    ctx.beginPath();
-    ctx.arc(cx, cy, innerRadius + 2, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(255,255,255,0.4)';
-    ctx.lineWidth = 1;
-    ctx.stroke();
+      // 3D Rim Inner Bevel
+      ctx.beginPath();
+      ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      // Inner bevel highlight
+      ctx.beginPath();
+      ctx.arc(cx, cy, innerRadius + 2, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
 
-    // ── Global Gloss overlay on the wheel ──
-    // Dramatic soft crescent gloss highlight on the top left
-    const globalGloss = ctx.createRadialGradient(
-      cx - outerRadius * 0.4, cy - outerRadius * 0.6, 0,
-      cx, cy, outerRadius
-    );
-    globalGloss.addColorStop(0, 'rgba(255,255,255,0.22)');
-    globalGloss.addColorStop(0.3, 'rgba(255,255,255,0.06)');
-    globalGloss.addColorStop(0.6, 'rgba(0,0,0,0.15)');
-    globalGloss.addColorStop(1, 'rgba(0,0,0,0.45)');
+      // ── Global Gloss overlay on the wheel ──
+      // Dramatic soft crescent gloss highlight on the top left
+      const globalGloss = ctx.createRadialGradient(
+        cx - outerRadius * 0.4, cy - outerRadius * 0.6, 0,
+        cx, cy, outerRadius
+      );
+      globalGloss.addColorStop(0, 'rgba(255,255,255,0.22)');
+      globalGloss.addColorStop(0.3, 'rgba(255,255,255,0.06)');
+      globalGloss.addColorStop(0.6, 'rgba(0,0,0,0.15)');
+      globalGloss.addColorStop(1, 'rgba(0,0,0,0.45)');
 
-    ctx.beginPath();
-    ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
-    ctx.fillStyle = globalGloss;
-    ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
+      ctx.fillStyle = globalGloss;
+      ctx.fill();
+    }
 
     // ── 5. Rim tick marks ─────────────────────────────────────────────────────
-    if (rimTickStyle !== 'none' && segments.length > 1) {
+    if (rimTickStyle !== 'none' && segments.length > 1 && !isTransparent(rimTickColor)) {
       const midRingR = (outerRadius + innerRadius) / 2;
 
       segments.forEach((_, i) => {
@@ -651,7 +739,9 @@ export function drawWheel(
           ctx.lineTo(tickSize * 0.65, tickSize * 0.55);
           ctx.lineTo(-tickSize * 0.65, tickSize * 0.55);
           ctx.closePath();
-          ctx.fillStyle = rimTickColor;
+          const tickCol = normalizeToRgba(rimTickColor);
+          console.log("[COLOR CHECK] Tick (Triangle):", tickCol);
+          ctx.fillStyle = tickCol;
           ctx.shadowColor = 'rgba(0,0,0,0.25)';
           ctx.shadowBlur = 3;
           ctx.fill();
@@ -660,7 +750,9 @@ export function drawWheel(
           // Premium Casino Bulb Style (3D luminous bulbs)
           ctx.save();
           // Glow around bulb
-          ctx.shadowColor = rimTickColor; // Glow matches tick color
+          const bulbCol = normalizeToRgba(rimTickColor);
+          console.log("[COLOR CHECK] Tick (Bulb):", bulbCol);
+          ctx.shadowColor = bulbCol; // Glow matches tick color
           ctx.shadowBlur = 12;
           ctx.beginPath();
           const bulbR = outerRingWidth * 0.28;
@@ -671,7 +763,7 @@ export function drawWheel(
             0,
             2 * Math.PI,
           );
-          ctx.fillStyle = rimTickColor;
+          ctx.fillStyle = bulbCol;
           ctx.fill();
 
           // Bulb Core
@@ -703,18 +795,26 @@ export function drawWheel(
       });
     }
 
-    // Ring outer edge highlight
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerRadius - 1, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
 
-    ctx.beginPath();
-    ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
-    ctx.strokeStyle = 'rgba(0,0,0,0.5)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
+    // Ring outer edge — only add 3D gloss highlight when ring is visible and thick enough.
+    // A thin or transparent ring should NOT get a bright white outline artifact.
+    if (!hasPremiumFace && !isTransparent(outerRingColor) && outerRingWidth >= 8) {
+      // Very subtle white top-edge highlight (only for thick metallic rings)
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerRadius - 1, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Outer edge dark boundary clip — only draw if rim is visible or requested
+    if (!hasPremiumFace && isRimVisible) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, outerRadius, 0, 2 * Math.PI);
+      ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
 
     // ── 5.5. Premium Frame Layer (ROTATING OUTER RIM — drawn on top of wheel) ──
     // Frame rotates with wheel and appears on top of the wheel geometry
@@ -735,76 +835,84 @@ export function drawWheel(
     }
 
     // ── 6. Center hub with gloss ──────────────────────────────────────────────
-    const centerR = Math.max(22, innerRadius * 0.16);
+    if (!isTransparent(primaryColor)) {
+      const centerR = Math.max(22, innerRadius * 0.16);
 
-    // Outer shadow ring of hub
-    ctx.save();
-    ctx.shadowColor = 'rgba(0,0,0,0.6)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetY = 4;
-    ctx.beginPath();
-    ctx.arc(cx, cy, centerR + 4, 0, 2 * Math.PI);
-    ctx.fillStyle = '#1D1D1D'; // Dark metallic hub housing
-    ctx.fill();
-    ctx.restore();
-
-    // Secondary hub gradient ring
-    const hubOuterGrad = ctx.createLinearGradient(cx - centerR, cy - centerR, cx + centerR, cy + centerR);
-    hubOuterGrad.addColorStop(0, '#FFFFFF');
-    hubOuterGrad.addColorStop(0.5, '#777777');
-    hubOuterGrad.addColorStop(1, '#222222');
-    ctx.beginPath();
-    ctx.arc(cx, cy, centerR, 0, 2 * Math.PI);
-    ctx.fillStyle = hubOuterGrad;
-    ctx.fill();
-
-    // Primary Color Fill
-    ctx.beginPath();
-    ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
-    ctx.fillStyle = primaryColor;
-    ctx.fill();
-
-    // Center image or gloss dot
-    const centerImgUrl = config.center_image_url;
-    if (centerImgUrl && imageCache?.has(centerImgUrl)) {
+      // Outer shadow ring of hub
       ctx.save();
+      ctx.shadowColor = 'rgba(0,0,0,0.6)';
+      ctx.shadowBlur = 20;
+      ctx.shadowOffsetY = 4;
+      ctx.beginPath();
+      ctx.arc(cx, cy, centerR + 4, 0, 2 * Math.PI);
+      ctx.fillStyle = '#1D1D1D'; // Dark metallic hub housing
+      ctx.fill();
+      ctx.restore();
+
+      // Secondary hub gradient ring
+      const hubOuterGrad = ctx.createLinearGradient(cx - centerR, cy - centerR, cx + centerR, cy + centerR);
+      hubOuterGrad.addColorStop(0, '#FFFFFF');
+      hubOuterGrad.addColorStop(0.5, '#777777');
+      hubOuterGrad.addColorStop(1, '#222222');
+      ctx.beginPath();
+      ctx.arc(cx, cy, centerR, 0, 2 * Math.PI);
+      ctx.fillStyle = hubOuterGrad;
+      ctx.fill();
+
+      // Primary Color Fill
       ctx.beginPath();
       ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
-      ctx.clip();
-      ctx.drawImage(
-        imageCache.get(centerImgUrl)!,
-        cx - (centerR - 3),
-        cy - (centerR - 3),
-        (centerR - 3) * 2,
-        (centerR - 3) * 2,
+      const hubCol = normalizeToRgba(primaryColor);
+      console.log("[COLOR CHECK] Hub Fill:", hubCol);
+      ctx.fillStyle = hubCol;
+      ctx.fill();
+
+      // Center image (Standardized branding.centerLogo) or gloss dot
+      // Bridging: prioritized branding.centerLogo then branding.center_logo then config.centerLogo then config.center_image_url
+      const centerImgUrl = 
+        branding.centerLogo || 
+        branding.center_logo || 
+        config.centerLogo || 
+        config.center_image_url;
+      if (centerImgUrl && imageCache?.has(centerImgUrl)) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
+        ctx.clip();
+        const img = imageCache.get(centerImgUrl)!;
+        const scale = (branding as any).center_logo_scale ?? 1.0;
+        const drawSize = (centerR - 3) * 2 * scale;
+        ctx.drawImage(
+          img,
+          cx - (drawSize / 2),
+          cy - (drawSize / 2),
+          drawSize,
+          drawSize,
+        );
+        ctx.restore();
+      } else {
+        // Small white inner dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, centerR * 0.35, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fill();
+      }
+
+      // Extreme Gloss overlay on hub (3D jewel spherical effect)
+      const hubGloss = ctx.createRadialGradient(
+        cx - centerR * 0.35, cy - centerR * 0.45, 1,
+        cx, cy, centerR,
       );
-      ctx.restore();
-    } else {
-      // Small white inner dot
+      hubGloss.addColorStop(0, 'rgba(255,255,255,0.8)');
+      hubGloss.addColorStop(0.35, 'rgba(255,255,255,0.15)');
+      hubGloss.addColorStop(0.8, 'rgba(0,0,0,0.4)');
+      hubGloss.addColorStop(1, 'rgba(0,0,0,0.7)');
+
       ctx.beginPath();
-      ctx.arc(cx, cy, centerR * 0.35, 0, 2 * Math.PI);
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
+      ctx.fillStyle = hubGloss;
       ctx.fill();
     }
-
-    // Extreme Gloss overlay on hub (3D jewel spherical effect)
-    const hubGloss = ctx.createRadialGradient(
-      cx - centerR * 0.35, cy - centerR * 0.45, 1,
-      cx, cy, centerR,
-    );
-    hubGloss.addColorStop(0, 'rgba(255,255,255,0.8)');
-    hubGloss.addColorStop(0.35, 'rgba(255,255,255,0.15)');
-    hubGloss.addColorStop(0.8, 'rgba(0,0,0,0.4)');
-    hubGloss.addColorStop(1, 'rgba(0,0,0,0.7)');
-
-    ctx.beginPath();
-    ctx.arc(cx, cy, centerR - 3, 0, 2 * Math.PI);
-    ctx.fillStyle = hubGloss;
-    ctx.fill();
-    } // <-- End if (!hasPremiumFace)
-
-    // Stand layer is now drawn as Layer 0 (background) above.
-
   } catch (e) {
     console.error('drawWheel error', e);
   }

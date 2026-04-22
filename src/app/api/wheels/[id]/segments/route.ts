@@ -3,11 +3,23 @@ import { sql } from '@/lib/db';
 import { requireAuth, okResponse, errorResponse } from '@/lib/middleware-utils';
 import { logAuditAction } from '@/lib/audit';
 
-// Validate color: must be valid hex (#RGB, #RRGGBB) or "transparent"
+// Validate color: must be valid hex, rgba, rgb, or "transparent"
 function isValidColor(color: string | undefined): boolean {
   if (!color) return false;
-  if (color.toLowerCase() === 'transparent') return true;
-  return /^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(color);
+  const c = color.trim().toLowerCase();
+  
+  if (c === 'transparent') return true;
+  
+  // Hex matching (supports #RGB, #RRGGBB, #RRGGBBAA)
+  if (/^#([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$/.test(c)) return true;
+  
+  // RGBA matching
+  if (c.startsWith('rgba(') && c.endsWith(')')) return true;
+  
+  // RGB matching
+  if (c.startsWith('rgb(') && c.endsWith(')')) return true;
+  
+  return false;
 }
 
 // GET /api/wheels/[id]/segments
@@ -29,9 +41,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       ORDER BY s.position ASC
     ` as any[];
 
-    // Filter to only active segments
-    const activeCount = wheel.active_segment_count ?? 0;
-    const segments = allSegments.slice(0, activeCount);
+    const activeCount = wheel.active_segment_count ?? allSegments.length;
+
+    // Map flat DB columns to nested application structure
+    const segments = allSegments.slice(0, activeCount).map(s => ({
+      ...s,
+      background: {
+        color: s.bg_color,
+        imageUrl: s.segment_image_url || null
+      }
+      // NOTE: icon_url is passed through untouched from the spread above.
+      // It is a separate column and must NEVER be overwritten by background data.
+    }));
+
     return okResponse({ segments });
   } catch (err) {
     console.error('Get segments error:', err);
@@ -61,11 +83,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return errorResponse('VALIDATION_ERROR', 'segments must be an array of 2-24 items.', 400);
     }
 
-    // Validate colors are valid hex or "transparent"
+    // Validate background colors
     for (let i = 0; i < segments.length; i++) {
       const seg = segments[i];
-      if (!isValidColor(seg.bg_color)) {
-        return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid bg_color "${seg.bg_color}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);
+      const bgColor = seg.background?.color || seg.bg_color;
+      if (!isValidColor(bgColor)) {
+        return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid background color "${bgColor}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);
       }
       if (!isValidColor(seg.text_color)) {
         return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid text_color "${seg.text_color}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);
@@ -82,20 +105,46 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     ` as any[];
     const referencedSet = new Set(referenced.map((r: Record<string, unknown>) => r.segment_id as string));
 
+    // RULE 3: API receives log — verify all label fields arrive from frontend
+    console.log(`[API /segments PUT] WHEEL: ${id} | RECEIVED: ${segments.length} segments`, {
+      labels: segments.map((seg: any) => seg.label),
+      colors: segments.map((seg: any) => ({
+        bg: seg.background?.color || seg.bg_color,
+        text: seg.text_color
+      }))
+    });
+
     // Upsert each incoming segment
     for (let i = 0; i < segments.length; i++) {
       const seg = segments[i];
       const existingId = existingIds[i]; // match by position index
 
+      const bgColor = seg.background?.color || seg.bg_color || '#cccccc';
+      const bgImage = seg.background?.imageUrl || seg.segment_image_url || null;
+
       if (existingId) {
-        // Update in place (safe even if referenced by spin_results)
+        // ── STEP 3: DB VALUE ──────────────────────────────────────────────────
+        console.log(`STEP 3 DB VALUE (Update Segment ${i}):`, {
+          id: existingId,
+          label: seg.label,
+          pos: {
+            lro: seg.label_radial_offset,
+            lto: seg.label_tangential_offset,
+            lra: seg.label_rotation_angle,
+            lfs: seg.label_font_scale,
+          },
+          bg: bgColor,
+          icon: seg.icon_url
+        });
+
         await sql`
           UPDATE segments SET
             position             = ${i},
             label                = ${seg.label},
-            bg_color             = ${seg.bg_color ?? '#cccccc'},
+            bg_color             = ${bgColor},
             text_color           = ${seg.text_color ?? '#FFFFFF'},
             icon_url             = ${seg.icon_url ?? null},
+            segment_image_url    = ${bgImage},
             weight               = ${seg.weight ?? 1.0},
             prize_id             = ${seg.prize_id ?? null},
             is_no_prize          = ${seg.is_no_prize ?? !seg.prize_id},
@@ -119,14 +168,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         // Insert new segment
         await sql`
           INSERT INTO segments (
-            wheel_id, position, label, bg_color, text_color, icon_url,
+            wheel_id, position, label, bg_color, text_color, icon_url, segment_image_url,
             weight, prize_id, is_no_prize, consolation_message, win_cap_daily, win_cap_total,
             label_offset_x, label_offset_y, icon_offset_x, icon_offset_y,
             label_rotation_angle, icon_rotation_angle,
             icon_radial_offset, icon_tangential_offset, label_radial_offset, label_tangential_offset, label_font_scale
           ) VALUES (
-            ${id}, ${i}, ${seg.label}, ${seg.bg_color ?? '#cccccc'}, ${seg.text_color ?? '#FFFFFF'},
-            ${seg.icon_url ?? null}, ${seg.weight ?? 1.0},
+            ${id}, ${i}, ${seg.label}, ${bgColor}, ${seg.text_color ?? '#FFFFFF'},
+            ${seg.icon_url ?? null}, ${bgImage}, ${seg.weight ?? 1.0},
             ${seg.prize_id ?? null}, ${seg.is_no_prize ?? !seg.prize_id},
             ${seg.consolation_message ?? null}, ${seg.win_cap_daily ?? null}, ${seg.win_cap_total ?? null},
             ${seg.label_offset_x ?? null}, ${seg.label_offset_y ?? null},

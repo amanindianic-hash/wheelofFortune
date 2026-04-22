@@ -11,27 +11,19 @@ interface WheelPreviewProps {
 }
 
 export function WheelPreview({ segments, config, branding, rotation = 0 }: WheelPreviewProps) {
+  // ── STEP 5.5: FINAL RENDER INPUT ───────────────────────────────────────
+  console.log('[FINAL RENDER INPUT] WheelPreview:', { segments: segments.length, branding, config });
+
   return (
-    <div className="flex flex-col items-center justify-center gap-4 bg-muted/30 rounded-xl p-8 border border-dashed border-muted-foreground/20">
-      <div className="relative isolate pt-4">
-        <div 
-          className="rounded-full shadow-2xl z-10"
-          style={{
-            background:
-              branding.background_value &&
-              branding.background_value !== 'rgba(0, 0, 0, 0)'
-                ? branding.background_value
-                : 'transparent',
-          }}
-        >
-          <UniversalWheelRenderer
-            segments={segments}
-            config={config}
-            branding={branding}
-            rotation={rotation}
-            size={360}
-          />
-        </div>
+    <div className="flex flex-col items-center justify-center gap-6 w-full py-4 overflow-visible">
+      <div className="w-full max-w-[440px] aspect-square relative overflow-visible flex items-center justify-center">
+        <UniversalWheelRenderer
+          segments={segments}
+          config={config}
+          branding={branding}
+          rotation={rotation}
+          className="z-10"
+        />
       </div>
 
       <div className="text-center">

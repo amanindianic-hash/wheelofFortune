@@ -20,7 +20,7 @@ function makeSegment(overrides: Partial<Segment> = {}): Segment {
     win_cap_daily: null,
     win_cap_total: null,
     ...overrides,
-  };
+  } as any;
 }
 
 // ─── selectSegment ────────────────────────────────────────────────────────────
