@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Wheel of Fortune Platform (Stabilized Build)
 
-## Getting Started
+A high-performance, enterprise-grade gamification engine built with **Next.js 15+**, **TypeScript**, and **Neon PostgreSQL**. This platform allows marketing teams to build, customize, and embed interactive spin-to-win campaigns on any website.
 
-First, run the development server:
+## 🚀 Recently Stabilized (v2.0)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+This version includes the **Stabilization & Modular Re-architecture** (April 2026):
+- **Modular Editor**: Tabs for Aesthetics, Canvas (Segments), Distribution, and Mechanics.
+- **Improved UX**: Sticky live monitor for real-time visual feedback while scrolling.
+- **Restored Features**: Full Embed Widget Protocol support and synchronized rendering pipelines.
+- **Bug Fixes**: Resolved segment color reactivity, "undefined" URL routing, and runtime crashes.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 📁 Repository Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `src/app`: App Router, API routes, and page layouts.
+- `src/components`: UI components, including the modular campaign editor.
+- `src/lib`: Core logic, theme normalization, and utility functions.
+- `public`: Static assets including `widget.js` for external embedding.
+- `Documents`: Comprehensive technical documentation, architecture guides, and API specs.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📚 Documentation & Handover
 
-## Learn More
+For detailed instructions on setup and deployment, please refer to:
+- **[Deployment Handover Guide](./DEPLOYMENT_HANDOVER.md)**: Mandatory setup for Neon DB and Vercel.
+- **[Documentation Index](./Documents/README.md)**: Full API, Schema, and Engine deeply explained.
+- **[Theme Presets Guide](./THEME_PRESETS_GUIDE.md)**: How to manage and extend visual themes.
 
-To learn more about Next.js, take a look at the following resources:
+## 🛠️ Getting Started
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1.  **Install Dependencies**:
+    ```bash
+    npm install
+    ```
+2.  **Environment Variables**:
+    Copy `.env.example` to `.env.local` and configure your Neon `DATABASE_URL`.
+3.  **Database Migrations**:
+    Run the SQL scripts in `Documents/migrations/` in order.
+4.  **Dev Server**:
+    ```bash
+    npm run dev
+    ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+*This branch (`stabilized-build-v2`) contains the finalized optimizations and should be merged into `main` after review.*
