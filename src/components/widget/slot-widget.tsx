@@ -25,8 +25,6 @@ interface SlotConfig {
 
 type Phase = 'loading' | 'form' | 'ready' | 'spinning' | 'result' | 'error';
 
-// ─── Cabinet style definitions ────────────────────────────────────────────────
-
 function getCabinetStyles(style: SlotConfig['slot_cabinet_style'], primaryColor: string) {
   switch (style) {
     case 'classic':
@@ -55,7 +53,7 @@ function getCabinetStyles(style: SlotConfig['slot_cabinet_style'], primaryColor:
         reelBorder: `3px solid ${primaryColor}`,
         panelBg: '#0A0A14',
       };
-    default: // modern
+    default:
       return {
         cabinet: {
           background: `linear-gradient(135deg, ${primaryColor}33, ${primaryColor}55)`,
@@ -70,8 +68,6 @@ function getCabinetStyles(style: SlotConfig['slot_cabinet_style'], primaryColor:
       };
   }
 }
-
-// ─── Premium Symbol cell with 3D effects ──────────────────────────────────────
 
 function SymbolCell({
   seg, mode, rowH,
@@ -100,7 +96,6 @@ function SymbolCell({
         position: 'relative',
       }}
     >
-      {/* Glossy overlay for premium look */}
       <div style={{
         position: 'absolute',
         inset: 0,
@@ -109,7 +104,6 @@ function SymbolCell({
       }} />
 
       {(mode === 'icon' || mode === 'both') && (
-        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={seg?.icon_url ?? getRandomSlotIcon()}
           alt={seg?.label ?? 'slot icon'}
@@ -145,9 +139,15 @@ function SymbolCell({
   );
 }
 
-// ─── Main widget ──────────────────────────────────────────────────────────────
-
-export function SlotWidget({ embedToken, isPreview = false }: { embedToken: string; isPreview?: boolean }) {
+export function SlotWidget({ 
+  embedToken, 
+  isPreview = false,
+  initialData 
+}: { 
+  embedToken: string; 
+  isPreview?: boolean;
+  initialData?: any;
+}) {
   const [phase, setPhase] = useState<Phase>('loading');
   const [sessionId, setSessionId] = useState('');
   const [segments, setSegments] = useState<SlotSegment[]>([]);
@@ -168,32 +168,66 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
     async function init() {
       try {
         const fp = `${navigator.userAgent}${screen.width}${screen.height}${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+        
+        // Immediate hydration from pre-fetched server data
+        if (initialData) {
+          setSegments(initialData.segments ?? []);
+          setFormConfig(initialData.wheel?.form_config ?? {});
+          setBranding(initialData.wheel?.branding ?? {});
+          setSlotConfig(initialData.wheel?.config ?? {});
+          setPhase(initialData.wheel?.form_config?.enabled ? 'form' : 'ready');
+        }
+
         const res = await fetch('/api/spin/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ embed_token: embedToken, fingerprint_data: fp, page_url: window.location.href, referrer_url: document.referrer || null, preview: isPreview || undefined }),
+          body: JSON.stringify({ 
+            embed_token: embedToken, 
+            fingerprint_data: fp, 
+            page_url: window.location.href, 
+            referrer_url: document.referrer || null, 
+            preview: isPreview || undefined 
+          }),
         });
         const data = await res.json();
-        if (!res.ok) { setErrorMsg(data.error?.message ?? 'Unavailable'); setPhase('error'); return; }
+        
+        if (!res.ok) { 
+          if (!initialData) {
+            setErrorMsg(data.error?.message ?? 'Unavailable'); 
+            setPhase('error'); 
+          }
+          return; 
+        }
+
         setSessionId(data.session_id);
-        setSegments(data.segments ?? []);
-        setFormConfig(data.wheel?.form_config ?? {});
-        setBranding(data.wheel?.branding ?? {});
-        setSlotConfig(data.wheel?.config ?? {});
+        
+        // Fallback hydration if pre-fetch failed or was missing
+        if (!initialData) {
+          setSegments(data.segments ?? []);
+          setFormConfig(data.wheel?.form_config ?? {});
+          setBranding(data.wheel?.branding ?? {});
+          setSlotConfig(data.wheel?.config ?? {});
+          setPhase(data.wheel?.form_config?.enabled ? 'form' : 'ready');
+        }
+
         const rules = data.wheel?.trigger_rules || {};
         if (!rules.time_on_page && !rules.scroll_depth && !rules.exit_intent) setIsTriggered(true);
-        setPhase(data.wheel?.form_config?.enabled ? 'form' : 'ready');
-      } catch { setErrorMsg('Failed to load.'); setPhase('error'); }
+      } catch (err) {
+        console.error('[SlotWidget] Init error:', err);
+        if (!initialData) {
+          setErrorMsg('Failed to load.'); 
+          setPhase('error');
+        }
+      }
     }
     init();
-  }, [embedToken]);
+  }, [embedToken, initialData, isPreview]);
 
   async function handleSpin() {
     if (spinningRef.current || segments.length === 0) return;
     spinningRef.current = true;
     setPhase('spinning');
 
-    // Play sound if configured
     if (slotConfig.sound_enabled && slotConfig.sound_url) {
       try { new Audio(slotConfig.sound_url).play(); } catch { /* ignore */ }
     }
@@ -201,13 +235,10 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
     const reelCount = slotConfig.slot_reel_count ?? 3;
     const visRowsLocal = slotConfig.slot_visible_rows ?? 3;
     const rowH = visRowsLocal === 1 ? 96 : visRowsLocal === 5 ? 56 : 72;
-    const visRows = slotConfig.slot_visible_rows ?? 3;
     const totalDuration = slotConfig.slot_spin_duration_ms ?? 3000;
     const stopDelay = slotConfig.slot_stop_delay_ms ?? 600;
-    const stripLen = 24 + visRows;
     const idempotencyKey = crypto.randomUUID();
 
-    // Animate all reels, start from fastest → slowest (staggered)
     const durations = Array.from({ length: reelCount }, (_, i) =>
       (totalDuration + i * stopDelay) / 1000
     );
@@ -239,7 +270,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
       if (res.ok) {
         setSpinResult(data.result);
         setPhase('result');
-        // Fetch streak (non-blocking)
         fetch(`/api/spin/streak?session_id=${sessionId}`)
           .then(r => r.ok ? r.json() : null)
           .then(d => { if (d?.streak != null) setStreak(d.streak); })
@@ -276,18 +306,22 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
   }
 
   if (phase === 'error') return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: bgColor, fontFamily }}>
-      <div className="text-center space-y-3 p-8"><p className="text-5xl">😕</p><p className="text-lg font-semibold">Unavailable</p><p className="text-sm text-gray-500">{errorMsg}</p></div>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white" style={{ fontFamily }}>
+      <div className="text-center space-y-3 p-8">
+        <p className="text-5xl text-zinc-600">😕</p>
+        <p className="text-lg font-semibold">Unavailable</p>
+        <p className="text-sm text-zinc-500">{errorMsg}</p>
+      </div>
     </div>
   );
 
   if (!isTriggered && !isPreview) return null;
 
   if (phase === 'loading') return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: bgColor, fontFamily }}>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950" style={{ fontFamily }}>
       <div className="text-center space-y-3">
         <div className="w-12 h-12 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-zinc-500">Loading campaign…</p>
       </div>
     </div>
   );
@@ -309,14 +343,14 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
           ))}
           {formConfig.gdpr_enabled && (
             <div className="flex items-start gap-2">
-              <input type="checkbox" id="gdpr" checked={gdprConsent} onChange={(e) => setGdprConsent(e.target.checked)} className="mt-1 rounded" required />
-              <label htmlFor="gdpr" className="text-xs text-gray-500">
+              <input type="checkbox" id="gdpr" checked={gdprConsent} onChange={(e) => setGdprConsent(e.target.checked)} className="mt-1 rounded border-gray-300" required />
+              <label htmlFor="gdpr" className="text-xs text-gray-500 leading-tight">
                 {formConfig.gdpr_text ?? 'I agree to receive marketing communications.'}
                 {formConfig.privacy_policy_url && <a href={formConfig.privacy_policy_url} target="_blank" rel="noreferrer" className="underline ml-1">Privacy Policy</a>}
               </label>
             </div>
           )}
-          <Button type="submit" className="w-full font-bold" style={{ backgroundColor: primaryColor }}>Play Now</Button>
+          <Button type="submit" className="w-full font-bold h-11" style={{ backgroundColor: primaryColor, color: '#fff' }}>Play Now</Button>
         </form>
       </div>
     </div>
@@ -339,7 +373,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
     </div>
   );
 
-  // ── Ready / spinning ──────────────────────────────────────────────────────
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center gap-8 p-4"
@@ -350,14 +383,12 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
         backgroundAttachment: 'fixed',
       }}
     >
-      {/* Classic Casino Slot Machine Cabinet */}
       <div style={{
         width: '100%',
         maxWidth: 520,
         perspective: '1200px',
         filter: 'drop-shadow(0 40px 100px rgba(0,0,0,0.3))',
       }}>
-        {/* Cabinet Container with premium metallic finish */}
         <div style={{
           background: `linear-gradient(165deg, #2a2a2a 0%, #1a1a1a 30%, #0a0a0a 60%, #1a1a1a 100%)`,
           borderRadius: '40px 40px 20px 20px',
@@ -372,7 +403,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
           position: 'relative',
           overflow: 'hidden',
         }}>
-          {/* Premium metal texture background */}
           <div style={{
             position: 'absolute',
             inset: 0,
@@ -394,7 +424,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
             `,
             pointerEvents: 'none',
           }} />
-          {/* Top Marquee - CASINO (Premium gold with premium effects) */}
           <div style={{
             background: `linear-gradient(165deg, #FFE55C 0%, #FFD700 25%, #FFA500 50%, #FFD700 75%, #FFE55C 100%)`,
             borderRadius: '20px 20px 0 0',
@@ -411,7 +440,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
             position: 'relative',
             overflow: 'hidden',
           }}>
-            {/* Metallic shine effect */}
             <div style={{
               position: 'absolute',
               inset: 0,
@@ -436,7 +464,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
             </h1>
           </div>
 
-          {/* Main Cabinet Body */}
           <div style={{
             display: 'flex',
             gap: '16px',
@@ -444,9 +471,7 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
             position: 'relative',
             zIndex: 1,
           }}>
-            {/* Reels Container */}
             <div style={{ flex: 1, position: 'relative' }}>
-              {/* Premium Chrome Frame around reels */}
               <div style={{
                 background: `linear-gradient(165deg, #F5F5F5 0%, #E8E8E8 15%, #C0C0C0 50%, #A9A9A9 85%, #909090 100%)`,
                 borderRadius: '12px',
@@ -461,7 +486,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                 border: '3px solid #606060',
                 position: 'relative',
               }}>
-                {/* Metallic texture on chrome */}
                 <div style={{
                   position: 'absolute',
                   inset: 0,
@@ -477,7 +501,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                   borderRadius: '12px',
                   pointerEvents: 'none',
                 }} />
-                {/* Reel Display Window - Premium deep black */}
                 <div
                   className="flex gap-2 rounded-lg p-2 relative"
                   style={{
@@ -504,7 +527,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                       `,
                       border: '1px solid rgba(255,255,255,0.05)',
                     }}>
-                      {/* Premium Win-line highlight with glow */}
                       {visRows >= 1 && (
                         <div
                           className="absolute inset-x-0 z-10 pointer-events-none"
@@ -519,11 +541,9 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                               inset 0 0 10px ${winLineColor}55,
                               0 0 60px ${winLineColor}44
                             `,
-                            animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                           }}
                         />
                       )}
-                      {/* Scrolling strip */}
                       <div
                         style={{
                           transform: `translateY(${reelOffsets[reelIdx] ?? 0}px)`,
@@ -540,7 +560,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
               </div>
             </div>
 
-            {/* Premium Mechanical Lever */}
             <div style={{
               display: 'flex',
               flexDirection: 'column',
@@ -549,7 +568,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
               paddingTop: '20px',
               position: 'relative',
             }}>
-              {/* Lever mount bracket */}
               <div style={{
                 width: '28px',
                 height: '8px',
@@ -559,7 +577,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                 border: '1px solid #404040',
               }} />
 
-              {/* Lever shaft - Premium chrome */}
               <div style={{
                 width: '10px',
                 height: '45px',
@@ -572,7 +589,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                 `,
               }} />
 
-              {/* Premium Lever handle button */}
               <button
                 onClick={handleSpin}
                 disabled={phase === 'spinning'}
@@ -593,14 +609,12 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
                   transform: phase === 'spinning' ? 'translateY(6px) scale(0.95)' : 'translateY(0)',
                   opacity: phase === 'spinning' ? 0.75 : 1,
                 }}
-                title="Pull the lever to spin!"
               >
                 <span style={{ fontSize: '28px', filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))' }}>🎰</span>
               </button>
             </div>
           </div>
 
-          {/* Premium Bottom JACKPOT text with glow effects */}
           <div style={{
             marginTop: '16px',
             textAlign: 'center',
@@ -616,14 +630,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
             position: 'relative',
             overflow: 'hidden',
           }}>
-            {/* Animated glow background */}
-            <div style={{
-              position: 'absolute',
-              inset: 0,
-              background: `radial-gradient(circle at 50% 50%, rgba(255,215,0,0.1) 0%, transparent 70%)`,
-              pointerEvents: 'none',
-              animation: 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            }} />
             <p style={{
               fontSize: '20px',
               fontWeight: 'bold',
@@ -644,7 +650,6 @@ export function SlotWidget({ embedToken, isPreview = false }: { embedToken: stri
         </div>
       </div>
 
-      {/* Status text */}
       <p style={{
         fontSize: '12px',
         color: '#999',

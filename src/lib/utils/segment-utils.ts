@@ -25,3 +25,8 @@ export function normalizeSegment<T>(s: T): T {
     icon_scale:           input.icon_scale           != null ? parseFloat(input.icon_scale           as string) : null,
   } as T;
 }
+export function isTransparent(c: string | undefined): boolean {
+  if (!c) return true;
+  const lower = c.toLowerCase().trim();
+  return lower === 'transparent' || lower.includes('rgba(0,0,0,0)') || lower.includes('rgba(0, 0, 0, 0)');
+}

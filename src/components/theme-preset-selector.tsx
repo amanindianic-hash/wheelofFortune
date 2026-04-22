@@ -75,10 +75,14 @@ export function ThemePresetSelector({
 
   return (
     <div className="w-full">
-      <Tabs defaultValue="gaming" className="w-full">
-        <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${Object.keys(presets).length}, 1fr)` }}>
+      <Tabs defaultValue="gaming" className="w-full mt-2">
+        <TabsList className="flex items-center gap-2 bg-transparent p-0 mb-8 border-0">
           {Object.keys(presets).map((category) => (
-            <TabsTrigger key={category} value={category} className="capitalize">
+            <TabsTrigger 
+              key={category} 
+              value={category} 
+              className="px-4 h-9 rounded-xl border border-white/5 bg-white/5 data-[state=active]:bg-violet-600 data-[state=active]:text-white text-[10px] font-black uppercase tracking-widest transition-all"
+            >
               {category === 'gaming' && '🎮'}
               {category === 'entertainment' && '🎬'}
               {category === 'luxury' && '✨'}
@@ -90,28 +94,31 @@ export function ThemePresetSelector({
         </TabsList>
 
         {Object.entries(presets).map(([category, categoryPresets]) => (
-          <TabsContent key={category} value={category} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
+          <TabsContent key={category} value={category} className="space-y-4 mt-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {categoryPresets.map((preset) => (
-                <Card
+                <div
                   key={preset.id}
-                  className={`cursor-pointer transition-all hover:shadow-lg ${
-                    selectedPresetId === preset.id ? 'ring-2 ring-primary border-primary' : ''
+                  className={`glass-panel group relative overflow-hidden transition-all hover:border-violet-500/40 cursor-pointer flex flex-col ${
+                    selectedPresetId === preset.id ? 'border-violet-500/50 shadow-[0_0_30px_rgba(124,58,237,0.15)] ring-1 ring-violet-500/20' : ''
                   }`}
                   onClick={() => handleSelectPreset(preset)}
                 >
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <span className="text-xl">{preset.emoji}</span>
-                      <span>{preset.name}</span>
-                    </CardTitle>
-                    <CardDescription className="text-xs line-clamp-2">{preset.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pb-3">
+                  <div className="p-5 flex-1 space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="h-14 w-14 shrink-0 rounded-2xl bg-white/5 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform">
+                        {preset.emoji}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-black text-white text-sm uppercase tracking-tight truncate">{preset.name}</h4>
+                        <p className="text-[10px] text-muted-foreground/60 font-medium leading-relaxed line-clamp-2 mt-1">{preset.description}</p>
+                      </div>
+                    </div>
+                    
                     {/* Color preview */}
-                    <div className="space-y-1">
-                      <p className="text-xs font-semibold text-muted-foreground">Color Palette:</p>
-                      <div className="flex gap-1 flex-wrap">
+                    <div className="space-y-2">
+                      <p className="text-[9px] font-black text-violet-400/60 uppercase tracking-[0.1em]">Spectral Array</p>
+                      <div className="flex gap-1.5 p-1.5 bg-black/40 rounded-xl w-fit border border-white/5">
                         {preset.config?.colorPalette ? (
                           [
                             preset.config.colorPalette.primary,
@@ -123,44 +130,52 @@ export function ThemePresetSelector({
                             .map((color, idx) => (
                               <div
                                 key={idx}
-                                className="w-6 h-6 rounded border border-gray-400 flex-shrink-0"
+                                className="w-5 h-5 rounded-md shadow-sm ring-1 ring-white/10"
                                 style={{ backgroundColor: color }}
                                 title={color}
                               />
                             ))
                         ) : (
-                          <p className="text-xs text-muted-foreground">No colors</p>
+                          <div className="w-5 h-5 rounded-md bg-zinc-800 animate-pulse" />
                         )}
                       </div>
                     </div>
 
                     {/* Typography & Style info */}
-                    <div className="mt-2 text-xs text-muted-foreground space-y-0.5">
+                    <div className="grid grid-cols-2 gap-4 bg-white/[0.02] p-3 rounded-xl border border-white/5">
                       {preset.config?.typography && (
-                        <p className="line-clamp-1">
-                          <strong>Fonts:</strong> {preset.config.typography.headingFont}
-                        </p>
+                        <div className="space-y-1">
+                          <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Typeface</p>
+                          <p className="text-[10px] font-bold text-white truncate">{preset.config.typography.headingFont}</p>
+                        </div>
                       )}
                       {preset.config?.style && (
-                        <p className="line-clamp-1">
-                          <strong>Style:</strong> {preset.config.style}
-                        </p>
+                        <div className="space-y-1">
+                          <p className="text-[8px] font-bold text-muted-foreground/40 uppercase tracking-widest">Visual DNA</p>
+                          <p className="text-[10px] font-bold text-white uppercase truncate">{preset.config.style}</p>
+                        </div>
                       )}
                     </div>
+                  </div>
 
-                    {/* Apply button */}
+                  <div className="px-5 py-3 bg-white/[0.02] border-t border-white/5 mt-auto">
                     <Button
-                      className="w-full mt-3 h-8 text-sm"
-                      variant={selectedPresetId === preset.id ? 'default' : 'outline'}
+                      size="sm"
+                      variant={selectedPresetId === preset.id ? 'default' : 'ghost'}
+                      className={`w-full text-[10px] font-black uppercase tracking-widest h-9 rounded-xl transition-all ${
+                        selectedPresetId === preset.id 
+                        ? 'bg-violet-600 text-white shadow-[0_0_15px_rgba(124,58,237,0.3)]' 
+                        : 'text-muted-foreground hover:text-emerald-400 hover:bg-emerald-500/10'
+                      }`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSelectPreset(preset);
                       }}
                     >
-                      {selectedPresetId === preset.id ? '✓ Applied' : 'Apply Theme'}
+                      {selectedPresetId === preset.id ? '✓ Synchronized' : 'Execute Deploy'}
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
               ))}
             </div>
           </TabsContent>

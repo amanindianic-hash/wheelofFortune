@@ -57,7 +57,7 @@ export default function RegisterPage() {
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
         Back to Home
       </Link>
-      <Card className="w-full max-w-md shadow-xl">
+      <Card className="w-full max-w-md shadow-xl glass-panel">
         <CardHeader className="text-center space-y-2">
           <Link 
             href="/" 

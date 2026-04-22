@@ -116,13 +116,16 @@ export function normalizeTheme(theme: any, wheelSegments: any[] = []) {
         is_no_prize: existing.is_no_prize ?? true,
         consolation_message: existing.consolation_message,
 
-        // ── VISUALS (STRICT THEME OVERRIDE) ──────────────────
-        // No merging or leaking from wheel database offsets/icons
-        bg_color: bgColor,
-        background: { color: bgColor, imageUrl: bgImage },
-        text_color: p.text_color || '#FFFFFF',
-        icon_url: themeIcon, 
-        segment_image_url: bgImage,
+        // ── VISUALS (USER OVERRIDES > THEME PALETTE) ─────────
+        // Prioritize existing state to ensure manual tweaks in SegmentsTab are reactive
+        bg_color: existing.bg_color || bgColor,
+        background: { 
+          color: existing.bg_color || bgColor, 
+          imageUrl: existing.segment_image_url || bgImage 
+        },
+        text_color: existing.text_color || p.text_color || '#FFFFFF',
+        icon_url: existing.icon_url || themeIcon, 
+        segment_image_url: existing.segment_image_url || bgImage,
 
         // Explicitly NULL out all visual overrides to ensure theme parity
         label_offset_x: null,

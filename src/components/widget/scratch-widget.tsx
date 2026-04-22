@@ -52,14 +52,12 @@ function drawScratchLayer(
     grad.addColorStop(1,   '#9e9e9e');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
-    // Subtle horizontal sheen lines
     ctx.strokeStyle = 'rgba(255,255,255,0.25)';
     ctx.lineWidth = 1;
     for (let y = 4; y < h; y += 8) {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
     }
   } else if (style === 'foil') {
-    // Iridescent rainbow foil
     const grad = ctx.createLinearGradient(0, 0, w, 0);
     grad.addColorStop(0,    '#FF6B6B');
     grad.addColorStop(0.16, '#FFD93D');
@@ -70,10 +68,8 @@ function drawScratchLayer(
     grad.addColorStop(1,    '#FFD93D');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, w, h);
-    // Semi-transparent white overlay for depth
     ctx.fillStyle = 'rgba(255,255,255,0.25)';
     ctx.fillRect(0, 0, w, h);
-    // Diagonal sheen
     ctx.strokeStyle = 'rgba(255,255,255,0.35)';
     ctx.lineWidth = 2;
     for (let x = -h; x < w + h; x += 14) {
@@ -88,12 +84,10 @@ function drawScratchLayer(
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + h, h); ctx.stroke();
     }
   } else {
-    // solid
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, w, h);
   }
 
-  // "Scratch here" text overlay
   ctx.fillStyle = 'rgba(255,255,255,0.80)';
   ctx.font = `bold ${Math.round(w * 0.058)}px Inter, system-ui, sans-serif`;
   ctx.textAlign = 'center';
@@ -122,7 +116,6 @@ function PrizeBg({
         style={{ backgroundColor: seg?.bg_color ?? primaryColor, flex: 1 }}
       >
         {seg?.icon_url
-          // eslint-disable-next-line @next/next/no-img-element
           ? <img src={seg.icon_url} alt={displayTitle} className="w-8 h-8 object-contain rounded" />
           : <span className="text-2xl">🎁</span>}
         <span className="text-xs font-bold text-center px-1 truncate max-w-full" style={{ color: seg?.text_color ?? '#fff' }}>
@@ -148,13 +141,11 @@ function PrizeBg({
       </div>
     );
   }
-  // single
   const seg = segments[0];
   return (
     <div className="absolute inset-0 flex flex-col items-center justify-center gap-2"
       style={{ backgroundColor: seg?.bg_color ?? primaryColor }}>
       {seg?.icon_url
-        // eslint-disable-next-line @next/next/no-img-element
         ? <img src={seg.icon_url} alt={seg.label} className="w-12 h-12 object-contain rounded" />
         : <span className="text-4xl">🎁</span>}
       <span className="text-base font-bold text-center px-2" style={{ color: seg?.text_color ?? '#fff' }}>
@@ -166,7 +157,15 @@ function PrizeBg({
 
 // ─── Main widget ──────────────────────────────────────────────────────────────
 
-export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: string; isPreview?: boolean }) {
+export function ScratchWidget({ 
+  embedToken, 
+  isPreview = false,
+  initialData
+}: { 
+  embedToken: string; 
+  isPreview?: boolean;
+  initialData?: any; 
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [phase, setPhase] = useState<Phase>('loading');
   const [sessionId, setSessionId] = useState('');
@@ -185,55 +184,82 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
   const revealedRef = useRef(false);
   const idempotencyKeyRef = useRef('');
 
-  // Load session
+  // Hydrate or initialize session
   useEffect(() => {
     async function init() {
       try {
         const fp = `${navigator.userAgent}${screen.width}${screen.height}${Intl.DateTimeFormat().resolvedOptions().timeZone}`;
+        
+        // Immediate hydration from initialData (server pre-pass)
+        if (initialData) {
+          setSegments(initialData.segments ?? []);
+          setFormConfig(initialData.wheel?.form_config ?? {});
+          setBranding(initialData.wheel?.branding ?? {});
+          setScratchConfig(initialData.wheel?.config ?? {});
+          setPhase(initialData.wheel?.form_config?.enabled ? 'form' : 'ready');
+        }
+
         const res = await fetch('/api/spin/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ embed_token: embedToken, fingerprint_data: fp, page_url: window.location.href, referrer_url: document.referrer || null, preview: isPreview || undefined }),
+          body: JSON.stringify({ 
+            embed_token: embedToken, 
+            fingerprint_data: fp, 
+            page_url: window.location.href, 
+            referrer_url: document.referrer || null, 
+            preview: isPreview || undefined 
+          }),
         });
         const data = await res.json();
-        if (!res.ok) { setErrorMsg(data.error?.message ?? 'Unavailable'); setPhase('error'); return; }
+        if (!res.ok) { 
+          if (!initialData) {
+            setErrorMsg(data.error?.message ?? 'Unavailable'); 
+            setPhase('error'); 
+          }
+          return; 
+        }
 
         setSessionId(data.session_id);
-        setSegments(data.segments ?? []);
-        setFormConfig(data.wheel?.form_config ?? {});
-        setBranding(data.wheel?.branding ?? {});
-        setScratchConfig(data.wheel?.config ?? {});
+        
+        // Final fallback if initialData was missing
+        if (!initialData) {
+          setSegments(data.segments ?? []);
+          setFormConfig(data.wheel?.form_config ?? {});
+          setBranding(data.wheel?.branding ?? {});
+          setScratchConfig(data.wheel?.config ?? {});
+          setPhase(data.wheel?.form_config?.enabled ? 'form' : 'ready');
+        }
 
-        // Fetch prize info for segments
-        if (data.segments && data.segments.length > 0) {
+        // Parallelized prize fetching for all segments
+        const segmentsToFetch = (initialData?.segments ?? data.segments ?? []).filter((s: any) => s.prize_id);
+        if (segmentsToFetch.length > 0) {
           const prizeMap: Record<string, PrizeInfo> = {};
-          for (const seg of data.segments) {
-            if (seg.prize_id) {
-              try {
-                const prizeRes = await fetch(`/api/prizes/${seg.prize_id}`);
-                if (prizeRes.ok) {
-                  const prizeData = await prizeRes.json();
-                  prizeMap[seg.id] = { id: seg.prize_id, display_title: prizeData.display_title };
-                }
-              } catch (e) {
-                // If prize fetch fails, we'll just show segment label
+          await Promise.all(segmentsToFetch.map(async (seg: any) => {
+            try {
+              const prizeRes = await fetch(`/api/prizes/${seg.prize_id}`);
+              if (prizeRes.ok) {
+                const prizeData = await prizeRes.json();
+                prizeMap[seg.id] = { id: seg.prize_id, display_title: prizeData.display_title };
               }
-            }
-          }
-          setPrizes(prizeMap);
+            } catch (e) { /* ignore individual failures */ }
+          }));
+          setPrizes(prev => ({ ...prev, ...prizeMap }));
         }
 
         const rules = data.wheel?.trigger_rules || {};
         if (!rules.time_on_page && !rules.scroll_depth && !rules.exit_intent) setIsTriggered(true);
-        setPhase(data.wheel?.form_config?.enabled ? 'form' : 'ready');
-      } catch {
-        setErrorMsg('Failed to load. Please try again.'); setPhase('error');
+      } catch (err) {
+        console.error('[ScratchWidget] Init failed:', err);
+        if (!initialData) {
+          setErrorMsg('Failed to load. Please try again.'); 
+          setPhase('error');
+        }
       }
     }
     init();
-  }, [embedToken]);
+  }, [embedToken, initialData, isPreview]);
 
-  // Draw scratch layer on canvas when entering ready phase
+  // Draw scratch layer
   useEffect(() => {
     if (phase !== 'ready') return;
     const canvas = canvasRef.current;
@@ -260,7 +286,6 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
     const { x, y } = getScratchPos(e, canvas);
-    // Mobile users get 20% larger brush for easier scratching
     const isMobileTouch = e.pointerType === 'touch' || (typeof navigator !== 'undefined' && navigator.maxTouchPoints > 0);
     const baseBrush = scratchConfig.scratch_card_size === 'large' ? 36 : scratchConfig.scratch_card_size === 'small' ? 22 : 28;
     const brushMultiplier = scratchConfig.scratch_brush_multiplier ?? 1.0;
@@ -297,7 +322,6 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
       if (res.ok) {
         setSpinResult(data.result);
         setPhase('result');
-        // Fetch streak (non-blocking)
         fetch(`/api/spin/streak?session_id=${sessionId}`)
           .then(r => r.ok ? r.json() : null)
           .then(d => { if (d?.streak != null) setStreak(d.streak); })
@@ -324,11 +348,11 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
   const borderColor = scratchConfig.scratch_border_color ?? primaryColor;
 
   if (phase === 'error') return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: bgColor, fontFamily }}>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white" style={{ fontFamily }}>
       <div className="text-center space-y-3 p-8">
-        <p className="text-5xl">😕</p>
+        <p className="text-5xl text-zinc-600">😕</p>
         <p className="text-lg font-semibold">Unavailable</p>
-        <p className="text-sm text-gray-500">{errorMsg}</p>
+        <p className="text-sm text-zinc-500">{errorMsg}</p>
       </div>
     </div>
   );
@@ -336,10 +360,10 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
   if (!isTriggered && !isPreview) return null;
 
   if (phase === 'loading') return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: bgColor, fontFamily }}>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950" style={{ fontFamily }}>
       <div className="text-center space-y-3">
         <div className="w-12 h-12 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-gray-500">Loading…</p>
+        <p className="text-sm text-zinc-500">Loading campaign…</p>
       </div>
     </div>
   );
@@ -361,14 +385,14 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
           ))}
           {formConfig.gdpr_enabled && (
             <div className="flex items-start gap-2">
-              <input type="checkbox" id="gdpr" checked={gdprConsent} onChange={(e) => setGdprConsent(e.target.checked)} className="mt-1 rounded" required />
-              <label htmlFor="gdpr" className="text-xs text-gray-500">
+              <input type="checkbox" id="gdpr" checked={gdprConsent} onChange={(e) => setGdprConsent(e.target.checked)} className="mt-1 rounded border-gray-300" required />
+              <label htmlFor="gdpr" className="text-xs text-gray-500 leading-tight">
                 {formConfig.gdpr_text ?? 'I agree to receive marketing communications.'}
                 {formConfig.privacy_policy_url && <a href={formConfig.privacy_policy_url} target="_blank" rel="noreferrer" className="underline ml-1">Privacy Policy</a>}
               </label>
             </div>
           )}
-          <Button type="submit" className="w-full font-bold" style={{ backgroundColor: primaryColor }}>Continue to Scratch</Button>
+          <Button type="submit" className="w-full font-bold h-11" style={{ backgroundColor: primaryColor, color: '#fff' }}>Continue to Scratch</Button>
         </form>
       </div>
     </div>
@@ -385,7 +409,6 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
     </div>
   );
 
-  // Ready / scratching phase
   return (
     <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4" style={{ backgroundColor: bgColor, fontFamily }}>
       <div className="text-center space-y-1">
@@ -394,13 +417,11 @@ export function ScratchWidget({ embedToken, isPreview = false }: { embedToken: s
       </div>
 
       <div
-        className="relative shadow-2xl overflow-hidden"
+        className="relative shadow-2xl overflow-hidden touch-none"
         style={{ width: cardW, height: cardH, borderRadius, border: `3px solid ${borderColor}` }}
       >
-        {/* Prize reveal background */}
         <PrizeBg layout={layout} segments={segments} primaryColor={primaryColor} prizes={prizes} />
 
-        {/* Scratch canvas on top */}
         <canvas
           ref={canvasRef}
           width={cardW}

@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { drawRoulette, computeFinalBallAngle } from '@/lib/utils/roulette-renderer';
 import type { RouletteSegment, RouletteBranding } from '@/lib/utils/roulette-renderer';
-// RouletteSegment already includes icon_url from the renderer interface
 import { WinQRCard } from './win-qr-card';
 import { easeOutQuart } from '@/lib/utils/wheel-renderer';
 
@@ -21,7 +20,15 @@ type Phase = 'loading' | 'form' | 'ready' | 'spinning' | 'result' | 'error';
 function easeOutCubic(t: number): number { return 1 - Math.pow(1 - t, 3); }
 function easeInQuad(t: number): number { return t * t; }
 
-export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: string; isPreview?: boolean }) {
+export function RouletteWidget({ 
+  embedToken, 
+  isPreview = false,
+  initialData
+}: { 
+  embedToken: string; 
+  isPreview?: boolean;
+  initialData?: any;
+}) {
   const canvasRef     = useRef<HTMLCanvasElement>(null);
   const [phase, setPhase]           = useState<Phase>('loading');
   const [sessionId, setSessionId]   = useState('');
@@ -38,22 +45,30 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
   const [streak, setStreak]             = useState<number>(0);
   const [imageCache, setImageCache]     = useState<Record<string, HTMLImageElement>>({});
 
-  // Animation state tracked in refs to avoid stale closures
   const wheelRotRef  = useRef(0);
-  const ballAngleRef = useRef(-Math.PI / 2); // start at top
+  const ballAngleRef = useRef(-Math.PI / 2);
   const ballDepthRef = useRef(0);
   const spinningRef  = useRef(false);
 
-  // React state for re-renders (drives canvas redraws)
   const [wheelRot,  setWheelRot]   = useState(0);
   const [ballAngle, setBallAngle]  = useState(-Math.PI / 2);
   const [ballDepth, setBallDepth]  = useState(0);
 
-  // Load session
   useEffect(() => {
     async function init() {
       try {
         const fp = `${navigator.userAgent}${screen.width}${screen.height}${Intl.DateTimeFormat().resolvedOptions().timeZone}${navigator.language}`;
+        
+        // Immediate optimization via server pre-fetched data
+        if (initialData) {
+          setSegments(initialData.segments ?? []);
+          setBranding(initialData.wheel?.branding ?? {});
+          setRConfig(initialData.wheel?.config ?? {});
+          setFormConfig(initialData.wheel?.form_config ?? {});
+          setTriggerRules(initialData.wheel?.trigger_rules ?? {});
+          setPhase(initialData.wheel?.form_config?.enabled ? 'form' : 'ready');
+        }
+
         const res = await fetch('/api/spin/session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -66,26 +81,40 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
           }),
         });
         const data = await res.json();
-        if (!res.ok) { setErrorMsg(data.error?.message ?? 'Wheel unavailable'); setPhase('error'); return; }
+        
+        if (!res.ok) { 
+          if (!initialData) {
+            setErrorMsg(data.error?.message ?? 'Wheel unavailable'); 
+            setPhase('error'); 
+          }
+          return; 
+        }
 
         setSessionId(data.session_id);
-        setSegments(data.segments ?? []);
-        setBranding(data.wheel?.branding ?? {});
-        setRConfig(data.wheel?.config ?? {});
-        setFormConfig(data.wheel?.form_config ?? {});
-        setTriggerRules(data.wheel?.trigger_rules ?? {});
-        setPhase(data.wheel?.form_config?.enabled ? 'form' : 'ready');
+        
+        // Fallback hydration
+        if (!initialData) {
+          setSegments(data.segments ?? []);
+          setBranding(data.wheel?.branding ?? {});
+          setRConfig(data.wheel?.config ?? {});
+          setFormConfig(data.wheel?.form_config ?? {});
+          setTriggerRules(data.wheel?.trigger_rules ?? {});
+          setPhase(data.wheel?.form_config?.enabled ? 'form' : 'ready');
+        }
 
         const rules = data.wheel?.trigger_rules || {};
         if (!rules.time_on_page && !rules.scroll_depth && !rules.exit_intent) setIsTriggered(true);
-      } catch {
-        setErrorMsg('Failed to load wheel.'); setPhase('error');
+      } catch (err) {
+        console.error('[RouletteWidget] Init error:', err);
+        if (!initialData) {
+          setErrorMsg('Failed to load wheel.'); 
+          setPhase('error');
+        }
       }
     }
     init();
-  }, [embedToken]);
+  }, [embedToken, initialData, isPreview]);
 
-  // Trigger monitoring
   useEffect(() => {
     if (isTriggered || phase === 'loading' || phase === 'error') return;
     const handlers: (() => void)[] = [];
@@ -109,7 +138,6 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
     return () => handlers.forEach(h => h());
   }, [isTriggered, triggerRules, phase]);
 
-  // Preload segment icons when segments arrive
   useEffect(() => {
     const urls = segments.map(s => s.icon_url).filter(Boolean) as string[];
     if (urls.length === 0) return;
@@ -128,7 +156,6 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
     }
   }, [segments]);
 
-  // Redraw canvas when animation state changes
   useEffect(() => {
     if (!canvasRef.current || segments.length === 0) return;
     drawRoulette(canvasRef.current, segments, wheelRot, ballAngle, ballDepth, branding, imageCache);
@@ -139,7 +166,6 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
     spinningRef.current = true;
     setPhase('spinning');
 
-    // Play sound if configured
     if (rConfig.sound_enabled && rConfig.sound_url) {
       try { new Audio(rConfig.sound_url).play(); } catch { /* ignore */ }
     }
@@ -147,7 +173,6 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
     const idempotencyKey = crypto.randomUUID();
     let result: SpinResult | null = null;
 
-    // Ask server who wins first
     try {
       const res = await fetch('/api/spin/execute', {
         method: 'POST',
@@ -166,7 +191,6 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
         return;
       }
       result = data.result as SpinResult;
-      // Fetch streak (non-blocking)
       fetch(`/api/spin/streak?session_id=${sessionId}`)
         .then(r => r.ok ? r.json() : null)
         .then(d => { if (d?.streak != null) setStreak(d.streak); })
@@ -178,13 +202,11 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
       return;
     }
 
-    // Calculate targets
     const duration    = rConfig.roulette_spin_duration_ms ?? 5000;
     const winIdx      = Math.max(0, segments.findIndex(s => s.id === result!.segment.id));
     const n           = segments.length;
     const segAngle    = (2 * Math.PI) / n;
 
-    // Wheel: same formula as SpinWidget
     const targetAngle   = segAngle * winIdx + segAngle / 2;
     const extraSpins    = 4 * 2 * Math.PI;
     const totalWheelTravel = extraSpins + (2 * Math.PI - targetAngle);
@@ -199,15 +221,12 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
       const elapsed  = now - startTime;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Wheel eases out (same as spin wheel)
       const wEase = easeOutQuart(progress);
       const currentWheelRot = startWheelRot + totalWheelTravel * wEase;
 
-      // Ball eases out slower (more inertia feel)
       const bEase = easeOutCubic(progress);
       const currentBallAngle = startBallAngle + (finalBallAngle - startBallAngle) * bEase;
 
-      // Ball falls into pocket in final 22% of animation
       const currentBallDepth = progress < 0.78 ? 0 : easeInQuad((progress - 0.78) / 0.22);
 
       wheelRotRef.current  = currentWheelRot;
@@ -237,19 +256,18 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
   }
 
   const primaryColor = branding.primary_color ?? '#7C3AED';
-  const buttonText   = (branding as { button_text?: string }).button_text ?? 'SPIN!';
-  const fontFamily   = (branding as { font_family?: string }).font_family ?? 'Inter, sans-serif';
-  const bgColor      = (branding as { background_value?: string }).background_value ?? '#F3E8FF';
+  const buttonText   = (branding as any).button_text ?? 'SPIN!';
+  const fontFamily   = (branding as any).font_family ?? 'Inter, sans-serif';
+  const bgColor      = (branding as any).background_value ?? '#F3E8FF';
   const pocketStyle  = rConfig.roulette_pocket_style ?? 'classic';
-
   const tableGreen   = pocketStyle === 'neon' ? '#0A0A14' : '#065c20';
 
   if (phase === 'error') return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: bgColor, fontFamily }}>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950 text-white" style={{ fontFamily }}>
       <div className="text-center space-y-3 p-8">
-        <p className="text-5xl">😕</p>
-        <p className="text-lg font-semibold text-white">Wheel Unavailable</p>
-        <p className="text-sm text-white/60">{errorMsg}</p>
+        <p className="text-5xl text-zinc-600">😕</p>
+        <p className="text-lg font-semibold">Wheel Unavailable</p>
+        <p className="text-sm text-zinc-500">{errorMsg}</p>
       </div>
     </div>
   );
@@ -257,10 +275,10 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
   if (!isTriggered && !isPreview) return null;
 
   if (phase === 'loading') return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: bgColor, fontFamily }}>
+    <div className="min-h-screen flex items-center justify-center bg-zinc-950" style={{ fontFamily }}>
       <div className="text-center space-y-3">
-        <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mx-auto" />
-        <p className="text-sm text-white/70">Loading roulette…</p>
+        <div className="w-12 h-12 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-sm text-zinc-500">Loading campaign…</p>
       </div>
     </div>
   );
@@ -269,12 +287,12 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
     <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: bgColor, fontFamily }}>
       <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8 space-y-5 text-gray-900 border border-gray-100">
         <div className="text-center">
-          <p className="text-4xl mb-3 drop-shadow-md">🎰</p>
+          <p className="text-4xl mb-3 drop-shadow-md">🎯</p>
           <h2 className="text-2xl font-bold text-gray-900">Spin the Roulette!</h2>
           <p className="text-sm text-gray-500 mt-1">Enter your details to spin</p>
         </div>
         <form onSubmit={handleFormSubmit} className="space-y-4">
-          {(formConfig.fields ?? [{ key: 'email', label: 'Email', type: 'email', required: true }, { key: 'name', label: 'Name', type: 'text', required: false }]).map((field) => (
+          {(formConfig.fields ?? [{ key: 'email', label: 'Email', type: 'email', required: true }]).map((field) => (
             <div key={field.key} className="space-y-1.5">
               <Label htmlFor={field.key}>{field.label}{field.required && ' *'}</Label>
               <Input id={field.key} type={field.type} required={field.required}
@@ -284,14 +302,14 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
           ))}
           {formConfig.gdpr_enabled && (
             <div className="flex items-start gap-2">
-              <input type="checkbox" id="gdpr" checked={gdprConsent} onChange={(e) => setGdprConsent(e.target.checked)} className="mt-1 rounded" required />
-              <label htmlFor="gdpr" className="text-xs text-gray-500">
+              <input type="checkbox" id="gdpr" checked={gdprConsent} onChange={(e) => setGdprConsent(e.target.checked)} className="mt-1 rounded border-zinc-300" required />
+              <label htmlFor="gdpr" className="text-xs text-gray-500 leading-tight">
                 {formConfig.gdpr_text ?? 'I agree to receive marketing communications.'}
                 {formConfig.privacy_policy_url && <a href={formConfig.privacy_policy_url} target="_blank" rel="noreferrer" className="underline ml-1">Privacy Policy</a>}
               </label>
             </div>
           )}
-          <Button type="submit" className="w-full font-bold" style={{ backgroundColor: primaryColor }}>Continue to Spin</Button>
+          <Button type="submit" className="w-full font-bold h-11" style={{ backgroundColor: primaryColor, color: '#fff' }}>Continue to Spin</Button>
         </form>
       </div>
     </div>
@@ -308,13 +326,8 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
     </div>
   );
 
-  // Ready / spinning
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center gap-6 p-4"
-      style={{ backgroundColor: bgColor, fontFamily }}
-    >
-      {/* Table felt area */}
+    <div className="min-h-screen flex flex-col items-center justify-center gap-6 p-4" style={{ backgroundColor: bgColor, fontFamily }}>
       <div
         className="rounded-3xl p-8 flex flex-col items-center gap-8 shadow-2xl"
         style={{
@@ -326,11 +339,10 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
         }}
       >
         <div className="text-center">
-          <h2 className="text-white font-bold text-2xl tracking-wide">🎰 Roulette</h2>
+          <h2 className="text-white font-bold text-2xl tracking-wide">🎯 Roulette</h2>
           <p className="text-white/70 text-sm mt-1">Place your bet and spin!</p>
         </div>
 
-        {/* Pointer triangle at top */}
         <div className="relative">
           <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-10 drop-shadow-xl">
             <div
@@ -343,8 +355,8 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
           </div>
           <canvas
             ref={canvasRef}
-            width={400}
-            height={400}
+            width={380}
+            height={380}
             className="rounded-full shadow-2xl"
             style={{
               border: pocketStyle === 'neon' ? `4px solid ${primaryColor}` : '4px solid #C8A050',
@@ -356,9 +368,10 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
         </div>
 
         <Button
-          className="w-48 h-14 text-lg font-bold rounded-full shadow-lg transition-all active:scale-95 duration-200"
+          className="w-48 h-12 text-lg font-bold rounded-full shadow-lg transition-all active:scale-95 duration-200"
           style={{
             backgroundColor: primaryColor,
+            color: '#fff',
             boxShadow: `0 8px 20px ${primaryColor}44, inset 0 2px 4px rgba(255,255,255,0.2)`,
             border: `2px solid ${primaryColor}`,
           }}
@@ -367,7 +380,7 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
         >
           {phase === 'spinning' ? (
             <span className="flex items-center gap-2">
-              <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="w-5 h-5 border-2 border-zinc-300 border-t-white rounded-full animate-spin" />
               Rolling…
             </span>
           ) : (
@@ -378,7 +391,7 @@ export function RouletteWidget({ embedToken, isPreview = false }: { embedToken: 
         </Button>
       </div>
 
-      <p className="text-white/40 text-xs">{segments.length} pocket{segments.length !== 1 ? 's' : ''}</p>
+      <p className="text-zinc-500 text-xs">{segments.length} pocket{segments.length !== 1 ? 's' : ''}</p>
     </div>
   );
 }

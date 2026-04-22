@@ -12,20 +12,20 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  theme: 'system',
-  resolvedTheme: 'light',
+  theme: 'dark',
+  resolvedTheme: 'dark',
   mounted: false,
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<Theme>('dark');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
   const [mounted, setMounted] = useState(false);
 
   // Single effect: read localStorage, apply class, mark mounted
   useEffect(() => {
-    const saved = (localStorage.getItem('theme') as Theme) ?? 'system';
+    const saved = (localStorage.getItem('theme') as Theme) ?? 'dark';
     setThemeState(saved);
     setMounted(true);
   }, []);

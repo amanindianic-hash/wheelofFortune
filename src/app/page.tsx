@@ -24,16 +24,9 @@ export default function HomePage() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-[#080810] text-white selection:bg-violet-600/40">
+    <div className="min-h-screen bg-background text-white selection:bg-violet-600/40">
 
-      {/* ── dot grid overlay ── */}
-      <div
-        className="pointer-events-none fixed inset-0 z-0"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
-        }}
-      />
+      <div className="pointer-events-none fixed inset-0 z-0 dot-grid opacity-[0.4]" />
 
       {/* ── hero radial glow ── */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -44,7 +37,7 @@ export default function HomePage() {
       </div>
 
       {/* ═══════════════════════════ NAV ══════════════════════════ */}
-      <header className="relative z-50 border-b border-white/[0.06] bg-[#080810]/80 backdrop-blur-xl">
+      <header className="relative z-50 border-b border-white/[0.06] bg-background/80 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between gap-8">
 
           {/* Logo */}
@@ -95,7 +88,7 @@ export default function HomePage() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-white/[0.06] bg-[#080810] px-6 py-4 space-y-4">
+          <div className="md:hidden border-t border-white/[0.06] bg-background px-6 py-4 space-y-4">
             {['#features', '#how-it-works', '#integrations', '#pricing'].map((href) => (
               <Link key={href} href={href} onClick={() => setMobileOpen(false)}
                 className="block text-sm text-[#888] hover:text-white transition-colors capitalize">
@@ -118,25 +111,20 @@ export default function HomePage() {
         <section className="pt-24 pb-20 px-6 text-center max-w-4xl mx-auto">
 
           {/* Eyebrow pill */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/25 bg-violet-500/8 px-3.5 py-1.5 mb-8">
+          <div className="inline-flex items-center gap-2 rounded-full ghost-border px-3.5 py-1.5 mb-8"
+            style={{ background: 'rgba(124,58,237,0.1)' }}
+          >
             <span className="h-1.5 w-1.5 rounded-full bg-violet-400 animate-pulse" />
-            <span className="text-[12px] font-semibold uppercase tracking-[0.08em] text-violet-300">
+            <span className="label-caps text-violet-300">
               Spin-to-Win Marketing
             </span>
           </div>
 
-          {/* Headline */}
-          <h1 className="text-[clamp(2.8rem,7vw,5.5rem)] font-bold leading-[1.02] tracking-[-0.04em] mb-6">
+          {/* Headline — Space Grotesk editorial */}
+          <h1 className="font-editorial text-[clamp(2.8rem,7vw,5.5rem)] font-bold leading-[1.02] tracking-[-0.04em] mb-6">
             <span className="text-white">Turn every visitor</span>
             <br />
-            <span
-              style={{
-                background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 40%, #c4b5fd 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-              }}
-            >
+            <span className="gradient-text-editorial">
               into a lead.
             </span>
           </h1>
@@ -151,14 +139,19 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link
               href="/register"
-              className="inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-[15px] px-7 py-3.5 transition-all duration-200 shadow-[0_0_0_1px_rgba(139,92,246,0.4),0_8px_24px_-4px_rgba(109,40,217,0.5)]"
+              className="inline-flex items-center gap-2 rounded-xl text-white font-semibold text-[15px] px-7 py-3.5 transition-all duration-200"
+              style={{
+                background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+                boxShadow: '0 0 0 1px rgba(124,58,237,0.4), 0 8px 28px -4px rgba(109,40,217,0.5)',
+              }}
             >
               Start for free
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/8 text-white font-semibold text-[15px] px-7 py-3.5 transition-all duration-200"
+              className="inline-flex items-center gap-2 rounded-xl text-white font-semibold text-[15px] px-7 py-3.5 transition-all duration-200 ghost-border"
+              style={{ background: 'rgba(255,255,255,0.04)', backdropFilter: 'blur(8px)' }}
             >
               View live demo
               <ChevronRight className="h-4 w-4 text-white/50" />
@@ -173,9 +166,8 @@ export default function HomePage() {
             <div className="absolute inset-x-1/4 top-4 bottom-0 blur-3xl bg-violet-600/20 rounded-3xl" />
 
             <div
-              className="relative rounded-2xl border border-white/[0.07] overflow-hidden"
+              className="relative rounded-2xl border border-white/[0.07] overflow-hidden glass-panel"
               style={{
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 100%)',
                 boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.07), 0 4px 40px -8px rgba(0,0,0,0.5)',
               }}
             >
@@ -313,8 +305,8 @@ export default function HomePage() {
 
             {/* Section header */}
             <div className="text-center mb-14">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-violet-400 mb-3">Features</p>
-              <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.03em]">
+              <p className="label-caps text-violet-400 mb-3">Features</p>
+              <h2 className="font-editorial text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.04em]">
                 Everything you need to convert
               </h2>
               <p className="mt-3 text-[16px] text-[#666] max-w-lg mx-auto">
@@ -327,48 +319,42 @@ export default function HomePage() {
               {[
                 {
                   icon: Zap,
-                  iconColor: 'text-violet-400',
-                  iconBg: 'bg-violet-500/10',
+                  accentColor: '#7c3aed',
                   title: 'Launch in minutes',
                   desc: 'Drag-and-drop wheel builder. Customize colors, segments, prizes, and branding without writing a single line of code.',
                   span: '',
                 },
                 {
                   icon: Users,
-                  iconColor: 'text-blue-400',
-                  iconBg: 'bg-blue-500/10',
+                  accentColor: '#3b82f6',
                   title: 'Lead capture built-in',
                   desc: 'Collect name, email, and phone before every spin. GDPR-compliant with configurable consent flows.',
                   span: '',
                 },
                 {
                   icon: BarChart2,
-                  iconColor: 'text-emerald-400',
-                  iconBg: 'bg-emerald-500/10',
+                  accentColor: '#10b981',
                   title: 'Real-time analytics',
                   desc: 'Track spins, win rates, lead conversion, and per-segment performance. Export CSV any time.',
                   span: '',
                 },
                 {
                   icon: Globe,
-                  iconColor: 'text-amber-400',
-                  iconBg: 'bg-amber-500/10',
+                  accentColor: '#f59e0b',
                   title: 'Embeddable anywhere',
                   desc: 'Drop a single <script> tag into any website, Shopify store, or landing page.',
                   span: 'md:col-span-2 lg:col-span-1',
                 },
                 {
                   icon: Shield,
-                  iconColor: 'text-rose-400',
-                  iconBg: 'bg-rose-500/10',
+                  accentColor: '#f43f5e',
                   title: 'A/B testing',
                   desc: 'Split traffic between two wheel variants and let the data pick the winner.',
                   span: '',
                 },
                 {
                   icon: Bell,
-                  iconColor: 'text-cyan-400',
-                  iconBg: 'bg-cyan-500/10',
+                  accentColor: '#06b6d4',
                   title: 'Push notifications',
                   desc: 'Re-engage subscribers with targeted web push campaigns, directly from the dashboard.',
                   span: '',
@@ -378,19 +364,31 @@ export default function HomePage() {
                 return (
                   <div
                     key={f.title}
-                    className={`group relative rounded-2xl border border-white/[0.06] p-6 overflow-hidden transition-all duration-300 hover:border-white/[0.12] ${f.span}`}
+                    className={`group relative rounded-2xl ghost-border p-6 overflow-hidden transition-all duration-300 ${f.span}`}
                     style={{
-                      background: 'linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+                      background: 'rgba(31,31,40,0.6)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
                       boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.05)',
                     }}
+                    onMouseEnter={e => {
+                      e.currentTarget.style.background = 'rgba(41,41,50,0.75)';
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                    }}
+                    onMouseLeave={e => {
+                      e.currentTarget.style.background = 'rgba(31,31,40,0.6)';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                    }}
                   >
-                    {/* Hover glow */}
-                    <div className="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                      style={{ background: 'radial-gradient(circle at 50% 0%, rgba(139,92,246,0.06) 0%, transparent 60%)' }} />
-                    <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${f.iconBg} mb-4`}>
-                      <Icon className={`h-4 w-4 ${f.iconColor}`} />
+                    {/* Hover accent glow at top */}
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-px opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ background: `linear-gradient(90deg, transparent, ${f.accentColor}60, transparent)` }} />
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl mb-4"
+                      style={{ background: `${f.accentColor}18`, color: f.accentColor }}
+                    >
+                      <Icon className="h-4 w-4" />
                     </div>
-                    <h3 className="text-[15px] font-semibold tracking-[-0.015em] mb-2">{f.title}</h3>
+                    <h3 className="font-editorial text-[15px] font-semibold tracking-[-0.02em] mb-2">{f.title}</h3>
                     <p className="text-[13px] text-[#666] leading-relaxed">{f.desc}</p>
                   </div>
                 );
@@ -403,8 +401,8 @@ export default function HomePage() {
         <section id="how-it-works" className="py-24 px-6 border-t border-white/[0.05]">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-violet-400 mb-3">How it works</p>
-              <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.03em]">
+              <p className="label-caps text-violet-400 mb-3">How it works</p>
+              <h2 className="font-editorial text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.04em]">
                 From zero to live in 3 steps
               </h2>
             </div>
@@ -466,8 +464,8 @@ export default function HomePage() {
         <section id="integrations" className="py-24 px-6 border-t border-white/[0.05]">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-violet-400 mb-3">Integrations</p>
-              <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.03em]">
+              <p className="label-caps text-violet-400 mb-3">Integrations</p>
+              <h2 className="font-editorial text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.04em]">
                 Works with your stack
               </h2>
               <p className="mt-3 text-[16px] text-[#666] max-w-md mx-auto">
@@ -508,8 +506,8 @@ export default function HomePage() {
         <section id="pricing" className="py-24 px-6 border-t border-white/[0.05]">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-14">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-violet-400 mb-3">Pricing</p>
-              <h2 className="text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.03em]">
+              <p className="label-caps text-violet-400 mb-3">Pricing</p>
+              <h2 className="font-editorial text-[clamp(2rem,4vw,3rem)] font-bold tracking-[-0.04em]">
                 Start free, scale as you grow
               </h2>
               <p className="mt-3 text-[16px] text-[#666] max-w-md mx-auto">
@@ -549,32 +547,37 @@ export default function HomePage() {
               ].map((plan) => (
                 <div
                   key={plan.name}
-                  className={`relative rounded-2xl p-6 flex flex-col ${
-                    plan.highlight
-                      ? ''
-                      : 'border border-white/[0.06]'
-                  }`}
+                  className="relative rounded-2xl p-6 flex flex-col"
                   style={plan.highlight ? {
-                    background: 'linear-gradient(145deg, rgba(139,92,246,0.12) 0%, rgba(109,40,217,0.06) 100%)',
-                    border: '1px solid rgba(139,92,246,0.3)',
-                    boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.08), 0 0 40px -8px rgba(109,40,217,0.3)',
+                    background: 'rgba(31,31,40,0.85)',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    border: '1px solid rgba(124,58,237,0.35)',
+                    boxShadow: 'inset 0 1px 0 0 rgba(167,139,250,0.15), 0 0 40px -8px rgba(124,58,237,0.35)',
                   } : {
-                    background: 'linear-gradient(145deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0.01) 100%)',
+                    background: 'rgba(27,27,35,0.6)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(74,68,85,0.2)',
                     boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.04)',
                   }}
                 >
                   {plan.highlight && (
-                    <div className="absolute -top-px inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-violet-400/60 to-transparent rounded-t-2xl" />
+                    <div className="absolute -top-px inset-x-0 h-[1px] rounded-t-2xl"
+                      style={{ background: 'linear-gradient(90deg, transparent, rgba(167,139,250,0.7), transparent)' }}
+                    />
                   )}
                   {plan.highlight && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full border border-violet-500/30 bg-violet-600 px-3 py-0.5 text-[11px] font-bold text-white">
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center rounded-full px-3 py-0.5 text-[11px] font-bold text-white"
+                      style={{ background: 'linear-gradient(135deg, #7c3aed, #a78bfa)', boxShadow: '0 0 12px rgba(124,58,237,0.5)' }}
+                    >
                       Most popular
                     </span>
                   )}
                   <div className="mb-5">
-                    <p className="text-[13px] font-semibold text-[#888] mb-2">{plan.name}</p>
+                    <p className="label-caps text-[#888] mb-2">{plan.name}</p>
                     <div className="flex items-baseline gap-1 mb-1">
-                      <span className="text-[42px] font-bold tracking-[-0.04em] leading-none">{plan.price}</span>
+                      <span className="font-editorial text-[42px] font-bold tracking-[-0.04em] leading-none">{plan.price}</span>
                       <span className="text-[14px] text-[#666]">{plan.period}</span>
                     </div>
                     <p className="text-[13px] text-[#555]">{plan.desc}</p>
@@ -591,11 +594,14 @@ export default function HomePage() {
 
                   <Link
                     href="/register"
-                    className={`inline-flex items-center justify-center gap-1.5 rounded-xl text-[14px] font-semibold py-2.5 px-5 transition-all duration-200 ${
-                      plan.highlight
-                        ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-[0_4px_16px_-4px_rgba(109,40,217,0.5)]'
-                        : 'bg-white/5 hover:bg-white/10 text-white border border-white/[0.08]'
-                    }`}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-xl text-[14px] font-semibold py-2.5 px-5 transition-all duration-200 text-white"
+                    style={plan.highlight ? {
+                      background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+                      boxShadow: '0 0 20px rgba(124,58,237,0.4)',
+                    } : {
+                      background: 'rgba(255,255,255,0.05)',
+                      border: '1px solid rgba(74,68,85,0.25)',
+                    }}
                   >
                     {plan.cta} <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
@@ -611,11 +617,11 @@ export default function HomePage() {
             {/* Glow */}
             <div className="pointer-events-none absolute inset-x-0 -top-20 h-80 blur-3xl bg-violet-600/10 rounded-full" />
             <div className="relative">
-              <p className="text-[12px] font-semibold uppercase tracking-[0.1em] text-violet-400 mb-4">Get started today</p>
-              <h2 className="text-[clamp(2.2rem,5vw,3.5rem)] font-bold tracking-[-0.04em] mb-5">
+              <p className="label-caps text-violet-400 mb-4">Get started today</p>
+              <h2 className="font-editorial text-[clamp(2.2rem,5vw,3.5rem)] font-bold tracking-[-0.04em] mb-5">
                 Your first wheel is free.
                 <br />
-                <span className="text-[#555]">Forever.</span>
+                <span className="gradient-text-editorial">Forever.</span>
               </h2>
               <p className="text-[16px] text-[#666] mb-10 max-w-md mx-auto">
                 Join thousands of marketers using SpinPlatform to turn visitors into leads and customers.
@@ -623,7 +629,11 @@ export default function HomePage() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold text-[15px] px-8 py-3.5 transition-all duration-200 shadow-[0_0_0_1px_rgba(139,92,246,0.4),0_8px_28px_-4px_rgba(109,40,217,0.5)]"
+                  className="inline-flex items-center gap-2 rounded-xl text-white font-semibold text-[15px] px-8 py-3.5 transition-all duration-200"
+                  style={{
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%)',
+                    boxShadow: '0 0 0 1px rgba(124,58,237,0.4), 0 8px 32px -4px rgba(109,40,217,0.55)',
+                  }}
                 >
                   Create your free account
                   <ArrowRight className="h-4 w-4" />
@@ -697,7 +707,7 @@ export default function HomePage() {
               },
             ].map((col) => (
               <div key={col.heading}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#444] mb-3">{col.heading}</p>
+                <p className="label-caps text-[#444] mb-3">{col.heading}</p>
                 <ul className="space-y-2.5">
                   {col.links.map((l) => (
                     <li key={l.label}>

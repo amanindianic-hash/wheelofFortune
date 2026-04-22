@@ -73,75 +73,120 @@ export default function WheelsPage() {
   }
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
+    <div className="relative min-h-full">
+      {/* Ambient background light leak */}
+      <div 
+        className="pointer-events-none absolute inset-x-0 top-0 h-[400px] z-0"
+        style={{ background: 'radial-gradient(ellipse 70% 50% at 50% -10%, rgba(124,58,237,0.08) 0%, transparent 70%)' }}
+      />
 
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight">Wheels</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Manage your spin-to-win campaigns</p>
-        </div>
-        <Button
-          size="sm"
-          className="bg-violet-600 hover:bg-violet-700 gap-1.5 h-8"
-          onClick={() => setShowCreate(true)}
-        >
-          <Plus className="h-3.5 w-3.5" /> New Wheel
-        </Button>
-      </div>
+      <div className="relative z-10 p-6 md:p-8 max-w-5xl mx-auto space-y-8">
 
-      {/* Content */}
-      {loading ? (
-        <div className="space-y-2">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-[68px] rounded-xl bg-muted/60 animate-pulse" />
-          ))}
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <h1 className="text-[32px] md:text-[40px] font-bold tracking-[-0.04em] leading-tight text-foreground"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
+              Campaigns
+            </h1>
+            <p className="text-[14px] text-muted-foreground/60 font-medium mt-1">
+              Design and manage your interactive spin-to-win experiences
+            </p>
+          </div>
+          <Button
+            size="sm"
+            className="gap-2 h-10 px-5 text-[13px] font-bold tracking-tight text-white border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+            style={{ 
+              background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+              boxShadow: '0 0 25px rgba(124,58,237,0.3), inset 0 1px 0 0 rgba(255,255,255,0.2)' 
+            }}
+            onClick={() => setShowCreate(true)}
+          >
+            <Plus className="h-4 w-4" /> New Campaign
+          </Button>
         </div>
-      ) : wheels.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted mb-4">
-              <Disc3 className="h-6 w-6 text-muted-foreground" />
+
+        {/* Content */}
+        {loading ? (
+          <div className="grid gap-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-[80px] rounded-2xl glass-panel animate-pulse bg-white/[0.02]" />
+            ))}
+          </div>
+        ) : wheels.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-24 px-6 glass-panel rounded-[32px] text-center">
+            <div className="relative mb-6">
+              <div className="absolute inset-0 blur-2xl bg-primary/20 rounded-full" />
+              <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-white/[0.03] ring-1 ring-white/10 shadow-xl">
+                <Disc3 className="h-8 w-8 text-primary animate-[spin_10s_linear_infinite]" />
+              </div>
             </div>
-            <p className="text-sm font-medium mb-1">No wheels yet</p>
-            <p className="text-xs text-muted-foreground mb-5 max-w-xs">
-              Create your first campaign to start collecting leads and giving away prizes
+            <h3 className="text-xl font-bold tracking-tight text-foreground mb-2">No campaigns found</h3>
+            <p className="text-[14px] text-muted-foreground/60 mb-8 max-w-sm leading-relaxed">
+              Start your growth engine by creating your first interactive wheel or sweepstakes.
             </p>
             <Button
-              size="sm"
-              className="bg-violet-600 hover:bg-violet-700 gap-1.5"
+              size="lg"
+              className="gap-2 h-11 px-8 rounded-xl font-bold text-white bg-primary hover:bg-primary/90 transition-all duration-300 shadow-[0_0_20px_rgba(124,58,237,0.4)]"
               onClick={() => setShowCreate(true)}
             >
-              <Plus className="h-3.5 w-3.5" /> Create your first wheel
+              <Plus className="h-4 w-4" /> Create your first wheel
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <div className="divide-y">
+          </div>
+        ) : (
+          <div className="grid gap-3">
             {wheels.map((wheel) => {
               const s = STATUS_MAP[wheel.status] ?? STATUS_MAP.draft;
               return (
-                <div key={wheel.id} className="flex items-center justify-between px-5 py-4 hover:bg-muted/30 transition-colors group">
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted shrink-0">
-                      <Disc3 className="h-4 w-4 text-muted-foreground" />
+                <div key={wheel.id} 
+                  className="group relative flex items-center justify-between pl-6 pr-5 py-5 glass-panel rounded-2xl hover:bg-white/[0.03] transition-all duration-300"
+                >
+                  <div className="flex items-center gap-5 min-w-0">
+                    {/* Visual Marker */}
+                    <div className="relative shrink-0">
+                      <div className="absolute inset-0 blur-lg bg-primary/10 rounded-full group-hover:bg-primary/20 transition-colors" />
+                      <div className="relative flex h-11 w-11 items-center justify-center rounded-[14px] bg-white/[0.03] ring-1 ring-white/10 shadow-lg group-hover:scale-110 transition-transform duration-500">
+                        <Disc3 className={`h-5 w-5 text-muted-foreground/60 transition-colors group-hover:text-primary ${wheel.status === 'active' ? 'animate-[spin_8s_linear_infinite]' : ''}`} />
+                      </div>
                     </div>
+
                     <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">{wheel.name}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
-                          <span className="text-xs text-muted-foreground">{s.label}</span>
+                      <p className="text-[15px] font-bold text-foreground leading-[1.2] truncate tracking-tight mb-1">
+                        {wheel.name}
+                      </p>
+                      <div className="flex items-center gap-3">
+                        {/* Status Pill */}
+                        <div className={`px-2 py-0.5 rounded-full ring-1 items-center gap-1.5 flex transition-all duration-300 ${
+                          wheel.status === 'active' ? 'bg-emerald-500/10 ring-emerald-500/20 text-emerald-400'
+                          : wheel.status === 'paused' ? 'bg-amber-500/10 ring-amber-500/20 text-amber-400'
+                          : 'bg-slate-500/10 ring-slate-500/20 text-slate-400'
+                        }`}>
+                          <span className={`h-1 w-1 rounded-full ${
+                            wheel.status === 'active' ? 'bg-emerald-400 animate-pulse'
+                            : wheel.status === 'paused' ? 'bg-amber-400'
+                            : 'bg-slate-400'
+                          }`} />
+                          <span className="text-[10px] font-bold uppercase tracking-[0.05em]">{s.label}</span>
                         </div>
-                        <span className="text-muted-foreground/30 text-xs">·</span>
-                        <span className="text-xs text-muted-foreground tabular-nums">
-                          {wheel.total_spins.toLocaleString()} spins
-                        </span>
-                        <span className="text-muted-foreground/30 text-xs hidden sm:inline">·</span>
-                        <span className="text-xs text-muted-foreground font-mono hidden sm:inline truncate max-w-[100px]">
-                          {wheel.embed_token.slice(0, 10)}…
-                        </span>
+
+                        <span className="text-muted-foreground/20 text-[10px] tabular-nums font-bold">·</span>
+                        
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-[11px] font-bold text-muted-foreground/50 tabular-nums">
+                            {wheel.total_spins.toLocaleString()}
+                          </span>
+                          <span className="text-[10px] font-bold text-muted-foreground/30 uppercase tracking-widest">Spins</span>
+                        </div>
+
+                        <span className="text-muted-foreground/20 text-[10px] tabular-nums font-bold hidden sm:inline">·</span>
+                        
+                        <div className="hidden sm:flex items-center gap-1.5">
+                          <span className="text-[10px] font-mono font-bold text-muted-foreground/30 uppercase tracking-widest">Token:</span>
+                          <span className="text-[10px] font-mono font-medium text-muted-foreground/40">
+                            {wheel.embed_token.slice(0, 8)}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -150,37 +195,41 @@ export default function WheelsPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="h-7 text-xs hidden sm:flex"
+                      className="h-8 pr-4 pl-3.5 text-[11px] font-bold tracking-tight rounded-lg glass-panel hover:bg-white/[0.04] border-0 ring-1 ring-white/10 hidden sm:flex"
                       nativeButton={false}
                       render={<Link href={`/dashboard/wheels/${wheel.id}`} />}
                     >
-                      <Pencil className="h-3 w-3 mr-1" /> Edit
+                      <Pencil className="h-3 w-3 mr-2 text-primary" /> Edit
                     </Button>
+                    
                     <DropdownMenu>
                       <DropdownMenuTrigger
-                        render={<Button variant="ghost" size="sm" className="h-7 w-7 p-0" />}
-                      >
-                        <MoreHorizontal className="h-4 w-4" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-44">
-                        <DropdownMenuItem render={<Link href={`/dashboard/wheels/${wheel.id}`} />}>
-                          <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
+                        render={
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-lg hover:bg-white/[0.05] transition-colors">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground/40" />
+                          </Button>
+                        }
+                      />
+                      <DropdownMenuContent align="end" className="w-52 glass-panel p-1.5">
+                        <DropdownMenuItem render={<Link href={`/dashboard/wheels/${wheel.id}`} />} className="rounded-lg py-2">
+                          <Pencil className="mr-2 h-3.5 w-3.5 opacity-60" /> Edit Campaign
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          className="rounded-lg py-2"
                           onClick={() => toggleStatus(wheel.id, wheel.status)}
                           disabled={wheel.status === 'archived'}
                         >
                           {wheel.status === 'active'
-                            ? <><Pause className="mr-2 h-3.5 w-3.5" /> Pause</>
-                            : <><Play  className="mr-2 h-3.5 w-3.5" /> Activate</>
+                            ? <><Pause className="mr-2 h-3.5 w-3.5 opacity-60" /> Pause Automation</>
+                            : <><Play  className="mr-2 h-3.5 w-3.5 opacity-60" /> Activate Campaign</>
                           }
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
+                        <DropdownMenuSeparator className="opacity-10" />
                         <DropdownMenuItem
                           onClick={() => handleDelete(wheel.id, wheel.name)}
-                          className="text-red-500 focus:text-red-500"
+                          className="rounded-lg py-2 text-rose-500 focus:text-rose-500 focus:bg-rose-500/10"
                         >
-                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete
+                          <Trash2 className="mr-2 h-3.5 w-3.5" /> Delete Forever
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -189,42 +238,62 @@ export default function WheelsPage() {
               );
             })}
           </div>
-        </Card>
-      )}
+        )}
 
-      {/* Create dialog */}
-      <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-base">Create new wheel</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-3 py-1">
-            <div className="space-y-1.5">
-              <Label htmlFor="wheel-name" className="text-xs font-medium">Wheel name</Label>
-              <Input
-                id="wheel-name"
-                placeholder="e.g. Summer Sale Campaign"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-                autoFocus
-              />
+        {/* Create dialog */}
+        <Dialog open={showCreate} onOpenChange={setShowCreate}>
+          <DialogContent className="sm:max-w-md glass-panel border-0 shadow-2xl p-0 overflow-hidden rounded-[24px]">
+            <div className="p-6 md:p-8 space-y-6">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-bold tracking-tight" style={{ fontFamily: 'var(--font-heading)' }}>
+                  Create New Campaign
+                </DialogTitle>
+                <p className="text-[13px] text-muted-foreground/60 leading-relaxed mt-1">
+                  Give your campaign a title. This is for internal reference only.
+                </p>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="wheel-name" className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/50 ml-1">
+                    Internal Title
+                  </Label>
+                  <Input
+                    id="wheel-name"
+                    placeholder="e.g. Q4 Growth Wheel"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+                    autoFocus
+                    className="h-11 bg-white/[0.02] border-white/[0.08] focus:border-primary/50 focus:ring-primary/20 rounded-xl"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 h-11 rounded-cl font-bold text-[13px] border-white/10 hover:bg-white/[0.05]" 
+                  onClick={() => setShowCreate(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 h-11 rounded-xl font-bold text-[13px] text-white shadow-lg transition-transform active:scale-[0.98]"
+                  style={{ 
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)',
+                    boxShadow: '0 0 20px rgba(124,58,237,0.3)' 
+                  }}
+                  onClick={handleCreate}
+                  disabled={creating || !newName.trim()}
+                >
+                  {creating ? 'Creating…' : 'Initialize Campaign'}
+                </Button>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">Internal label — not visible to end users.</p>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button variant="outline" size="sm" onClick={() => setShowCreate(false)}>Cancel</Button>
-            <Button
-              size="sm"
-              className="bg-violet-600 hover:bg-violet-700"
-              onClick={handleCreate}
-              disabled={creating || !newName.trim()}
-            >
-              {creating ? 'Creating…' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }

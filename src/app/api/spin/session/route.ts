@@ -118,8 +118,13 @@ export async function POST(req: NextRequest) {
     const fingerprint = createHash('sha256').update(fpInput).digest('hex');
 
     // Ensure device columns exist (idempotent)
-    await sql`ALTER TABLE spin_sessions ADD COLUMN IF NOT EXISTS device_type VARCHAR(20)`;
-    await sql`ALTER TABLE spin_sessions ADD COLUMN IF NOT EXISTS os VARCHAR(30)`;
+    // Background these migrations to avoid blocking the critical path
+    (async () => {
+      try {
+        await sql`ALTER TABLE spin_sessions ADD COLUMN IF NOT EXISTS device_type VARCHAR(20)`;
+        await sql`ALTER TABLE spin_sessions ADD COLUMN IF NOT EXISTS os VARCHAR(30)`;
+      } catch (e) { /* ignore */ }
+    })();
 
     const sessionResults = await sql`
       INSERT INTO spin_sessions (wheel_id, fingerprint, ip_address, user_agent, page_url, referrer_url, variant_id, ab_test_id, device_type, os)
@@ -129,20 +134,23 @@ export async function POST(req: NextRequest) {
     const session = (sessionResults as any)[0];
 
     // ── Auto-migrate: ensure all positioning columns exist (idempotent) ─────────
-    // Safe to run on every request — IF NOT EXISTS makes it a no-op when columns
-    // already exist. This guarantees the schema is always in sync with the code.
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_radial_offset     FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_tangential_offset  FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_rotation_angle     FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_font_scale         FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_x           FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_y           FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_radial_offset       FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_tangential_offset   FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_rotation_angle      FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_x            FLOAT`;
-    await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_y            FLOAT`;
-    console.log('[SpinSession] DB column migration check complete.');
+    // Backgrounding positioning column checks
+    (async () => {
+      try {
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_radial_offset     FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_tangential_offset  FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_rotation_angle     FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_font_scale         FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_x           FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_y           FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_radial_offset       FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_tangential_offset   FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_rotation_angle      FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_x            FLOAT`;
+        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_y            FLOAT`;
+      } catch (e) { /* ignore */ }
+    })();
+
 
     // Fetch segments for the widget (use variant wheel if assigned)
     // Get all segments but filter to active_segment_count

@@ -80,22 +80,27 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
 
       {/* ── Brand ─────────────────────────────────────────── */}
       <div
-        className="flex items-center gap-3 px-4 h-[58px] shrink-0"
-        style={{ borderBottom: '1px solid oklch(1 0 0 / 5%)' }}
+        className="flex items-center gap-3 px-5 h-[64px] shrink-0"
+        style={{ borderBottom: '1px solid oklch(var(--border) / 0.1)' }}
       >
         {/* Logo mark */}
-        <div className="relative flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-violet-700">
-          <Zap className="h-3.5 w-3.5 text-white fill-white" />
-          {/* Ambient glow */}
-          <div className="absolute inset-0 rounded-lg ring-1 ring-violet-400/25" />
-          <div className="absolute -inset-1 rounded-xl bg-violet-500/12 blur-md -z-10" />
+        <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-xl"
+          style={{ 
+            background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)', 
+            boxShadow: '0 0 20px rgba(124,58,237,0.35), inset 0 1px 0 0 rgba(255,255,255,0.2)' 
+          }}
+        >
+          <Zap className="h-4 w-4 text-white fill-white" />
+          <div className="absolute inset-0 rounded-xl ring-1 ring-white/10" />
         </div>
         <div className="min-w-0">
-          <p className="text-[13px] font-semibold text-sidebar-foreground/95 leading-none tracking-[-0.01em]">
+          <p className="text-[14px] font-bold text-foreground leading-none tracking-[-0.03em]"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
             SpinPlatform
           </p>
           {client && (
-            <p className="text-[11px] text-sidebar-foreground/35 truncate mt-[3px] max-w-[130px]">
+            <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider truncate mt-1 max-w-[130px]">
               {client.name}
             </p>
           )}
@@ -105,43 +110,42 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
       {/* ── Usage Meter ──────────────────────────────────── */}
       {client && (
         <div
-          className="px-4 pt-3 pb-3.5 shrink-0"
-          style={{ borderBottom: '1px solid oklch(1 0 0 / 5%)' }}
+          className="px-5 pt-4 pb-4 shrink-0"
+          style={{ borderBottom: '1px solid oklch(var(--border) / 0.08)' }}
         >
-          <div className="flex items-center justify-between mb-2">
-            <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider capitalize ${planBadge}`}>
+          <div className="flex items-center justify-between mb-2.5">
+            <span className={`inline-flex items-center rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest ${planBadge}`}>
               {client.plan}
             </span>
-            <span className="text-[11px] text-sidebar-foreground/35 tabular-nums font-medium tracking-tight">
-              {client.spins_used_this_month.toLocaleString()}&thinsp;<span className="text-sidebar-foreground/20">/</span>&thinsp;{client.plan_spin_limit.toLocaleString()}
+            <span className="text-[11px] text-muted-foreground/50 tabular-nums font-semibold tracking-tight">
+              {client.spins_used_this_month.toLocaleString()}&thinsp;<span className="text-muted-foreground/20">/</span>&thinsp;{client.plan_spin_limit.toLocaleString()}
             </span>
           </div>
           {/* Track */}
           <div
-            className="h-[3px] w-full rounded-full overflow-hidden"
-            style={{ background: 'oklch(1 0 0 / 5%)' }}
+            className="h-1.5 w-full rounded-full overflow-hidden bg-muted/30"
           >
             <div
-              className={`h-full rounded-full transition-all duration-700 ease-out ${
-                usedPct >= 90 ? 'bg-gradient-to-r from-rose-500 to-pink-400'
-                : usedPct >= 70 ? 'bg-gradient-to-r from-amber-500 to-yellow-400'
-                : `${planBarColor}`
+              className={`h-full rounded-full transition-all duration-1000 ease-out ${
+                usedPct >= 90 ? 'bg-rose-500'
+                : usedPct >= 70 ? 'bg-amber-500'
+                : 'bg-primary'
               }`}
-              style={{ width: `${usedPct}%` }}
+              style={{ width: `${usedPct}%`, boxShadow: '0 0 8px var(--primary)' }}
             />
           </div>
         </div>
       )}
 
       {/* ── Navigation ──────────────────────────────────── */}
-      <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-4">
+      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
         {NAV_GROUPS.map((group) => (
           <div key={group.label}>
-            {/* Group label */}
-            <p className="px-3 mb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-sidebar-foreground/25">
+            {/* Group label — Clean technical label style */}
+            <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground/40">
               {group.label}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {group.items.map((item) => {
                 const Icon = item.icon;
                 const active = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
@@ -150,21 +154,21 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
                     key={item.href}
                     href={item.href}
                     onClick={onNav}
-                    className={`group relative flex items-center gap-2.5 rounded-lg px-3 py-[7px] text-[13px] font-medium transition-all duration-150 ${
+                    className={`group relative flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-all duration-200 ${
                       active
-                        ? 'bg-white/[0.08] text-sidebar-foreground/95'
-                        : 'text-sidebar-foreground/45 hover:bg-white/[0.04] hover:text-sidebar-foreground/75'
+                        ? 'text-foreground bg-white/[0.03] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]'
+                        : 'text-muted-foreground/60 hover:text-foreground hover:bg-white/[0.05]'
                     }`}
                   >
-                    {/* Active indicator bar */}
+                    {/* Active indicator — vertical pill */}
                     {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-0.5 rounded-r-full bg-violet-400" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-1 rounded-r-full bg-primary shadow-[0_0_12px_rgba(124,58,237,0.5)]" />
                     )}
                     <Icon
-                      className={`h-[14px] w-[14px] shrink-0 transition-colors duration-150 ${
+                      className={`h-[16px] w-[16px] shrink-0 transition-transform duration-200 ${
                         active
-                          ? 'text-violet-400'
-                          : 'text-sidebar-foreground/28 group-hover:text-sidebar-foreground/60'
+                          ? 'text-primary scale-110'
+                          : 'opacity-40 group-hover:opacity-100'
                       }`}
                     />
                     {item.label}
@@ -178,44 +182,44 @@ function SidebarContent({ onNav }: { onNav?: () => void }) {
 
       {/* ── User Section ────────────────────────────────── */}
       <div
-        className="shrink-0 p-2"
-        style={{ borderTop: '1px solid oklch(1 0 0 / 5%)' }}
+        className="shrink-0 p-3"
+        style={{ borderTop: '1px solid oklch(var(--border) / 0.1)' }}
       >
         <DropdownMenu>
-          <DropdownMenuTrigger className="w-full flex items-center gap-2.5 rounded-lg px-2.5 py-2 hover:bg-white/[0.05] transition-all duration-150 group outline-none">
+          <DropdownMenuTrigger className="w-full flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-white/[0.05] transition-all duration-200 group outline-none ring-offset-background focus:ring-2 ring-primary/20">
             {/* Avatar */}
-            <Avatar className="h-7 w-7 shrink-0">
-              <AvatarFallback className="text-[10px] font-bold text-white" style={{ background: 'linear-gradient(135deg, oklch(0.55 0.22 264) 0%, oklch(0.40 0.20 280) 100%)' }}>
+            <Avatar className="h-8 w-8 shrink-0 ring-1 ring-white/10 shadow-lg">
+              <AvatarFallback className="text-[11px] font-bold text-white bg-primary">
                 {initials}
               </AvatarFallback>
             </Avatar>
             {/* Name / Email */}
             <div className="text-left min-w-0 flex-1">
-              <p className="text-[12px] font-semibold text-sidebar-foreground/90 truncate leading-tight tracking-[-0.005em]">
+              <p className="text-[13px] font-bold text-foreground/90 truncate leading-none">
                 {user?.full_name}
               </p>
-              <p className="text-[10.5px] text-sidebar-foreground/30 truncate mt-px">
+              <p className="text-[10px] font-medium text-muted-foreground/40 truncate mt-1">
                 {user?.email}
               </p>
             </div>
-            <ChevronsUpDown className="h-3.5 w-3.5 text-sidebar-foreground/20 shrink-0 group-hover:text-sidebar-foreground/45 transition-colors" />
+            <ChevronsUpDown className="h-4 w-4 text-muted-foreground/30 shrink-0 group-hover:text-muted-foreground/60 transition-colors" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="top" align="start" className="w-56 mb-1">
-            <DropdownMenuLabel className="text-xs font-normal text-muted-foreground py-1.5">
+          <DropdownMenuContent side="top" align="start" className="w-60 mb-2 glass-panel p-1">
+            <DropdownMenuLabel className="px-2 py-2 text-xs font-medium text-muted-foreground tabular-nums">
               {user?.email}
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="opacity-20" />
             <DropdownMenuGroup>
-              <DropdownMenuItem render={<Link href="/dashboard/account" />}>
-                <Settings className="mr-2 h-3.5 w-3.5" />
-                Account settings
+              <DropdownMenuItem render={<Link href="/dashboard/account" />} className="rounded-lg">
+                <Settings className="mr-2 h-4 w-4 opacity-70" />
+                Account Settings
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
+            <DropdownMenuSeparator className="opacity-20" />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
-                <LogOut className="mr-2 h-3.5 w-3.5" />
-                Sign out
+              <DropdownMenuItem onClick={handleLogout} className="rounded-lg text-rose-500 focus:text-rose-500 focus:bg-rose-500/10">
+                <LogOut className="mr-2 h-4 w-4" />
+                Sign Out
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

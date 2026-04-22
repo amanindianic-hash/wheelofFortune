@@ -89,7 +89,7 @@ function LoginForm() {
           <p className="text-sm text-muted-foreground mt-1">Sign in to your Wheel of Fortune dashboard</p>
         </div>
 
-        <Card className="overflow-hidden">
+        <Card className="overflow-hidden glass-panel">
           <CardContent className="p-6 space-y-4">
             {/* OAuth error banner */}
             {oauthError && (
