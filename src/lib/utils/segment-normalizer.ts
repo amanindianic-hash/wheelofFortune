@@ -112,5 +112,4 @@ export function assertSegments(segments: NormalizedSegment[], caller: string): v
     if (!s.bg_color)                       console.warn(`[${caller}]  seg[${i}] bg_color missing`);
     if (!s.background?.color)             console.warn(`[${caller}]  seg[${i}] background.color missing`);
   });
-  console.log(`[${caller}] ✅ assertSegments PASSED — ${segments.length} segments valid`);
 }

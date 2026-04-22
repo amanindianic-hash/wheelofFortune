@@ -180,11 +180,6 @@ export function normalizeTheme(theme: any, wheelSegments: any[] = []) {
     }
   };
 
-  console.log("FINAL RENDER CONFIG", {
-    segmentCount: finalResult.segments.length,
-    hasLogo: !!finalResult.branding?.logo,
-    rim: finalResult.styles?.rim || finalResult.branding?.outer_ring_width
-  });
 
   return finalResult;
 }
