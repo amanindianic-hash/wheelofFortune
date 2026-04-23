@@ -88,7 +88,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       const seg = segments[i];
       const bgColor = seg.background?.color || seg.bg_color;
       if (!isValidColor(bgColor)) {
-        return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid background color "${bgColor}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);
+        return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid bg_color "${bgColor}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);
       }
       if (!isValidColor(seg.text_color)) {
         return errorResponse('VALIDATION_ERROR', `Segment ${i + 1} has invalid text_color "${seg.text_color}". Use hex (#RGB, #RRGGBB, #RRGGBBAA) or "transparent".`, 400);

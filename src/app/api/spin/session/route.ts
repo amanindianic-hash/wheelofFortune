@@ -119,38 +119,13 @@ export async function POST(req: NextRequest) {
 
     // Ensure device columns exist (idempotent)
     // Background these migrations to avoid blocking the critical path
-    (async () => {
-      try {
-        await sql`ALTER TABLE spin_sessions ADD COLUMN IF NOT EXISTS device_type VARCHAR(20)`;
-        await sql`ALTER TABLE spin_sessions ADD COLUMN IF NOT EXISTS os VARCHAR(30)`;
-      } catch (e) { /* ignore */ }
-    })();
-
+    // Store session in DB
     const sessionResults = await sql`
       INSERT INTO spin_sessions (wheel_id, fingerprint, ip_address, user_agent, page_url, referrer_url, variant_id, ab_test_id, device_type, os)
       VALUES (${wheel.id}, ${fingerprint}, ${ip}::inet, ${userAgent}, ${page_url ?? null}, ${referrer_url ?? null}, ${assignedVariantId}, ${assignedAbTestId}, ${deviceType}, ${os})
       RETURNING id, wheel_id, status, expires_at, created_at
     `;
     const session = (sessionResults as any)[0];
-
-    // ── Auto-migrate: ensure all positioning columns exist (idempotent) ─────────
-    // Backgrounding positioning column checks
-    (async () => {
-      try {
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_radial_offset     FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_tangential_offset  FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_rotation_angle     FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_font_scale         FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_x           FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS label_offset_y           FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_radial_offset       FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_tangential_offset   FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_rotation_angle      FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_x            FLOAT`;
-        await sql`ALTER TABLE segments ADD COLUMN IF NOT EXISTS icon_offset_y            FLOAT`;
-      } catch (e) { /* ignore */ }
-    })();
-
 
     // Fetch segments for the widget (use variant wheel if assigned)
     // Get all segments but filter to active_segment_count

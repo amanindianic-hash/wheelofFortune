@@ -16,7 +16,7 @@ describe('Theme Application Utility', () => {
     const festivalTheme = WHEEL_TEMPLATES.find((t) => t.id === 'festival');
     expect(festivalTheme).toBeDefined();
 
-    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(festivalTheme!);
+    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(festivalTheme!, dummySegments);
 
     // Should merge the config
     expect(newConfig.confetti_enabled).toBe(true);
@@ -53,7 +53,7 @@ describe('Theme Application Utility', () => {
       ]
     };
 
-    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(customTheme);
+    const { newConfig, newBranding, newSegments } = applyTemplateToWheel(customTheme, dummySegments);
 
     expect(newConfig.animation_speed).toBe('slow');
     expect(newBranding.primary_color).toBe('#123456');

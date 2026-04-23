@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#ccc3d8",
+                        "on-background": "#e4e1ed",
+                        "on-tertiary-container": "#76ffc2",
+                        "on-primary": "#3f008e",
+                        "on-tertiary": "#003824",
+                        "inverse-surface": "#e4e1ed",
+                        "error": "#ffb4ab",
+                        "on-error": "#690005",
+                        "background": "#13131b",
+                        "inverse-on-surface": "#302f39",
+                        "outline": "#958da1",
+                        "tertiary": "#4edea3",
+                        "tertiary-fixed-dim": "#4edea3",
+                        "on-primary-fixed-variant": "#5a00c6",
+                        "surface-bright": "#393842",
+                        "on-secondary-fixed": "#21005e",
+                        "surface": "#13131b",
+                        "primary-fixed-dim": "#d2bbff",
+                        "surface-tint": "#d2bbff",
+                        "error-container": "#93000a",
+                        "primary-container": "#7c3aed",
+                        "surface-container-low": "#1b1b23",
+                        "surface-dim": "#13131b",
+                        "secondary": "#cebdff",
+                        "tertiary-container": "#007650",
+                        "on-primary-container": "#ede0ff",
+                        "on-tertiary-fixed": "#002113",
+                        "on-surface": "#e4e1ed",
+                        "secondary-container": "#4f319c",
+                        "surface-container-lowest": "#0d0d16",
+                        "surface-variant": "#34343d",
+                        "tertiary-fixed": "#6ffbbe",
+                        "on-secondary": "#381385",
+                        "secondary-fixed": "#e8ddff",
+                        "on-tertiary-fixed-variant": "#005236",
+                        "on-secondary-container": "#bea8ff",
+                        "surface-container-highest": "#34343d",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#eaddff",
+                        "on-secondary-fixed-variant": "#4f319c",
+                        "surface-container-high": "#292932",
+                        "secondary-fixed-dim": "#cebdff",
+                        "outline-variant": "#4a4455",
+                        "inverse-primary": "#732ee4",
+                        "on-primary-fixed": "#25005a",
+                        "primary": "#d2bbff",
+                        "surface-container": "#1f1f28"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .glass-panel {
+            background: rgba(41, 41, 50, 0.6);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+        }
+        .neon-glow-primary {
+            box-shadow: 0 0 15px #7c3aed;
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 50% 50%, rgba(124, 58, 237, 0.15) 0%, rgba(13, 13, 22, 0) 70%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#0d0d16]/60 backdrop-blur-xl border-b border-white/10 shadow-[0_8px_32px_0_rgba(12,12,22,0.8)]">
+<div class="flex justify-between items-center px-8 h-20 w-full max-w-[1440px] mx-auto">
+<div class="text-2xl font-black tracking-[-0.04em] text-[#d2bbff] drop-shadow-[0_0_10px_#7c3aed] font-headline uppercase">
+                SpinPlatform
+            </div>
+<div class="hidden md:flex items-center space-x-8">
+<a class="font-headline tracking-tighter uppercase font-bold text-[#d2bbff] border-b-2 border-[#7c3aed] pb-1 transition-colors" href="#">Platform</a>
+<a class="font-headline tracking-tighter uppercase font-bold text-[#e4e1ed]/70 hover:text-[#d2bbff] hover:bg-white/5 transition-colors" href="#">Features</a>
+<a class="font-headline tracking-tighter uppercase font-bold text-[#e4e1ed]/70 hover:text-[#d2bbff] hover:bg-white/5 transition-colors" href="#">Pricing</a>
+<a class="font-headline tracking-tighter uppercase font-bold text-[#e4e1ed]/70 hover:text-[#d2bbff] hover:bg-white/5 transition-colors" href="#">Community</a>
+</div>
+<div class="flex items-center space-x-6">
+<div class="hidden lg:flex items-center space-x-4 text-[#e4e1ed]/70">
+<span class="material-symbols-outlined cursor-pointer hover:text-[#d2bbff] transition-colors" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-[#d2bbff] transition-colors" data-icon="settings">settings</span>
+</div>
+<button class="bg-gradient-to-br from-primary-container to-primary text-on-primary font-headline font-bold uppercase tracking-widest px-6 py-2.5 rounded-lg scale-95 active:scale-90 transition-transform neon-glow-primary">
+                    Launch App
+                </button>
+</div>
+</div>
+</nav>
+<main class="pt-20">
+<!-- Hero Section -->
+<section class="relative min-h-[921px] flex items-center overflow-hidden px-8 hero-gradient">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7 z-10">
+<div class="inline-block px-3 py-1 rounded-full bg-primary-container/10 border border-primary/20 mb-6">
+<span class="text-primary font-label text-[10px] tracking-[0.2em] font-bold uppercase">Evolution of Conversion</span>
+</div>
+<h1 class="font-headline text-6xl md:text-8xl font-black tracking-[-0.04em] text-on-background mb-8 leading-[0.9]">
+                        GAMIFY YOUR <br/>
+<span class="text-transparent bg-clip-text bg-gradient-to-r from-primary via-tertiary to-primary">GROWTH ENGINE</span>
+</h1>
+<p class="body-lg text-on-surface-variant max-w-xl mb-10 text-lg leading-relaxed">
+                        Convert passive traffic into hyper-active leads with SpinPlatform. The world’s first high-fidelity behavioral gamification hub built for deep-space digital marketing.
+                    </p>
+<div class="flex flex-wrap gap-4">
+<button class="bg-gradient-to-br from-primary-container to-primary px-8 py-4 rounded-lg font-headline font-black uppercase tracking-widest text-on-primary text-sm shadow-[0_0_30px_rgba(124,58,237,0.4)] hover:shadow-[0_0_50px_rgba(124,58,237,0.6)] transition-all">
+                            Start Free Trial
+                        </button>
+<button class="glass-panel px-8 py-4 rounded-lg font-headline font-black uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all text-sm">
+                            Watch Demo
+                        </button>
+</div>
+</div>
+<div class="lg:col-span-5 relative">
+<div class="relative w-full aspect-square max-w-md mx-auto">
+<div class="absolute inset-0 bg-primary/20 blur-[120px] rounded-full"></div>
+<img alt="Neon Wheel Mockup" class="relative z-10 w-full h-full object-contain drop-shadow-[0_0_40px_rgba(124,58,237,0.5)]" data-alt="3D high-fidelity rendering of a futuristic neon fortune wheel glowing with violet and emerald light in a dark void" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAudwuGx-Xoy8VSWDSWr_m2-f5bn5F6ykOWP1uCWF0GZqvyN0RuYcqzAULFsUmMbqAZYLNZIjHR_M1BnG9NVCOkACa5fWMPsnASTzEoItI7AT2tOK-MNH0Nz-cRWnVUgl8InkDj6A5uwB8qWZ7V-k2WcFoZPYLNZrcAwXdh2ZDOf8SD5H5ggrCa1Oj_76PJCy_w5bir0yVkZZBPZlNKoDR2-nxH6Ni_carcu6ZC_v5IC5jAwQdjipWXKR6LmsqUMO2N_h_GFqrJD8z6"/>
+<div class="absolute -bottom-4 -right-4 glass-panel p-4 rounded-xl border border-white/10 z-20">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-tertiary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary" data-icon="trending_up">trending_up</span>
+</div>
+<div>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Conv. Rate</p>
+<p class="text-xl font-headline font-black text-tertiary">+342%</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Integration Strip -->
+<section class="py-12 bg-surface-container-lowest border-y border-white/5">
+<div class="max-w-7xl mx-auto px-8">
+<p class="text-center font-label text-[10px] tracking-[0.3em] font-bold text-on-surface-variant/40 mb-10 uppercase">Powering Ecosystems Globally</p>
+<div class="flex flex-wrap justify-center items-center gap-12 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all duration-700">
+<img alt="Shopify Logo" class="h-8 object-contain" data-alt="minimalist Shopify logo in monochromatic silver" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnitL_98uOcIYrTMmrfk1a1jWSGACooN4Wz9ZIrPN6nSJQwzFyrKOkv7zzbd7QCcE6rXsJb_3KkeMgpIYcYlyd9um7fOD__uTZudb5wYxM9-z50he7STKPJJEQ9psAOUlb5GFS9JsXiTw3MLmMmZzonYh_ptZfJGweVEGOOZ3CsbMmUmHdWSxwDkSwvLJMVeoa3TeHq6eEYysa3-AZ3nQmU-18O8FxCbVn6eh2-5bWTtQTTFbVjMtcDBGrr4tjyWRXupQoTIXEzmaV"/>
+<img alt="Mailchimp Logo" class="h-8 object-contain" data-alt="minimalist Mailchimp logo in monochromatic silver" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD8jptiD3qwUHXkE6f-40LKPbMSOjqJHkqZnmi327S2MoNw6YVuCGCYm-oPPAIi_euIKNk2_x1CH7COUwNn9x9pywvjkMKirbi19LOdsaNg8rj6ELWGfMYWdtuYBN2eEkFQZkNqIsOPXriJjuvkz0NasIaC1RFLTNQbM9ys4iYWe66Lz7bpb6Wd_mj7MOxbSX7b4LyWv4w8FrjcjNBfTPgUGKl1X1JDT4YIXOIAf6Co9ITHVap0QVot7xqutPAYXyFxISlgtC1NgIu7"/>
+<img alt="Hubspot Logo" class="h-8 object-contain" data-alt="minimalist Hubspot logo in monochromatic silver" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2oIUdYCk5WGECGe4QTKppjCO8e2IHIX_dNaGXYe0eaPELx_85u1_CiMTDtQDmcuP3GqW8FwdkEpCAzC2oK5uJnP5hjHQnRjWJKPRBB5c1CbIc2RlciRGZ9j4LaUVgk33pSSN1BQrDLCOqxQgZiyNeMMu8qjmLamJoksS_Mjj6tMfWqzxCuVZwS1McMR4rP191d-UuerDgNcH0BmcMyIsWjWgBE6wvrHMNtfn5a_mx3cngC65UwPlUvHK3jPblrn3aXqbVju3nPiY6"/>
+<img alt="Salesforce Logo" class="h-8 object-contain" data-alt="minimalist Salesforce logo in monochromatic silver" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXjcav12jD44JwtYPUGwUAlIHe_WsZZf7yttxZr4D7zaVEtSOFVQPyZM2WqCgar9ggfVS6epMVUXTTPaforOqWgsdASW9KDEc_TrXTbOgscUCysfSG-_jkV2FA4nxLxMTl1N9pP0sZCAxGcjUqvWdb7T76c01tNw6TqnTVLkliTy9a3xaBMQmnRLuZWN8G0QCyNp7u1wx0KsKhBzkQeaVjwykokHc9drUad6pFpLn5DW2QtX_cbnStB9tj18e3ZxljWZXGhQF61Z7r"/>
+<img alt="Slack Logo" class="h-8 object-contain" data-alt="minimalist Slack logo in monochromatic silver" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCON40SL9WyBZ2OlGr3ij0gzYScv7AijCajuvL7415tARG6IZ4-JfyObZA5W2QK9KuhVn_3mGNrri624QUIrcbyWFr6z_d6Sst5ptEkKqxHOgF6IEnsnrPUL8ChJzBiVRPBhEaUdmxND_TLBrRdt7KgX9oRA0UkYYmLDF1o8LdBCtWnTIGDsoOjI3soiha3ZT3dudlXhUHMUipJcEIipVq4jb5z_U50wTQTJnIHXS0z3hsR3o-iT_bAazfaSZvTTKCvKh8p1HjCxz2S"/>
+</div>
+</div>
+</section>
+<!-- Feature Grid (Bento) -->
+<section class="py-32 px-8 bg-surface">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+<div class="max-w-2xl">
+<h2 class="font-headline text-5xl font-black tracking-tight mb-6">THE NEURAL <span class="text-primary">TOOLKIT</span></h2>
+<p class="text-on-surface-variant text-lg">Sophisticated features designed to bridge the gap between user intent and brand loyalty.</p>
+</div>
+<button class="text-primary font-headline font-bold uppercase tracking-widest flex items-center gap-2 hover:translate-x-2 transition-transform">
+                        Explore All Features <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6 auto-rows-[280px]">
+<!-- Large Card -->
+<div class="md:col-span-8 md:row-span-2 glass-panel rounded-2xl p-10 relative overflow-hidden group border border-white/5">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[80px] -mr-32 -mt-32 group-hover:bg-primary/20 transition-all"></div>
+<div class="relative z-10 flex flex-col h-full">
+<div class="w-14 h-14 rounded-xl bg-gradient-to-br from-primary-container to-primary flex items-center justify-center mb-8 shadow-lg">
+<span class="material-symbols-outlined text-on-primary-container text-3xl" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<h3 class="font-headline text-3xl font-bold mb-4">Hyper-Personalized Analytics</h3>
+<p class="text-on-surface-variant text-lg max-w-md mb-8">Utilize our proprietary LLM-driven prediction engine to understand why users spin and when they are most likely to convert.</p>
+<div class="mt-auto flex gap-4">
+<img alt="Dashboard Preview" class="w-full h-48 object-cover rounded-xl border border-white/10 opacity-80 group-hover:opacity-100 transition-opacity" data-alt="UI dashboard showing complex glowing violet graphs and data visualization points against a dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMStmSrpz9c9EHQbeZoFY4zB6E2ft7tsetxb8p_5Cu-XLSd1N6okp_YTe0fFB0fph47yKOno0ovX0ck2JauiayP0fTCWTq7rkuID4b3cXX8-s8XIUZUomPAcEKohMRIbsbfDAGY1z9EK2V3dEfHb82ostNZ2Sq9txYdOzWV_LUMQJy4pzkqpR4B8Eufvz5wsqT3DSnOE9yBH5_nt5Q9W2AhEoniAkHemN9BGgz6sOa1s2DgH9vT4zLfCO69L3htj1T23gjWYVQ0v5C"/>
+</div>
+</div>
+</div>
+<!-- Medium Card 1 -->
+<div class="md:col-span-4 md:row-span-1 glass-panel rounded-2xl p-8 border border-white/5 hover:border-primary/30 transition-all">
+<div class="w-12 h-12 rounded-lg bg-tertiary/20 flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-tertiary" data-icon="speed">speed</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-2">Zero-Latency Spin</h3>
+<p class="text-on-surface-variant text-sm">Optimized assets that load in under 200ms globally, ensuring no drop-off.</p>
+</div>
+<!-- Medium Card 2 -->
+<div class="md:col-span-4 md:row-span-1 glass-panel rounded-2xl p-8 border border-white/5 hover:border-primary/30 transition-all">
+<div class="w-12 h-12 rounded-lg bg-secondary-container/30 flex items-center justify-center mb-6 text-secondary">
+<span class="material-symbols-outlined" data-icon="integration_instructions">integration_instructions</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-2">Omnichannel Flow</h3>
+<p class="text-on-surface-variant text-sm">Native integrations with 100+ marketing stacks for seamless sync.</p>
+</div>
+<!-- Small Highlight Card -->
+<div class="md:col-span-4 md:row-span-1 bg-gradient-to-br from-primary-container to-secondary-container rounded-2xl p-8 shadow-xl hover:scale-[1.02] transition-transform">
+<h3 class="font-headline text-2xl font-black text-on-primary mb-4">READY TO SCALE?</h3>
+<p class="text-on-primary-container font-medium mb-6">Join 2,500+ brands reaching for the horizon.</p>
+<button class="w-full bg-surface-container-lowest text-primary font-headline font-bold uppercase tracking-widest py-3 rounded-lg text-sm">Get Access</button>
+</div>
+<!-- Medium Card 3 -->
+<div class="md:col-span-4 md:row-span-1 glass-panel rounded-2xl p-8 border border-white/5 hover:border-primary/30 transition-all">
+<div class="w-12 h-12 rounded-lg bg-error-container/20 flex items-center justify-center mb-6 text-error">
+<span class="material-symbols-outlined" data-icon="security">security</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-2">Fraud Protection</h3>
+<p class="text-on-surface-variant text-sm">Advanced bot detection to ensure your rewards go to real humans.</p>
+</div>
+<!-- Medium Card 4 -->
+<div class="md:col-span-4 md:row-span-1 glass-panel rounded-2xl p-8 border border-white/5 hover:border-primary/30 transition-all">
+<div class="w-12 h-12 rounded-lg bg-primary-container/20 flex items-center justify-center mb-6 text-primary">
+<span class="material-symbols-outlined" data-icon="palette">palette</span>
+</div>
+<h3 class="font-headline text-xl font-bold mb-2">Brand Canvas</h3>
+<p class="text-on-surface-variant text-sm">Complete white-label control over every pixel and animation state.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Section -->
+<section class="py-24 px-8 relative overflow-hidden">
+<div class="absolute inset-0 bg-primary/5 blur-[150px]"></div>
+<div class="max-w-4xl mx-auto text-center relative z-10">
+<h2 class="font-headline text-5xl md:text-7xl font-black tracking-tight mb-8">COMMAND THE <span class="text-tertiary">CONVERSION</span></h2>
+<p class="text-on-surface-variant text-xl mb-12 max-w-2xl mx-auto">Stop guessing. Start winning. SpinPlatform provides the architectural foundation for high-performance gamification.</p>
+<div class="flex flex-col sm:flex-row justify-center gap-6">
+<button class="bg-gradient-to-br from-primary-container to-primary px-10 py-5 rounded-lg font-headline font-black uppercase tracking-widest text-on-primary text-lg shadow-[0_0_40px_rgba(124,58,237,0.4)]">
+                        Create Your First Wheel
+                    </button>
+<button class="glass-panel px-10 py-5 rounded-lg font-headline font-black uppercase tracking-widest border border-white/10 hover:bg-white/10 transition-all text-lg">
+                        Book Strategy Session
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0d0d16] w-full py-12 border-t border-white/5">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center">
+<div class="flex flex-col items-center md:items-start mb-8 md:mb-0">
+<div class="font-['Space_Grotesk'] font-bold text-[#d2bbff] text-xl mb-2 uppercase">SpinPlatform</div>
+<p class="text-[#e4e1ed]/40 text-xs tracking-normal font-['Inter']">© 2024 SpinPlatform Editorial. All rights reserved.</p>
+</div>
+<div class="flex gap-8 mb-8 md:mb-0">
+<a class="text-[#e4e1ed]/40 hover:text-[#4edea3] transition-opacity duration-200 text-xs tracking-normal font-['Inter']" href="#">Privacy Policy</a>
+<a class="text-[#e4e1ed]/40 hover:text-[#4edea3] transition-opacity duration-200 text-xs tracking-normal font-['Inter']" href="#">Terms of Service</a>
+<a class="text-[#e4e1ed]/40 hover:text-[#4edea3] transition-opacity duration-200 text-xs tracking-normal font-['Inter']" href="#">API Docs</a>
+<a class="text-[#e4e1ed]/40 hover:text-[#4edea3] transition-opacity duration-200 text-xs tracking-normal font-['Inter']" href="#">Status</a>
+</div>
+<div class="flex gap-4">
+<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-xs text-[#d2bbff]" data-icon="share">share</span>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary/20 transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-xs text-[#d2bbff]" data-icon="mail">mail</span>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

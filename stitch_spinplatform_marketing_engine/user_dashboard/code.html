@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SpinPlatform - Dashboard</title>
+<!-- Google Fonts: Space Grotesk & Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Design System Tailwind Config -->
+<script id="tailwind-config">tailwind.config = {darkMode: "class", theme: {extend: {colors: {"secondary-container": "#4f319c", "on-tertiary-fixed-variant": "#005236", "surface-dim": "#13131b", "surface-container-lowest": "#0d0d16", primary: "#d2bbff", "on-tertiary-container": "#76ffc2", "surface-container": "#1f1f28", "on-error": "#690005", "surface-tint": "#d2bbff", "on-error-container": "#ffdad6", "on-tertiary": "#003824", "secondary-fixed": "#e8ddff", "on-secondary": "#381385", "surface-container-highest": "#34343d", "surface-container-high": "#292932", "secondary-fixed-dim": "#cebdff", surface: "#13131b", "on-primary-container": "#ede0ff", "primary-container": "#7c3aed", outline: "#958da1", "inverse-on-surface": "#302f39", "on-secondary-container": "#bea8ff", "surface-variant": "#34343d", "on-primary": "#3f008e", "tertiary-fixed": "#6ffbbe", "surface-container-low": "#1b1b23", "tertiary-fixed-dim": "#4edea3", secondary: "#cebdff", background: "#13131b", "error-container": "#93000a", "on-surface-variant": "#ccc3d8", "outline-variant": "#4a4455", "on-surface": "#e4e1ed", "inverse-surface": "#e4e1ed", "on-primary-fixed-variant": "#5a00c6", "on-tertiary-fixed": "#002113", "tertiary-container": "#007650", tertiary: "#4edea3", "surface-bright": "#393842", "primary-fixed-dim": "#d2bbff", "on-primary-fixed": "#25005a", error: "#ffb4ab", "on-secondary-fixed-variant": "#4f319c", "primary-fixed": "#eaddff", "on-background": "#e4e1ed", "inverse-primary": "#732ee4", "on-secondary-fixed": "#21005e"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}, fontFamily: {headline: ["Space Grotesk"], body: ["Inter"], label: ["Inter"], display: "Space Grotesk"}}}};</script>
+<style>
+        /* Custom Utilities for Design System specifics */
+        .glass-panel {
+            background-color: rgba(41, 41, 50, 0.6); /* surface-container-high @ 60% */
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 0 40px rgba(210, 187, 255, 0.08); /* ambient glow */
+        }
+        .ghost-border {
+            box-shadow: inset 0 1px 0 0 rgba(74, 68, 85, 0.2); /* outline-variant */
+        }
+        .neon-text-primary {
+            text-shadow: 0 0 15px rgba(124, 58, 237, 0.8);
+        }
+        .btn-primary-gradient {
+            background: linear-gradient(135deg, #7c3aed 0%, #d2bbff 100%);
+        }
+    </style>
+</head>
+<body class="bg-[#13131b] text-on-surface font-body antialiased min-h-screen overflow-x-hidden selection:bg-primary-container selection:text-white flex">
+<!-- Ambient Background Light Leak -->
+<div class="fixed top-[-20%] left-[10%] w-[50vw] h-[50vw] rounded-full bg-primary-container/10 blur-[120px] pointer-events-none z-0"></div>
+<!-- JSON Component: SideNavBar -->
+<!-- Applying exact styles from JSON where prefixed with style_ -->
+<nav class="h-screen w-64 fixed left-0 border-r border-[#393842]/10 bg-[#0d0d16] text-[#7c3aed] font-['Inter'] text-sm font-medium tracking-wide shadow-[20px_0_40px_rgba(124,58,237,0.03)] z-50 flex flex-col pt-20 pb-8">
+<!-- Header -->
+<div class="px-6 mb-12">
+<div class="flex items-center gap-4 mb-8">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high flex items-center justify-center overflow-hidden ring-1 ring-outline-variant/20">
+<img alt="SpinPlatform Workspace" class="w-full h-full object-cover mix-blend-screen opacity-80" data-alt="abstract swirling galaxy dust in deep purple and dark void colors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDuoyT7JHeuRMqzioDwWsdItFRgl4PFh4VbLV9_spydOlP9ALc9rN-Lw7Lic1BOsPOOYRsdlPEbbvRmcckxSQrPmiUEr1D0wZ2AWfNOMfDZFFjc3BDq5gGrUT5B2pDiBU0XKDbxsh1KOHlCH6MmkDkYAbcAjxMf29hhbDXOs3wFRYuPpSt7sE4Hta-YU4_vYO5LJSUZXDlxoFLbLn6MKbIK_T2oTsq7A4wRpUicgQLxwgKiVL_8vtlHLsZXS06XTB1CJ8Y6TyPb2dnW"/>
+</div>
+<div>
+<h2 class="text-lg font-bold text-[#d2bbff] font-headline tracking-[-0.04em]">Main Hub</h2>
+<p class="text-xs uppercase tracking-[0.08em] text-on-surface-variant">Premium Tier</p>
+</div>
+</div>
+<!-- CTA -->
+<button class="w-full btn-primary-gradient text-surface-container-lowest font-headline font-bold py-3 rounded-lg hover:shadow-[0_0_15px_rgba(124,58,237,0.5)] transition-all duration-300">
+                Create New Spin
+            </button>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 flex flex-col gap-2">
+<!-- Active Tab: Dashboard (Index 0) based on Intent -->
+<a class="flex items-center gap-3 bg-gradient-to-r from-[#7C3AED]/20 to-transparent text-[#d2bbff] border-l-4 border-[#7C3AED] py-3 px-6" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 text-[#e4e1ed]/50 py-3 px-6 hover:translate-x-1 hover:text-[#4edea3] transition-all duration-300 hover:shadow-[0_0_15px_rgba(78,222,163,0.2)]" href="#">
+<span class="material-symbols-outlined">rocket_launch</span>
+                Campaigns
+            </a>
+<a class="flex items-center gap-3 text-[#e4e1ed]/50 py-3 px-6 hover:translate-x-1 hover:text-[#4edea3] transition-all duration-300 hover:shadow-[0_0_15px_rgba(78,222,163,0.2)]" href="#">
+<span class="material-symbols-outlined">ads_click</span>
+                Editor
+            </a>
+<a class="flex items-center gap-3 text-[#e4e1ed]/50 py-3 px-6 hover:translate-x-1 hover:text-[#4edea3] transition-all duration-300 hover:shadow-[0_0_15px_rgba(78,222,163,0.2)]" href="#">
+<span class="material-symbols-outlined">group</span>
+                Audience
+            </a>
+<a class="flex items-center gap-3 text-[#e4e1ed]/50 py-3 px-6 hover:translate-x-1 hover:text-[#4edea3] transition-all duration-300 hover:shadow-[0_0_15px_rgba(78,222,163,0.2)]" href="#">
+<span class="material-symbols-outlined">tune</span>
+                Settings
+            </a>
+</div>
+<!-- Footer Links -->
+<div class="mt-auto flex flex-col gap-2 pt-8 border-t border-[#393842]/10 mx-6">
+<a class="flex items-center gap-3 text-[#e4e1ed]/50 py-2 hover:translate-x-1 hover:text-[#4edea3] transition-all duration-300 hover:shadow-[0_0_15px_rgba(78,222,163,0.2)]" href="#">
+<span class="material-symbols-outlined text-[18px]">help</span>
+                Support
+            </a>
+<a class="flex items-center gap-3 text-[#e4e1ed]/50 py-2 hover:translate-x-1 hover:text-[#4edea3] transition-all duration-300 hover:shadow-[0_0_15px_rgba(78,222,163,0.2)]" href="#">
+<span class="material-symbols-outlined text-[18px]">description</span>
+                Docs
+            </a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="ml-64 flex-1 p-10 min-h-screen relative z-10">
+<!-- Header Area: Asymmetric & Editorial -->
+<header class="mb-12 flex justify-between items-end">
+<div class="max-w-2xl">
+<h1 class="font-headline text-5xl md:text-6xl font-black text-primary tracking-[-0.04em] leading-none mb-2">Overview.</h1>
+<p class="font-body text-on-surface-variant text-lg">System telemetry and active campaign velocity.</p>
+</div>
+<!-- High-Tech Label Status -->
+<div class="flex items-center gap-3 glass-panel rounded-full px-4 py-2 ghost-border">
+<div class="w-2 h-2 rounded-full bg-tertiary shadow-[0_0_10px_rgba(78,222,163,0.8)]"></div>
+<span class="font-label uppercase tracking-[0.08em] text-xs font-semibold text-tertiary">Systems Nominal</span>
+</div>
+</header>
+<!-- Bento Grid -->
+<div class="grid grid-cols-12 gap-6 auto-rows-min">
+<!-- Bento 1: Primary Metrics / Chrono-Wheel focus (Span 8) -->
+<div class="col-span-12 lg:col-span-8 glass-panel rounded-xl ghost-border p-8 relative overflow-hidden group">
+<!-- Inner decorative light -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary-container/20 rounded-full blur-[60px] group-hover:bg-primary-container/30 transition-all duration-700"></div>
+<div class="relative z-10 flex flex-col h-full justify-between">
+<div>
+<span class="font-label uppercase tracking-[0.08em] text-xs text-on-surface-variant mb-4 block">Total Network Impact</span>
+<div class="flex items-baseline gap-4">
+<h2 class="font-headline text-7xl font-black text-on-surface tracking-[-0.04em] neon-text-primary">2.4M</h2>
+<span class="font-headline text-2xl text-tertiary">+14.2%</span>
+</div>
+</div>
+<div class="mt-12 flex gap-8">
+<div>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] text-outline block mb-1">Active Wheels</span>
+<p class="font-headline text-xl text-primary font-bold">14</p>
+</div>
+<div>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] text-outline block mb-1">Avg Engagement</span>
+<p class="font-headline text-xl text-primary font-bold">42s</p>
+</div>
+<div>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] text-outline block mb-1">Drop-off Rate</span>
+<p class="font-headline text-xl text-on-surface font-bold">3.1%</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Bento 2: Quick Action / Status (Span 4) -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low rounded-xl p-8 flex flex-col justify-center items-center text-center relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface-container-lowest/50 pointer-events-none"></div>
+<div class="w-24 h-24 rounded-xl bg-surface-dim ring-1 ring-outline-variant/30 flex items-center justify-center mb-6 relative">
+<!-- Fake circular progress -->
+<svg class="absolute inset-0 w-full h-full -rotate-90" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="46" stroke="rgba(74, 68, 85, 0.2)" stroke-width="4"></circle>
+<circle class="drop-shadow-[0_0_8px_rgba(78,222,163,0.5)]" cx="50" cy="50" fill="none" r="46" stroke="#4edea3" stroke-dasharray="289" stroke-dashoffset="60" stroke-width="4"></circle>
+</svg>
+<span class="material-symbols-outlined text-4xl text-tertiary">electric_bolt</span>
+</div>
+<h3 class="font-headline text-xl font-bold text-on-surface mb-2 tracking-tight">Optimization Ready</h3>
+<p class="font-body text-sm text-on-surface-variant mb-6">Algorithm suggests tuning 3 wheels for higher conversion.</p>
+<button class="px-6 py-2 rounded-md font-label uppercase tracking-[0.08em] text-xs font-semibold text-primary border border-outline-variant/30 hover:bg-surface-bright transition-colors w-full">
+                    Review Suggestions
+                </button>
+</div>
+<!-- Bento 3: Spin Volume Chart (Span 6) -->
+<div class="col-span-12 lg:col-span-6 glass-panel rounded-xl ghost-border p-6 flex flex-col h-80">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline text-lg font-bold text-on-surface tracking-tight">Spin Volume</h3>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] text-on-surface-variant bg-surface-container-highest px-2 py-1 rounded">Last 7 Days</span>
+</div>
+<!-- Pure HTML/CSS pseudo-chart using SVG -->
+<div class="flex-1 w-full relative pt-4">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 400 100">
+<defs>
+<lineargradient id="lineGrad" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#7c3aed" stop-opacity="0.3"></stop>
+<stop offset="50%" stop-color="#d2bbff" stop-opacity="1"></stop>
+<stop offset="100%" stop-color="#4edea3" stop-opacity="0.8"></stop>
+</lineargradient>
+<lineargradient id="fillGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#d2bbff" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#d2bbff" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Area Fill -->
+<path d="M0 80 Q 50 60, 100 70 T 200 40 T 300 50 T 400 20 L 400 100 L 0 100 Z" fill="url(#fillGrad)"></path>
+<!-- Line -->
+<path d="M0 80 Q 50 60, 100 70 T 200 40 T 300 50 T 400 20" fill="none" stroke="url(#lineGrad)" stroke-width="3" style="filter: drop-shadow(0px 4px 6px rgba(124,58,237,0.4));"></path>
+</svg>
+<!-- Y-Axis Labels (Faked) -->
+<div class="absolute left-0 top-0 h-full flex flex-col justify-between text-[10px] text-outline font-label pt-4 pb-2">
+<span>10k</span>
+<span>5k</span>
+<span>0</span>
+</div>
+</div>
+</div>
+<!-- Bento 4: Conversion Rates Chart (Span 6) -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container-lowest rounded-xl border-t border-outline-variant/10 p-6 flex flex-col h-80 relative overflow-hidden">
+<!-- Subtle inner glow for sectioning without 1px border around whole box -->
+<div class="absolute inset-0 shadow-[inset_0_1px_0_0_rgba(149,141,161,0.05)] pointer-events-none"></div>
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline text-lg font-bold text-on-surface tracking-tight">Conversion Rates</h3>
+<div class="flex gap-2">
+<span class="w-2 h-2 rounded-full bg-primary mt-1"></span>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] text-primary">Current</span>
+</div>
+</div>
+<!-- Bar Chart Pseudo-layout -->
+<div class="flex-1 flex items-end justify-between gap-4 px-2 mt-4">
+<!-- Bars -->
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-surface-container-high rounded-t-sm h-[30%] group-hover:bg-surface-bright transition-colors relative"></div>
+<span class="text-[10px] text-outline font-label uppercase">Mon</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-surface-container-high rounded-t-sm h-[45%] group-hover:bg-surface-bright transition-colors"></div>
+<span class="text-[10px] text-outline font-label uppercase">Tue</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-primary-container rounded-t-sm h-[70%] shadow-[0_0_15px_rgba(124,58,237,0.3)] relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity">70%</div>
+</div>
+<span class="text-[10px] text-primary font-label uppercase font-bold">Wed</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-surface-container-high rounded-t-sm h-[50%] group-hover:bg-surface-bright transition-colors"></div>
+<span class="text-[10px] text-outline font-label uppercase">Thu</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-surface-container-high rounded-t-sm h-[65%] group-hover:bg-surface-bright transition-colors"></div>
+<span class="text-[10px] text-outline font-label uppercase">Fri</span>
+</div>
+<div class="w-full flex flex-col items-center gap-2 group">
+<div class="w-full bg-surface-container-high rounded-t-sm h-[40%] group-hover:bg-surface-bright transition-colors"></div>
+<span class="text-[10px] text-outline font-label uppercase">Sat</span>
+</div>
+</div>
+</div>
+<!-- Bento 5: Wheel Management List (Span 12) -->
+<div class="col-span-12 mt-4">
+<h2 class="font-headline text-2xl font-bold text-on-surface mb-6 tracking-tight">Active Wheels</h2>
+<!-- List Container (No internal dividers, tonal shifts on hover) -->
+<div class="flex flex-col gap-3">
+<!-- List Item 1: Live -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-bright transition-colors duration-300 group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-md bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">attractions</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface text-base">Summer Promo Spinner</h4>
+<p class="font-body text-xs text-on-surface-variant">Last edited 2h ago</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right hidden md:block">
+<p class="font-label uppercase tracking-[0.08em] text-[10px] text-outline">Impressions</p>
+<p class="font-body text-sm text-on-surface font-medium">124,592</p>
+</div>
+<!-- Status Indicator -->
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.8)]"></div>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] font-bold text-tertiary">Live</span>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- List Item 2: Draft -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-bright transition-colors duration-300 group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-md bg-surface-container-lowest flex items-center justify-center opacity-60">
+<span class="material-symbols-outlined text-outline text-xl">cyclone</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface text-base">Black Friday Core</h4>
+<p class="font-body text-xs text-on-surface-variant">Created 1d ago</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right hidden md:block opacity-50">
+<p class="font-label uppercase tracking-[0.08em] text-[10px] text-outline">Impressions</p>
+<p class="font-body text-sm text-on-surface font-medium">--</p>
+</div>
+<!-- Status Indicator -->
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-outline-variant"></div>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] font-bold text-outline">Draft</span>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<!-- List Item 3: Live -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low hover:bg-surface-bright transition-colors duration-300 group">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-md bg-surface-container-lowest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-xl">casino</span>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface text-base">VIP Retention Roulette</h4>
+<p class="font-body text-xs text-on-surface-variant">Last edited 5d ago</p>
+</div>
+</div>
+<div class="flex items-center gap-8">
+<div class="text-right hidden md:block">
+<p class="font-label uppercase tracking-[0.08em] text-[10px] text-outline">Impressions</p>
+<p class="font-body text-sm text-on-surface font-medium">45,102</p>
+</div>
+<!-- Status Indicator -->
+<div class="flex items-center gap-2">
+<div class="w-1.5 h-1.5 rounded-full bg-tertiary shadow-[0_0_8px_rgba(78,222,163,0.8)]"></div>
+<span class="font-label uppercase tracking-[0.08em] text-[10px] font-bold text-tertiary">Live</span>
+</div>
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

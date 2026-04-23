@@ -15,11 +15,11 @@ import { type WheelTemplate, WHEEL_TEMPLATES } from '@/lib/wheel-templates';
  */
 export const BRANDING_RESET_BASE: Partial<WheelBranding> = {
   // Colors
-  primary_color:          'transparent',
+  primary_color:          '#7C3AED',
   secondary_color:        undefined,
   pointer_color:          undefined,
   background_type:        'solid',
-  background_value:       'transparent',
+  background_value:       '#FFFFFF',
 
   // Ring
   outer_ring_color:       'transparent',
@@ -62,7 +62,7 @@ export const CONFIG_RESET_BASE: Partial<WheelConfig> = {
   spin_duration_ms: 4000,
   animation_speed: 'medium',
   pointer_position: 'top',
-  confetti_enabled: true,
+  confetti_enabled: false,
   show_segment_labels: true,
   label_rotation: 'radial',
   
@@ -86,7 +86,7 @@ export const CONFIG_RESET_BASE: Partial<WheelConfig> = {
  * Enforces Theme = Single Source of Truth architecture.
  * No merging. No local fallback for colors/rims/logo.
  */
-export function normalizeTheme(theme: any, wheelSegments: any[] = []) {
+export function normalizeTheme(theme: any, wheelSegments: any[] | null = null, forceTheme = false) {
   if (!theme) return null;
   
   // 1. Deep clone to guarantee no references
@@ -94,55 +94,61 @@ export function normalizeTheme(theme: any, wheelSegments: any[] = []) {
   
   // 2. Extract palette or segments
   const palette = clone.segmentPalette || clone.segment_palette || clone.palette || [];
-  let resolvedSegments = clone.segments || [];
+  
+  // 3. Generate segments from palette or apply palette to existing segments
+  // Basis selection: If wheelSegments is explicitly provided (including empty array), we theme that collection.
+  // If wheelSegments is null, we use the palette as the basis (creating a preview).
+  const basis = wheelSegments !== null ? wheelSegments : palette;
+  
+  const resolvedSegments = basis.map((item: any, i: number) => {
+    // Determine which palette settings to apply (wrap around if more segments than colors)
+    const p = palette[i % palette.length] || {};
+    
+    // Existing data (if item is from wheelSegments)
+    const existing = wheelSegments.length > 0 ? item : {};
+    
+    const bgColor = p.background?.color || p.bg_color || (typeof p === 'string' ? p : 'rgba(124, 58, 237, 1)');
+    const bgImage = p.background?.imageUrl || p.segment_image_url || p.image_url || null;
+    const themeIcon = (p.icon_url && p.icon_url.length > 4 && !p.icon_url.startsWith('#')) ? p.icon_url : null;
+    
+    return {
+      // ── IDENTITY & PRIZE DATA ────────────────────────────
+      id: existing.id || `seg-${i}`,
+      wheel_id: existing.wheel_id,
+      position: i,
+      label: existing.label || `Segment ${i + 1}`,
+      weight: existing.weight || 1,
+      prize_id: existing.prize_id,
+      is_no_prize: existing.is_no_prize ?? true,
+      consolation_message: existing.consolation_message,
 
-  // Generate segments from palette if we don't have literal segments
-  if (resolvedSegments.length === 0 && palette.length > 0) {
-    resolvedSegments = palette.map((p: any, i: number) => {
-      const bgColor = p.background?.color || p.bg_color || (typeof p === 'string' ? p : 'rgba(124, 58, 237, 1)');
-      const bgImage = p.background?.imageUrl || p.segment_image_url || p.image_url || null;
-      const themeIcon = (p.icon_url && p.icon_url.length > 4 && !p.icon_url.startsWith('#')) ? p.icon_url : null;
-      
-      const existing = wheelSegments[i] || {};
-      
-      return {
-        // ── IDENTITY & PRIZE DATA ────────────────────────────
-        id: existing.id || `seg-${i}`,
-        wheel_id: existing.wheel_id,
-        position: i,
-        label: existing.label || `Segment ${i + 1}`,
-        weight: existing.weight || 1,
-        prize_id: existing.prize_id,
-        is_no_prize: existing.is_no_prize ?? true,
-        consolation_message: existing.consolation_message,
+      // ── VISUALS (USER OVERRIDES > THEME PALETTE) ─────────
+      // If forceTheme is true (e.g. user clicked "Apply Theme"), we prioritize the palette.
+      // Otherwise, we prioritize manual overrides in the segments array.
+      bg_color: (forceTheme ? bgColor : (existing.bg_color || bgColor)),
+      background: { 
+        color: (forceTheme ? bgColor : (existing.bg_color || bgColor)), 
+        imageUrl: (forceTheme ? bgImage : (existing.segment_image_url || bgImage))
+      },
+      text_color: (forceTheme ? (p.text_color || '#FFFFFF') : (existing.text_color || p.text_color || '#FFFFFF')),
+      icon_url: (forceTheme ? themeIcon : (existing.icon_url || themeIcon)), 
+      segment_image_url: (forceTheme ? bgImage : (existing.segment_image_url || bgImage)),
 
-        // ── VISUALS (USER OVERRIDES > THEME PALETTE) ─────────
-        // Prioritize existing state to ensure manual tweaks in SegmentsTab are reactive
-        bg_color: existing.bg_color || bgColor,
-        background: { 
-          color: existing.bg_color || bgColor, 
-          imageUrl: existing.segment_image_url || bgImage 
-        },
-        text_color: existing.text_color || p.text_color || '#FFFFFF',
-        icon_url: existing.icon_url || themeIcon, 
-        segment_image_url: existing.segment_image_url || bgImage,
-
-        // Explicitly NULL out all visual overrides to ensure theme parity
-        label_offset_x: null,
-        label_offset_y: null,
-        icon_offset_x: null,
-        icon_offset_y: null,
-        label_rotation_angle: null,
-        icon_rotation_angle: null,
-        label_radial_offset: p.label_radial_offset ?? null,
-        label_tangential_offset: p.label_tangential_offset ?? null,
-        icon_radial_offset: p.icon_radial_offset ?? null,
-        icon_tangential_offset: p.icon_tangential_offset ?? null,
-        label_font_scale: p.label_font_scale ?? null,
-        icon_scale: p.icon_scale ?? null,
-      };
-    });
-  }
+      // Explicitly NULL out all visual overrides to ensure theme parity
+      label_offset_x: null,
+      label_offset_y: null,
+      icon_offset_x: null,
+      icon_offset_y: null,
+      label_rotation_angle: null,
+      icon_rotation_angle: null,
+      label_radial_offset: p.label_radial_offset ?? null,
+      label_tangential_offset: p.label_tangential_offset ?? null,
+      icon_radial_offset: p.icon_radial_offset ?? null,
+      icon_tangential_offset: p.icon_tangential_offset ?? null,
+      label_font_scale: p.label_font_scale ?? null,
+      icon_scale: p.icon_scale ?? null,
+    };
+  });
 
   const finalConfig = clone.config || clone.styles || {};
   const finalBranding = clone.branding || {};
@@ -220,10 +226,10 @@ export function getFinalVisualConfig(wheel: any, template?: any, uiOverrides?: a
   return wheelConfig;
 }
 
-export function applyTemplateToWheel(template: any, _segments?: any, _config?: any) {
-  const normalized = normalizeTheme(template);
+export function applyTemplateToWheel(template: any, segments: any[] | null = null, config?: any) {
+  const normalized = normalizeTheme(template, segments, true);
   return {
-    newConfig: normalized?.config || {},
+    newConfig: normalized?.config || config || {},
     newBranding: normalized?.branding || {},
     newSegments: normalized?.segments || []
   };

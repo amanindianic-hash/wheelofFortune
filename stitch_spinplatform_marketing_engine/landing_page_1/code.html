@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SpinPlatform - Modern Editorial</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&amp;family=Montserrat:wght@300;400;500;600&amp;family=Playfair+Display:wght@700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        forest: "#062C22",
+                        gold: "#C5A059",
+                        'soft-gold': "#E5D1A4",
+                        cream: "#F9F7F2",
+                        'deep-green': "#041E17"
+                    },
+                    fontFamily: {
+                        headline: ["Cormorant Garamond", "serif"],
+                        body: ["Montserrat", "sans-serif"],
+                        display: ["Playfair Display", "serif"]
+                    }
+                }
+            }
+        };
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --forest-green: #062C22;
+            --gold-accent: #C5A059;
+            --cream-bg: #F9F7F2;
+        }
+        body {
+            background-color: var(--cream-bg);
+            color: var(--forest-green);
+            font-family: theme('fontFamily.body');
+        }
+        .editorial-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+        }
+        .gold-border {
+            border: 1px solid rgba(197, 160, 89, 0.3);
+        }
+        .gold-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold-accent), transparent);
+        }
+        .heading-decoration::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 2px;
+            background-color: var(--gold-accent);
+            margin-top: 1rem;
+        }
+        .image-mask {
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 85% 100%, 0 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden selection:bg-gold/30 selection:text-forest">
+<nav class="fixed top-0 w-full flex justify-between items-center px-8 py-6 bg-cream/90 backdrop-blur-md z-50 border-b border-gold/10 transition-all duration-300">
+<div class="flex items-center gap-12">
+<a class="text-2xl font-display font-bold tracking-tight text-forest" href="#">
+            SpinPlatform<span class="text-gold">.</span>
+</a>
+<div class="hidden md:flex gap-8 items-center text-[11px] uppercase tracking-[0.2em] font-medium">
+<a class="text-forest border-b border-gold pb-1" href="#">Platform</a>
+<a class="text-forest/60 hover:text-gold transition-colors" href="#">Templates</a>
+<a class="text-forest/60 hover:text-gold transition-colors" href="#">Analytics</a>
+<a class="text-forest/60 hover:text-gold transition-colors" href="#">Pricing</a>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden lg:flex items-center border-b border-gold/30 pb-1 focus-within:border-gold transition-all">
+<span class="material-symbols-outlined text-forest/40 text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-xs text-forest placeholder-forest/30 w-32 outline-none uppercase tracking-widest" placeholder="Search" type="text"/>
+</div>
+<div class="flex gap-4">
+<button class="text-forest/60 hover:text-gold transition-colors">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</button>
+<button class="text-forest/60 hover:text-gold transition-colors">
+<span class="material-symbols-outlined text-xl">settings</span>
+</button>
+</div>
+<button class="hidden md:block border border-gold text-forest hover:bg-gold hover:text-white transition-all px-6 py-2.5 text-[10px] uppercase tracking-[0.2em] font-bold">
+            Launch App
+        </button>
+</div>
+</nav>
+<main class="flex-grow pt-32 pb-20 px-6 md:px-12 lg:px-24 max-w-7xl mx-auto w-full">
+<section class="editorial-grid min-h-[716px] items-center">
+<div class="col-span-12 lg:col-span-6 flex flex-col gap-10 z-10">
+<div class="flex items-center gap-4">
+<div class="w-12 h-[1px] bg-gold"></div>
+<span class="font-body text-[10px] uppercase tracking-[0.3em] text-gold font-bold">v2.0 Now Live</span>
+</div>
+<h1 class="font-headline text-6xl md:text-8xl leading-[0.95] text-forest font-light italic">
+                Drive conversions with <span class="font-bold not-italic block mt-2">Lead focused</span> gamification.
+            </h1>
+<p class="font-body text-sm md:text-base text-forest/70 leading-[1.8] max-w-md border-l-2 border-gold/20 pl-6">
+                Transform passive traffic into active leads. The premium chronograph of digital engagement designed for high-conversion funnels.
+            </p>
+<div class="flex flex-wrap gap-6 items-center mt-4">
+<button class="bg-forest text-cream px-10 py-5 text-[11px] uppercase tracking-[0.2em] font-bold hover:bg-gold transition-all duration-500 shadow-xl shadow-forest/10">
+                    Start Building
+                </button>
+<button class="flex items-center gap-3 text-forest group">
+<span class="w-12 h-12 rounded-full border border-gold flex items-center justify-center group-hover:bg-gold group-hover:text-white transition-all">
+<span class="material-symbols-outlined text-xl" data-icon="play_circle">play_arrow</span>
+</span>
+<span class="text-[11px] uppercase tracking-[0.2em] font-bold">View Demo</span>
+</button>
+</div>
+</div>
+<div class="col-span-12 lg:col-span-6 mt-12 lg:mt-0 relative">
+<div class="grid grid-cols-6 grid-rows-6 gap-4 h-[600px] w-full">
+<div class="col-start-1 col-end-6 row-start-1 row-end-5 overflow-hidden shadow-2xl z-10 bg-forest">
+<img alt="Macro-detail of intricate metallic gears with polished glass textures and gold accents" class="w-full h-full object-cover opacity-90 hover:scale-110 transition-transform duration-[2s]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHf1LZCKDvrIjIXjkVB3fVkx_OFr85cQyMdXqDt0MNXaLnetnO5k_g4n032um1IoACClZtPFEfxoIsWcQ6fVltuv6YIdWIPACR1aGGaB_jq5qHowyZh_VrF8WsnOYAWjY3OJfGt7sV_ElNAHVp5Urcef9c7iVAbr4sy25vaG1VgTDBF6M62VfW8qa0RMuDphhocLqpOLmStJoZCUt_ukXIJTjM7jC-FVXQy3UXE2iwgqqhBVBR5l6WufdOuekzKBq7HT0aiFz5z1cX"/>
+</div>
+<div class="col-start-4 col-end-7 row-start-3 row-end-6 bg-gold overflow-hidden shadow-xl z-20 translate-y-4">
+<img alt="Close up of mechanical movement and glass" class="w-full h-full object-cover mix-blend-multiply opacity-50 grayscale" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKfyfnQa365amdrAG8zFMDrTDFGqPiXd1lKR7gHNOwsaSQUyyd1VBPF_hElW1JcLvgCKhRjlzolsnynvLK2jsjZdd1_8EKd82aYzWNqCqMlbUBai4fPIk6Bdn9NWPZjjnFzAWOdICxLdUfgOnsJYmp9i3gbjX8CMU-e6FzgnOZr5NkxRrabEUJ_-q03Q81vxFTgEG2vNVfMmhgmLLGftzILgF48T2-_Z9d-9FodpPYqO0woEkevvujHzJ1nRFVneurqfDtcq1Zpfci"/>
+</div>
+<div class="absolute -bottom-8 -left-8 bg-cream p-8 gold-border shadow-2xl z-30 max-w-[240px]">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-gold" data-icon="check_circle">check_circle</span>
+<span class="font-body text-[10px] uppercase tracking-[0.2em] font-bold text-forest">+24% Conversion</span>
+</div>
+<p class="text-[10px] text-forest/50 leading-relaxed italic">
+                        Precision engineering meets digital marketing performance.
+                    </p>
+</div>
+<div class="absolute -top-10 -right-10 w-40 h-40 border-t border-r border-gold/40 pointer-events-none"></div>
+<div class="absolute -bottom-4 right-20 w-px h-64 bg-gold/20 pointer-events-none"></div>
+</div>
+</div>
+</section>
+<section class="mt-40 border-t border-gold/10 pt-12">
+<div class="flex flex-col md:flex-row justify-between items-center gap-8">
+<span class="text-[10px] uppercase tracking-[0.4em] text-forest/40 font-semibold italic">Trusted Partnerships</span>
+<div class="flex flex-wrap justify-center gap-12 lg:gap-24 grayscale opacity-40">
+<span class="font-display text-xl text-forest font-bold">Shopify</span>
+<span class="font-display text-xl text-forest font-bold">Mailchimp</span>
+<span class="font-display text-xl text-forest font-bold">Salesforce</span>
+<span class="font-display text-xl text-forest font-bold">Hubspot</span>
+</div>
+</div>
+</section>
+</main>
+<footer class="mt-20 py-10 border-t border-gold/10 text-center">
+<p class="text-[10px] uppercase tracking-[0.3em] text-forest/40">© 2024 SpinPlatform Editorial. All Rights Reserved.</p>
+</footer>
+
+</body></html>
