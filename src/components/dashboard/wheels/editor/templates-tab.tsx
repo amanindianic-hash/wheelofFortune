@@ -17,7 +17,7 @@ interface TemplatesTabProps {
   setWheel: (wheel: Wheel) => void;
   setSegments: (segments: Segment[]) => void;
   setAppliedTheme: (theme: any) => void;
-  saveCurrentAsTheme: () => void;
+  saveCurrentAsTheme: (name: string, emoji: string) => Promise<void>;
   savingTheme: boolean;
 }
 

@@ -213,6 +213,7 @@ export interface Segment {
   icon_url?: string | null;
   // Legacy fields for DB mapping compatibility
   bg_color?: string;
+  text_color?: string;
   segment_image_url?: string | null;
   weight: number;
   prize_id?: string | null;

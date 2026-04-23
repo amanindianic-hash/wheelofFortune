@@ -9,7 +9,8 @@ import { SlotPreview } from '@/components/dashboard/wheels/slot-preview';
 import { RoulettePreview } from '@/components/dashboard/wheels/roulette-preview';
 import { getFinalVisualConfig } from '@/lib/utils/theme-utils';
 import { WHEEL_TEMPLATES } from '@/lib/wheel-templates';
-import type { Wheel, Segment, WheelSegment } from '@/lib/types';
+import type { Wheel, Segment } from '@/lib/types';
+import type { WheelSegment } from '@/lib/utils/wheel-renderer';
 
 interface PreviewMonitorProps {
   wheel: Wheel;

@@ -105,7 +105,7 @@ export function normalizeTheme(theme: any, wheelSegments: any[] | null = null, f
     const p = palette[i % palette.length] || {};
     
     // Existing data (if item is from wheelSegments)
-    const existing = wheelSegments.length > 0 ? item : {};
+    const existing = (wheelSegments?.length ?? 0) > 0 ? item : {};
     
     const bgColor = p.background?.color || p.bg_color || (typeof p === 'string' ? p : 'rgba(124, 58, 237, 1)');
     const bgImage = p.background?.imageUrl || p.segment_image_url || p.image_url || null;

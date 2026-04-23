@@ -178,11 +178,11 @@ const SegmentRow = memo(({
             <Label className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest pl-0.5">Text Vector</Label>
             <div className="flex h-9 gap-2 items-center bg-white/5 border border-white/5 rounded-xl px-2 focus-within:border-violet-500/50 transition-all">
               <input type="color"
-                value={seg.text_color.startsWith('#') ? seg.text_color : '#FFFFFF'}
+                value={(seg.text_color || '#FFFFFF').startsWith('#') ? (seg.text_color || '#FFFFFF') : '#FFFFFF'}
                 onChange={(e) => onUpdate(idx, 'text_color', e.target.value)}
                 className="w-6 h-6 rounded-lg cursor-pointer border-0 bg-transparent shrink-0" />
               <Input 
-                value={seg.text_color} 
+                value={seg.text_color || ''} 
                 onChange={(e) => onUpdate(idx, 'text_color', e.target.value)} 
                 className="h-full border-0 bg-transparent text-xs font-mono p-0 focus-visible:ring-0" 
               />

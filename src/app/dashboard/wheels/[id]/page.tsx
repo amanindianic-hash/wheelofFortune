@@ -181,13 +181,14 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
     }
   }, [segments, id]);
 
-  const saveCurrentAsTheme = useCallback(async () => {
-    if (!wheel || !saveThemeName) return;
+  const saveCurrentAsTheme = useCallback(async (name?: string, emoji?: string) => {
+    const finalName = name || saveThemeName;
+    if (!wheel || !finalName) return;
     setSavingTheme(true);
     try {
       const res = await api.post('/api/themes', {
-        name: saveThemeName,
-        emoji: '🎨',
+        name: finalName,
+        emoji: emoji || '🎨',
         branding: wheel.branding,
         config: { ...wheel.config, game_type: wheel.config.game_type || 'wheel' },
         segment_palette: segments.map(s => ({
@@ -423,7 +424,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
                   setWheel={updateWheel}
                   setSegments={updateSegments}
                   setAppliedTheme={setAppliedTheme}
-                  saveCurrentAsTheme={() => setSaveThemeDialog(true)}
+                  saveCurrentAsTheme={saveCurrentAsTheme}
                   savingTheme={savingTheme}
                 />
               </TabsContent>
@@ -509,7 +510,7 @@ export default function WheelEditorPage({ params }: { params: Promise<{ id: stri
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setSaveThemeDialog(false)}>Cancel</Button>
-            <Button className="bg-violet-600 hover:bg-violet-500" onClick={saveCurrentAsTheme} disabled={savingTheme}>Archive</Button>
+            <Button className="bg-violet-600 hover:bg-violet-500" onClick={() => saveCurrentAsTheme()} disabled={savingTheme}>Archive</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
