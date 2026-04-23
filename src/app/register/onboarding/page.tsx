@@ -3,10 +3,6 @@
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useAuth } from '@/components/providers/auth-provider';
 
 export default function OnboardingPage() {
@@ -51,46 +47,65 @@ function OnboardingForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center text-2xl">🎡</div>
-          <CardTitle className="text-2xl">One last step</CardTitle>
-          <CardDescription>Tell us your company name to finish setting up your account</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {/* Show the linked Google account */}
-            <div className="space-y-1.5">
-              <Label>Signed in with Google</Label>
-              <div className="flex items-center gap-2.5 rounded-md border bg-muted/50 px-3 py-2.5 text-sm text-muted-foreground">
-                <GoogleIcon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{name} &mdash; {email}</span>
+    <div className="min-h-screen flex items-center justify-center bg-[#13131b] p-4 relative">
+      {/* Radial glow */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px]" />
+      </div>
+
+      <div className="relative w-full max-w-sm">
+        {/* Logo / header */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-[0_0_0_1px_rgba(124,58,237,0.3),0_8px_24px_-4px_rgba(124,58,237,0.5)] mb-5">
+            <svg viewBox="0 0 24 24" className="h-7 w-7 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 2v10l4 4" />
+              <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
+            </svg>
+          </div>
+          <h1 className="text-[26px] font-bold tracking-[-0.03em] text-white">One last step</h1>
+          <p className="text-sm text-white/40 mt-1">Tell us your company name to finish setting up your account</p>
+        </div>
+
+        {/* Card */}
+        <div className="overflow-hidden rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl">
+          <form onSubmit={handleSubmit}>
+            <div className="p-6 space-y-4">
+              {/* Google account info */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-white/70">Signed in with Google</label>
+                <div className="flex items-center gap-2.5 rounded-lg border border-white/10 bg-white/5 px-3 py-2.5 text-sm text-white/50">
+                  <GoogleIcon className="h-4 w-4 shrink-0" />
+                  <span className="truncate">{name} — {email}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label htmlFor="company_name" className="text-xs font-medium text-white/70">Company Name</label>
+                <input
+                  id="company_name"
+                  type="text"
+                  placeholder="Acme Corp"
+                  required
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-white placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+                />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="company_name">Company Name</Label>
-              <Input
-                id="company_name"
-                placeholder="Acme Corp"
-                required
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
+            <div className="px-6 pb-6">
+              <button
+                type="submit"
+                className="w-full h-10 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-lg shadow-[0_0_0_1px_rgba(124,58,237,0.4),0_4px_12px_-2px_rgba(124,58,237,0.35)] transition-all duration-200 disabled:opacity-50"
+                disabled={loading || !token}
+              >
+                {loading ? 'Setting up…' : 'Complete Setup'}
+              </button>
             </div>
-          </CardContent>
-          <CardFooter>
-            <Button
-              type="submit"
-              className="w-full bg-violet-600 hover:bg-violet-700"
-              disabled={loading || !token}
-            >
-              {loading ? 'Setting up…' : 'Complete Setup'}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }

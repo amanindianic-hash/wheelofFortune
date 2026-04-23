@@ -5,10 +5,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 export default function ResetPasswordPage() {
   return (
@@ -32,19 +28,20 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <Card className="w-full max-w-md shadow-xl">
-          <CardHeader className="text-center space-y-2">
-            <div className="mx-auto w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl">⚠️</div>
-            <CardTitle className="text-2xl">Invalid link</CardTitle>
-            <CardDescription>This reset link is missing or invalid.</CardDescription>
-          </CardHeader>
-          <CardFooter className="justify-center">
-            <Link href="/forgot-password" className="text-sm text-violet-600 hover:underline">
+      <div className="min-h-screen flex items-center justify-center bg-[#13131b] p-4">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <div className="h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px]" />
+        </div>
+        <div className="relative w-full max-w-sm">
+          <div className="rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl p-8 text-center">
+            <div className="mx-auto w-12 h-12 bg-rose-500/10 border border-rose-500/20 rounded-xl flex items-center justify-center text-2xl mb-4">⚠️</div>
+            <h2 className="text-xl font-bold text-white mb-1">Invalid link</h2>
+            <p className="text-sm text-white/40 mb-4">This reset link is missing or invalid.</p>
+            <Link href="/forgot-password" className="text-sm text-violet-400 hover:text-violet-300 transition-colors">
               Request a new reset link
             </Link>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
       </div>
     );
   }
@@ -80,12 +77,18 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center space-y-2">
-          <Link 
-            href="/" 
-            className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-[0_0_0_1px_rgb(124_58_237/0.3),0_8px_24_px_-4px_rgb(124_58_237/0.5)] mb-2 hover:scale-105 transition-transform"
+    <div className="min-h-screen flex items-center justify-center bg-[#13131b] p-4 relative">
+      {/* Radial glow */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="h-[600px] w-[600px] rounded-full bg-violet-600/5 blur-[120px]" />
+      </div>
+
+      <div className="relative w-full max-w-sm">
+        {/* Logo */}
+        <div className="flex flex-col items-center mb-8">
+          <Link
+            href="/"
+            className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-[0_0_0_1px_rgba(124,58,237,0.3),0_8px_24px_-4px_rgba(124,58,237,0.5)] mb-5 hover:scale-105 transition-transform"
           >
             <svg viewBox="0 0 24 24" className="h-7 w-7 text-white" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
@@ -93,87 +96,90 @@ function ResetPasswordForm() {
               <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none" />
             </svg>
           </Link>
-          <CardTitle className="text-2xl">Set new password</CardTitle>
-          <CardDescription>Choose a strong password for your account</CardDescription>
-        </CardHeader>
+          <h1 className="text-[26px] font-bold tracking-[-0.03em] text-white">Set new password</h1>
+          <p className="text-sm text-white/40 mt-1">Choose a strong password for your account</p>
+        </div>
 
-        <CardContent>
-          {done ? (
-            <div className="rounded-md bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-800 text-center">
-              Password reset successfully! Redirecting to login…
-            </div>
-          ) : (
-            <form id="reset-form" onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="password">New password</Label>
-                <div className="relative">
-                  <Input
-                    id="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Min. 8 characters"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    tabIndex={-1}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
+        {/* Card */}
+        <div className="overflow-hidden rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl">
+          <div className="p-6">
+            {done ? (
+              <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-400 text-center">
+                Password reset successfully! Redirecting to login…
               </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="confirm">Confirm password</Label>
-                <div className="relative">
-                  <Input
-                    id="confirm"
-                    type={showConfirm ? 'text' : 'password'}
-                    placeholder="Repeat password"
-                    required
-                    value={confirm}
-                    onChange={(e) => setConfirm(e.target.value)}
-                    className="pr-10"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirm((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    tabIndex={-1}
-                    aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                  >
-                    {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
+            ) : (
+              <form id="reset-form" onSubmit={handleSubmit} className="space-y-3.5">
+                <div className="space-y-1.5">
+                  <label htmlFor="password" className="text-xs font-medium text-white/70">New password</label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      placeholder="Min. 8 characters"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 pr-10 text-white placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                      tabIndex={-1}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            </form>
-          )}
-        </CardContent>
+                <div className="space-y-1.5">
+                  <label htmlFor="confirm" className="text-xs font-medium text-white/70">Confirm password</label>
+                  <div className="relative">
+                    <input
+                      id="confirm"
+                      type={showConfirm ? 'text' : 'password'}
+                      placeholder="Repeat password"
+                      required
+                      value={confirm}
+                      onChange={(e) => setConfirm(e.target.value)}
+                      className="h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 pr-10 text-white placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-white/30 hover:text-white transition-colors"
+                      tabIndex={-1}
+                      aria-label={showConfirm ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            )}
+          </div>
 
-        <CardFooter className="flex flex-col gap-3">
-          {!done && (
-            <Button
-              type="submit"
-              form="reset-form"
-              className="w-full bg-violet-600 hover:bg-violet-700"
-              disabled={loading}
+          <div className="flex flex-col gap-3 px-6 pb-6 pt-0">
+            {!done && (
+              <button
+                type="submit"
+                form="reset-form"
+                className="w-full h-10 bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-lg shadow-[0_0_0_1px_rgba(124,58,237,0.4),0_4px_12px_-2px_rgba(124,58,237,0.35)] transition-all duration-200 disabled:opacity-50"
+                disabled={loading}
+              >
+                {loading ? 'Saving…' : 'Reset Password'}
+              </button>
+            )}
+            <Link
+              href="/login"
+              className="flex items-center justify-center gap-1.5 text-sm text-white/40 hover:text-white transition-colors"
             >
-              {loading ? 'Saving…' : 'Reset Password'}
-            </Button>
-          )}
-          <Link
-            href="/login"
-            className="flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Back to sign in
-          </Link>
-        </CardFooter>
-      </Card>
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Back to sign in
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

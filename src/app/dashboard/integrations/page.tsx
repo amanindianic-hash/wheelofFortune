@@ -3,11 +3,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { api } from '@/lib/api-client';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import {
   Mail, MessageSquare, Webhook, Loader2, Save,
@@ -23,13 +18,13 @@ interface Integration {
 }
 
 const INTEGRATION_TYPES = [
-  { id: 'mailchimp',     name: 'Mailchimp',      icon: Mail,         description: 'Sync leads directly to Mailchimp',        fields: [{ key: 'api_key', label: 'API Key', type: 'password' }, { key: 'list_id', label: 'Audience ID', type: 'text' }] },
-  { id: 'klaviyo',       name: 'Klaviyo',         icon: MessageSquare,description: 'Sync leads directly to Klaviyo',           fields: [{ key: 'api_key', label: 'Private API Key', type: 'password' }, { key: 'list_id', label: 'List ID', type: 'text' }] },
-  { id: 'webhook',       name: 'Webhooks',        icon: Webhook,      description: 'Send real-time alerts to any server',      fields: [{ key: 'url', label: 'Webhook URL', type: 'url' }, { key: 'secret', label: 'Secret (optional)', type: 'password' }] },
-  { id: 'hubspot',       name: 'HubSpot',         icon: Users,        description: 'Create contacts in your HubSpot CRM',      fields: [{ key: 'access_token', label: 'Private App Token', type: 'password' }, { key: 'list_id', label: 'List ID (optional)', type: 'text' }] },
-  { id: 'salesforce',    name: 'Salesforce',      icon: Database,     description: 'Create leads in Salesforce CRM',           fields: [{ key: 'instance_url', label: 'Instance URL', type: 'url' }, { key: 'client_id', label: 'Consumer Key', type: 'text' }, { key: 'client_secret', label: 'Consumer Secret', type: 'password' }, { key: 'username', label: 'Username', type: 'text' }, { key: 'password', label: 'Password', type: 'password' }, { key: 'security_token', label: 'Security Token', type: 'password' }] },
-  { id: 'google_sheets', name: 'Google Sheets',   icon: Table2,       description: 'Append spin wins as rows in a Sheet',      fields: [{ key: 'spreadsheet_id', label: 'Spreadsheet ID', type: 'text' }, { key: 'sheet_name', label: 'Sheet Name', type: 'text' }, { key: 'service_account_email', label: 'Service Account Email', type: 'text' }, { key: 'private_key', label: 'Private Key (PEM)', type: 'password' }] },
-  { id: 'zapier',        name: 'Zapier',          icon: Zap,          description: 'Trigger Zapier workflows on spin wins',    fields: [{ key: 'webhook_url', label: 'Zapier Webhook URL', type: 'url' }] },
+  { id: 'mailchimp',     name: 'Mailchimp',     icon: Mail,          description: 'Sync leads directly to Mailchimp',      fields: [{ key: 'api_key', label: 'API Key', type: 'password' }, { key: 'list_id', label: 'Audience ID', type: 'text' }] },
+  { id: 'klaviyo',       name: 'Klaviyo',        icon: MessageSquare, description: 'Sync leads directly to Klaviyo',         fields: [{ key: 'api_key', label: 'Private API Key', type: 'password' }, { key: 'list_id', label: 'List ID', type: 'text' }] },
+  { id: 'webhook',       name: 'Webhooks',       icon: Webhook,       description: 'Send real-time alerts to any server',    fields: [{ key: 'url', label: 'Webhook URL', type: 'url' }, { key: 'secret', label: 'Secret (optional)', type: 'password' }] },
+  { id: 'hubspot',       name: 'HubSpot',        icon: Users,         description: 'Create contacts in your HubSpot CRM',    fields: [{ key: 'access_token', label: 'Private App Token', type: 'password' }, { key: 'list_id', label: 'List ID (optional)', type: 'text' }] },
+  { id: 'salesforce',    name: 'Salesforce',     icon: Database,      description: 'Create leads in Salesforce CRM',         fields: [{ key: 'instance_url', label: 'Instance URL', type: 'url' }, { key: 'client_id', label: 'Consumer Key', type: 'text' }, { key: 'client_secret', label: 'Consumer Secret', type: 'password' }, { key: 'username', label: 'Username', type: 'text' }, { key: 'password', label: 'Password', type: 'password' }, { key: 'security_token', label: 'Security Token', type: 'password' }] },
+  { id: 'google_sheets', name: 'Google Sheets',  icon: Table2,        description: 'Append spin wins as rows in a Sheet',    fields: [{ key: 'spreadsheet_id', label: 'Spreadsheet ID', type: 'text' }, { key: 'sheet_name', label: 'Sheet Name', type: 'text' }, { key: 'service_account_email', label: 'Service Account Email', type: 'text' }, { key: 'private_key', label: 'Private Key (PEM)', type: 'password' }] },
+  { id: 'zapier',        name: 'Zapier',         icon: Zap,           description: 'Trigger Zapier workflows on spin wins',   fields: [{ key: 'webhook_url', label: 'Zapier Webhook URL', type: 'url' }] },
 ];
 
 export default function IntegrationsPage() {
@@ -121,19 +116,20 @@ export default function IntegrationsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-20">
-        <Loader2 className="animate-spin text-violet-600 h-8 w-8" />
+        <Loader2 className="animate-spin text-violet-500 h-8 w-8" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-full bg-background">
+    <div className="min-h-full bg-[#13131b]">
       <div className="max-w-5xl mx-auto px-6 md:px-8 py-8 space-y-8">
 
         {/* Header */}
         <div>
-          <h1 className="text-[26px] font-bold tracking-[-0.03em]">Integrations</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Push leads and spin data to your marketing tools</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-violet-400 mb-1">Connections</p>
+          <h1 className="text-[26px] font-bold tracking-[-0.03em] text-white">Integrations</h1>
+          <p className="text-sm text-white/50 mt-0.5">Push leads and spin data to your marketing tools</p>
         </div>
 
         {/* Integration Cards */}
@@ -145,20 +141,20 @@ export default function IntegrationsPage() {
             const isConnected = !!current.id && current.is_active;
 
             return (
-              <Card key={type.id} className="relative overflow-hidden flex flex-col">
+              <div key={type.id} className="relative overflow-hidden rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl flex flex-col">
                 {isConnected && (
                   <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-600 to-emerald-400" />
                 )}
-                <CardHeader className="pb-3 pt-5 px-5">
+                <div className="px-5 pt-5 pb-4 flex-1 flex flex-col">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-violet-500/10">
-                      <Icon className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                      <Icon className="h-4 w-4 text-violet-400" />
                     </div>
                     <div className="flex items-center gap-2">
                       {isConnected && (
-                        <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-500/20 text-[10px] py-0.5">
+                        <span className="inline-flex items-center rounded-md bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 px-2 py-0.5 text-[10px] font-medium">
                           Active
-                        </Badge>
+                        </span>
                       )}
                       <Switch
                         checked={current.is_active}
@@ -166,70 +162,68 @@ export default function IntegrationsPage() {
                       />
                     </div>
                   </div>
-                  <CardTitle className="text-sm font-semibold">{type.name}</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">{type.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="px-5 pb-5 flex-1 flex flex-col justify-between gap-4">
-                  <div className="space-y-3">
+                  <p className="text-sm font-semibold text-white">{type.name}</p>
+                  <p className="text-xs text-white/40 mt-0.5 mb-4">{type.description}</p>
+                  <div className="space-y-3 flex-1">
                     {type.fields.map((field) => (
                       <div key={field.key} className="space-y-1">
-                        <Label className="text-[11px] text-muted-foreground font-medium">{field.label}</Label>
-                        <Input
+                        <label className="text-[11px] font-medium text-white/50">{field.label}</label>
+                        <input
                           type={field.type}
                           placeholder={`${field.label}…`}
                           value={String(current.config[field.key] || '')}
                           onChange={(e) => updateConfig(type.id, field.key, e.target.value)}
-                          className="h-8 text-xs"
+                          className="h-8 w-full rounded-md border border-white/10 bg-white/5 px-2.5 text-xs text-white placeholder:text-white/20 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
                         />
                       </div>
                     ))}
                   </div>
-                  <Button
-                    className="w-full bg-violet-600 hover:bg-violet-700 text-white h-8 text-xs gap-1.5"
+                </div>
+                <div className="px-5 pb-5">
+                  <button
+                    className="w-full h-8 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-[0_0_0_1px_rgba(124,58,237,0.4)] transition-all disabled:opacity-50"
                     disabled={isSaving}
                     onClick={() => handleSave(type.id)}
                   >
                     {isSaving ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : <Save className="h-3.5 w-3.5" />}
                     {current.id ? 'Save Changes' : 'Connect'}
-                  </Button>
-                </CardContent>
-              </Card>
+                  </button>
+                </div>
+              </div>
             );
           })}
         </div>
 
         {/* Shopify */}
         <div className="space-y-3">
-          <h2 className="text-sm font-semibold flex items-center gap-2">
-            <ShoppingBag className="h-4 w-4 text-emerald-600" /> Shopify
+          <h2 className="text-sm font-semibold text-white flex items-center gap-2">
+            <ShoppingBag className="h-4 w-4 text-emerald-400" /> Shopify
           </h2>
-          <Card className={shopify?.connected ? 'border-emerald-500/30' : ''}>
+          <div className={`relative rounded-2xl border bg-[rgba(31,31,40,0.7)] backdrop-blur-xl overflow-hidden ${shopify?.connected ? 'border-emerald-500/30' : 'border-white/5'}`}>
             {shopify?.connected && (
-              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-600 to-emerald-400 rounded-t-xl" />
+              <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-600 to-emerald-400" />
             )}
-            <CardHeader className="pb-3 pt-5 px-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-sm font-semibold">Shopify Discount Codes</CardTitle>
-                  <CardDescription className="text-xs mt-0.5">
-                    Auto-generate single-use discount codes when a customer wins a prize.
-                  </CardDescription>
-                </div>
-                {shopify?.connected ? (
-                  <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-500/20 flex items-center gap-1 text-[11px]">
-                    <CheckCircle2 className="h-3 w-3" /> Connected
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="flex items-center gap-1 text-[11px]">
-                    <XCircle className="h-3 w-3" /> Not Connected
-                  </Badge>
-                )}
+            <div className="px-5 pt-5 pb-4 border-b border-white/5 flex items-start justify-between">
+              <div>
+                <p className="text-sm font-semibold text-white">Shopify Discount Codes</p>
+                <p className="text-xs text-white/40 mt-0.5">
+                  Auto-generate single-use discount codes when a customer wins a prize.
+                </p>
               </div>
-            </CardHeader>
-            <CardContent className="px-5 pb-5 space-y-4">
               {shopify?.connected ? (
-                <>
-                  <div className="rounded-lg border border-border bg-muted/30 p-3 space-y-1.5 text-xs">
+                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 px-2 py-0.5 text-[11px] font-medium">
+                  <CheckCircle2 className="h-3 w-3" /> Connected
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-md bg-white/5 border border-white/10 text-white/40 px-2 py-0.5 text-[11px] font-medium">
+                  <XCircle className="h-3 w-3" /> Not Connected
+                </span>
+              )}
+            </div>
+            <div className="p-5">
+              {shopify?.connected ? (
+                <div className="space-y-4">
+                  <div className="rounded-lg border border-white/10 bg-white/5 p-3 space-y-1.5 text-xs">
                     {[
                       ['Store', String((shopify.integration as Record<string, Record<string, unknown>>)?.config?.shop_name ?? '')],
                       ['Domain', String((shopify.integration as Record<string, Record<string, unknown>>)?.config?.shop_domain ?? '')],
@@ -238,15 +232,18 @@ export default function IntegrationsPage() {
                       ['Expiry', `${(shopify.integration as Record<string, Record<string, unknown>>)?.config?.expiry_days ?? 30} days`],
                     ].map(([k, v]) => (
                       <div key={k} className="flex justify-between">
-                        <span className="text-muted-foreground">{k}</span>
-                        <span className="font-medium text-foreground">{v}</span>
+                        <span className="text-white/40">{k}</span>
+                        <span className="font-medium text-white/80">{v}</span>
                       </div>
                     ))}
                   </div>
-                  <Button variant="outline" size="sm" className="text-rose-500 border-rose-200 hover:bg-rose-500/10 hover:border-rose-500/30 text-xs h-8" onClick={disconnectShopify}>
+                  <button
+                    onClick={disconnectShopify}
+                    className="h-8 px-4 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 text-xs font-medium transition-colors"
+                  >
                     Disconnect Shopify
-                  </Button>
-                </>
+                  </button>
+                </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {[
@@ -256,31 +253,41 @@ export default function IntegrationsPage() {
                     { label: 'Code Prefix', key: 'prefix', type: 'text', placeholder: 'WHEEL' },
                   ].map((f) => (
                     <div key={f.key} className="space-y-1">
-                      <Label className="text-xs text-muted-foreground">{f.label}</Label>
-                      <Input
+                      <label className="text-xs font-medium text-white/50">{f.label}</label>
+                      <input
                         type={f.type}
                         placeholder={f.placeholder}
-                        className="h-8 text-xs"
+                        className="h-8 w-full rounded-md border border-white/10 bg-white/5 px-2.5 text-xs text-white placeholder:text-white/20 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
                         value={shopifyForm[f.key as keyof typeof shopifyForm] as string}
                         onChange={e => setShopifyForm(prev => ({ ...prev, [f.key]: e.target.value }))}
                       />
                     </div>
                   ))}
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Expiry (days)</Label>
-                    <Input type="number" min={1} max={365} className="h-8 text-xs" value={shopifyForm.expiry_days}
-                      onChange={e => setShopifyForm(f => ({ ...f, expiry_days: parseInt(e.target.value) || 30 }))} />
+                    <label className="text-xs font-medium text-white/50">Expiry (days)</label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={365}
+                      className="h-8 w-full rounded-md border border-white/10 bg-white/5 px-2.5 text-xs text-white placeholder:text-white/20 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+                      value={shopifyForm.expiry_days}
+                      onChange={e => setShopifyForm(f => ({ ...f, expiry_days: parseInt(e.target.value) || 30 }))}
+                    />
                   </div>
                   <div className="flex items-end">
-                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white h-8 text-xs gap-1.5" onClick={connectShopify} disabled={shopifySaving}>
+                    <button
+                      className="w-full h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 shadow-[0_0_0_1px_rgba(16,185,129,0.4)] transition-all disabled:opacity-50"
+                      onClick={connectShopify}
+                      disabled={shopifySaving}
+                    >
                       {shopifySaving ? <Loader2 className="animate-spin h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
                       {shopifySaving ? 'Connecting…' : 'Connect Shopify'}
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
       </div>

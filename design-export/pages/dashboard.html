@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpinPlatform - System Telemetry</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --font-heading: 'Space Grotesk', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --color-primary: #d2bbff;
+      --color-primary-container: #7c3aed;
+      --color-tertiary: #4edea3;
+      --color-error: #ffb4ab;
+      --color-background: #13131b;
+      --color-surface: #13131b;
+      --color-on-surface: #e4e1ed;
+    }
+    body { background: #13131b; font-family: var(--font-body); color: #e4e1ed; }
+    .font-editorial { font-family: var(--font-heading); letter-spacing: -0.04em; }
+    .font-heading { font-family: var(--font-heading); }
+    .text-stat { font-variant-numeric: tabular-nums; letter-spacing: -0.035em; }
+    .label-caps { text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.6875rem; font-weight: 600; font-family: var(--font-heading); }
+    .bg-dot-pattern { background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 24px 24px; }
+    .glass-panel { background: rgba(41, 41, 50, 0.6); backdrop-filter: blur(24px); }
+    .neon-glow { box-shadow: 0 0 15px rgba(124, 58, 237, 0.3); }
+    .neon-glow-lg { box-shadow: 0 0 30px rgba(124, 58, 237, 0.4), 0 0 60px rgba(124, 58, 237, 0.15); }
+    .gradient-text { background: linear-gradient(135deg, #7c3aed 0%, #d2bbff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  </style>
+</head>
+<body class="min-h-screen bg-[#13131b]">
+  <div class="p-8 md:p-12 min-h-screen flex-1 w-full max-w-7xl mx-auto space-y-16 bg-dot-pattern">
+
+    <!-- Neural Header Section -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative">
+      <div class="space-y-2">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="h-px w-8 bg-[#d2bbff]/40 shrink-0"></div>
+          <span class="text-[10px] font-black text-[#d2bbff] uppercase tracking-[0.3em]">Neural Interface v4.0</span>
+        </div>
+        <h1 class="text-4xl md:text-6xl font-black font-heading tracking-tight text-white leading-[0.9]">
+          System <span class="text-white/20">Telemetry</span>
+        </h1>
+        <p class="text-muted-foreground/40 font-bold text-[11px] uppercase tracking-[0.2em] max-w-md leading-relaxed">
+          Real-time engagement matrix synthesis for <span class="text-foreground/60">Distributed Network</span>
+        </p>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <div class="glass-panel px-5 py-2.5 rounded-2xl flex items-center gap-3 border-white/5 shadow-[0_0_30px_rgba(16,185,129,0.05)] transition-all hover:border-emerald-500/20 group">
+          <div class="relative">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)]"></div>
+            <div class="absolute inset-0 w-2 h-2 rounded-full bg-emerald-500 animate-ping opacity-40"></div>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-[9px] font-black uppercase tracking-[0.1em] text-emerald-400/80">Active Protocol</span>
+            <span class="text-[10px] font-bold text-muted-foreground/60">Live Stream Data</span>
+          </div>
+        </div>
+
+        <button class="glass-panel p-3 rounded-2xl border-white/5 hover:bg-white/[0.05] hover:border-white/10 transition-all group active:scale-95">
+          <svg class="h-5 w-5 text-muted-foreground/40 group-hover:text-[#d2bbff] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Analytics Bento Matrix -->
+    <section class="grid grid-cols-12 gap-8">
+
+      <!-- Engagement Volume Card -->
+      <div class="col-span-12 lg:col-span-8 glass-panel rounded-[2rem] p-10 relative overflow-hidden group border-white/10 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)]">
+        <div class="flex justify-between items-start relative z-10">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2 mb-1">
+              <div class="w-1.5 h-1.5 rounded-full bg-[#d2bbff]"></div>
+              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Temporal Distribution</p>
+            </div>
+            <h3 class="text-4xl font-bold text-white tracking-tighter">Spin Activity</h3>
+          </div>
+          <div class="bg-black/40 rounded-2xl p-4 border border-white/5 text-right min-w-[120px] backdrop-blur-md">
+            <span class="text-2xl font-black font-heading tabular-nums text-[#d2bbff]/80 block">+12.4%</span>
+            <p class="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 mt-1">Efficiency Delta</p>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="mt-16 h-44 w-full flex items-end gap-2 relative">
+          <div class="absolute inset-0 flex flex-col justify-between opacity-[0.03] pointer-events-none">
+            <div class="w-full h-px bg-white"></div>
+            <div class="w-full h-px bg-white"></div>
+            <div class="w-full h-px bg-white"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 45%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 62%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 38%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 71%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 55%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 82%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 48%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 67%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 73%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 59%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 88%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-white/[0.05] hover:bg-white/[0.12] transition-all" style="height: 65%"></div>
+          </div>
+          <div class="flex-1 group/bar relative h-full flex flex-col justify-end">
+            <div class="w-full rounded-t-xl bg-[#d2bbff] shadow-[0_0_30px_rgba(124,58,237,0.4)] border-t border-white/20" style="height: 91%"></div>
+          </div>
+        </div>
+
+        <div class="absolute -bottom-24 -left-24 w-96 h-96 bg-[#d2bbff]/10 blur-[120px] rounded-full pointer-events-none group-hover:bg-[#d2bbff]/15 transition-all duration-1000"></div>
+      </div>
+
+      <!-- System Efficiency Card -->
+      <div class="col-span-12 lg:col-span-4 glass-panel rounded-[2rem] p-10 relative overflow-hidden flex flex-col justify-between border-white/10 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.5)]">
+        <div class="space-y-1">
+          <div class="flex items-center gap-2 mb-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-[#d2bbff]"></div>
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40">Core Ratio Analysis</p>
+          </div>
+          <h3 class="text-4xl font-bold text-white tracking-tighter">Efficiency</h3>
+        </div>
+
+        <div class="flex flex-col items-center justify-center flex-1 py-10">
+          <div class="relative w-44 h-44 flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border border-white/[0.02] scale-110"></div>
+            <div class="absolute inset-0 rounded-full border border-white/[0.02] scale-125 opacity-30"></div>
+
+            <svg class="w-full h-full -rotate-90 drop-shadow-[0_0_15px_rgba(124,58,237,0.15)]">
+              <circle class="text-white/[0.03]" cx="88" cy="88" fill="transparent" r="80" stroke="currentColor" stroke-width="12"></circle>
+              <circle class="text-[#d2bbff]" cx="88" cy="88" fill="transparent" r="80" stroke="currentColor" stroke-width="12" stroke-linecap="round" stroke-dasharray="502" stroke-dashoffset="150"></circle>
+            </svg>
+            <div class="absolute inset-0 flex flex-col items-center justify-center pt-2">
+              <span class="text-5xl font-black font-heading tabular-nums text-white leading-none tracking-tighter">68<span class="text-xl text-[#d2bbff]/60 opacity-50 ml-0.5">%</span></span>
+              <span class="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground/30 mt-4">Global C.R.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-5 bg-black/20 p-5 rounded-2xl border border-white/5">
+          <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/50">
+            <span class="flex items-center gap-2">
+              <div class="w-1 h-1 rounded-full bg-white/20"></div>
+              System Samples
+            </span>
+            <span class="text-white tracking-widest">24,892</span>
+          </div>
+          <div class="w-full h-2 bg-white/[0.04] rounded-full overflow-hidden p-0.5">
+            <div class="h-full bg-gradient-to-r from-[#d2bbff]/60 to-[#d2bbff] shadow-[0_0_12px_rgba(124,58,237,0.5)] rounded-full" style="width: 72%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metric Modules -->
+      <div class="col-span-12 md:col-span-4 glass-panel rounded-[1.5rem] p-7 flex items-center gap-6 border-white/5 hover:border-white/20 transition-all duration-500 group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-[#d2bbff]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        <div class="relative z-10 p-4 bg-white/[0.03] rounded-2xl group-hover:bg-white/[0.08] transition-all group-hover:scale-110 shadow-inner">
+          <svg class="h-6 w-6 text-[#d2bbff] opacity-70 group-hover:opacity-100 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </div>
+        <div class="relative z-10 flex-1">
+          <h4 class="text-3xl font-bold font-heading tabular-nums text-white tracking-tight">1,248</h4>
+          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 mt-1">Leads Aggregated</p>
+        </div>
+        <div class="relative z-10 h-8 w-px bg-white/[0.05]"></div>
+      </div>
+
+      <div class="col-span-12 md:col-span-4 glass-panel rounded-[1.5rem] p-7 flex items-center gap-6 border-white/5 hover:border-white/20 transition-all duration-500 group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        <div class="relative z-10 p-4 bg-white/[0.03] rounded-2xl group-hover:bg-white/[0.08] transition-all group-hover:scale-110 shadow-inner">
+          <svg class="h-6 w-6 text-emerald-400 opacity-70 group-hover:opacity-100 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+          </svg>
+        </div>
+        <div class="relative z-10 flex-1">
+          <h4 class="text-3xl font-bold font-heading tabular-nums text-white tracking-tight">847</h4>
+          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 mt-1">Winners Synced</p>
+        </div>
+        <div class="relative z-10 h-8 w-px bg-white/[0.05]"></div>
+      </div>
+
+      <div class="col-span-12 md:col-span-4 glass-panel rounded-[1.5rem] p-7 flex items-center gap-6 border-white/5 hover:border-white/20 transition-all duration-500 group relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+        <div class="relative z-10 p-4 bg-white/[0.03] rounded-2xl group-hover:bg-white/[0.08] transition-all group-hover:scale-110 shadow-inner">
+          <svg class="h-6 w-6 text-amber-400 opacity-70 group-hover:opacity-100 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <div class="relative z-10 flex-1">
+          <h4 class="text-3xl font-bold font-heading tabular-nums text-white tracking-tight">2,841</h4>
+          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/30 mt-1">Neural Velocity</p>
+        </div>
+        <div class="relative z-10 h-8 w-px bg-white/[0.05]"></div>
+      </div>
+    </section>
+
+    <!-- Deployment Oversight -->
+    <section class="space-y-10 relative">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 px-1">
+        <div class="space-y-1">
+          <h2 class="text-3xl font-bold text-white tracking-tighter">Active Deployments</h2>
+          <p class="text-[11px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-[#d2bbff]/40 animate-pulse"></span>
+            Live Campaign Engine Tracking
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="text-[10px] font-black uppercase tracking-[0.15em] px-6 py-2.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-all text-muted-foreground/60 hover:text-white">All Systems</button>
+          <button class="text-[10px] font-black uppercase tracking-[0.15em] px-6 py-2.5 rounded-xl bg-[#7c3aed] hover:bg-[#7c3aed]/90 text-white transition-all shadow-[0_10px_20px_-5px_rgba(124,58,237,0.4)] active:scale-95">
+            New Deployment
+          </button>
+        </div>
+      </div>
+
+      <div class="grid gap-4 relative">
+        <div class="absolute left-10 top-0 bottom-0 w-px bg-gradient-to-b from-white/[0.05] via-white/[0.02] to-transparent pointer-events-none hidden sm:block"></div>
+
+        <!-- Wheel Card 1 -->
+        <div class="group glass-panel border-white/5 hover:border-white/20 hover:bg-white/[0.03] transition-all duration-500 rounded-[1.5rem] p-5 flex flex-col sm:flex-row items-center justify-between gap-8 relative overflow-hidden">
+          <div class="flex items-center gap-6 w-full sm:w-auto relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-black/40 flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10 group-hover:ring-[#d2bbff]/40 transition-all shadow-inner">
+              <svg class="h-8 w-8 text-[#d2bbff]/60 animate-[spin_6s_linear_infinite] group-hover:text-[#d2bbff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <path stroke-width="2" d="M12 2v10l4 4"/>
+              </svg>
+            </div>
+            <div class="min-w-0 space-y-1.5">
+              <a href="/dashboard/wheels/1" class="group/link flex items-center gap-3">
+                <h4 class="text-xl font-bold text-white tracking-tight group-hover/link:text-[#d2bbff] transition-colors truncate">Summer Sale Wheel</h4>
+              </a>
+              <div class="flex items-center gap-3">
+                <div class="px-2 py-0.5 rounded bg-[#d2bbff]/10 border border-[#d2bbff]/20">
+                  <span class="text-[8px] font-black text-[#d2bbff] uppercase tracking-widest">v2.4.0</span>
+                </div>
+                <p class="text-[9px] font-black font-mono text-muted-foreground/20 uppercase tracking-[0.1em]">UUID: a1b2c3d4e5f6</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-12 relative z-10 px-2 sm:px-0">
+            <div class="flex flex-col items-end">
+              <span class="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/20 mb-2">Network Samples</span>
+              <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black tabular-nums text-white tracking-tighter">12,847</span>
+                <span class="text-[10px] font-black text-muted-foreground/40 uppercase">Units</span>
+              </div>
+            </div>
+
+            <div class="h-10 w-px bg-white/[0.05]"></div>
+
+            <div class="px-4 py-1.5 rounded-xl border bg-emerald-500/5 border-emerald-500/20 text-emerald-400/80 text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2.5 transition-all duration-500 shadow-sm">
+              <div class="relative">
+                <div class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+                <div class="absolute inset-0 w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping opacity-30"></div>
+              </div>
+              active
+            </div>
+
+            <button class="p-3 text-muted-foreground/20 hover:text-white transition-all hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/5 group-hover:text-muted-foreground/60 active:scale-90">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#d2bbff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+        </div>
+
+        <!-- Wheel Card 2 -->
+        <div class="group glass-panel border-white/5 hover:border-white/20 hover:bg-white/[0.03] transition-all duration-500 rounded-[1.5rem] p-5 flex flex-col sm:flex-row items-center justify-between gap-8 relative overflow-hidden">
+          <div class="flex items-center gap-6 w-full sm:w-auto relative z-10">
+            <div class="w-16 h-16 rounded-2xl bg-black/40 flex items-center justify-center shrink-0 overflow-hidden ring-1 ring-white/10 group-hover:ring-[#d2bbff]/40 transition-all shadow-inner">
+              <svg class="h-8 w-8 text-muted-foreground/20 group-hover:text-[#d2bbff]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                <path stroke-width="2" d="M12 2v10l4 4"/>
+              </svg>
+            </div>
+            <div class="min-w-0 space-y-1.5">
+              <a href="/dashboard/wheels/2" class="group/link flex items-center gap-3">
+                <h4 class="text-xl font-bold text-white tracking-tight group-hover/link:text-[#d2bbff] transition-colors truncate">Q4 Promo Spin</h4>
+              </a>
+              <div class="flex items-center gap-3">
+                <div class="px-2 py-0.5 rounded bg-[#d2bbff]/10 border border-[#d2bbff]/20">
+                  <span class="text-[8px] font-black text-[#d2bbff] uppercase tracking-widest">v2.4.0</span>
+                </div>
+                <p class="text-[9px] font-black font-mono text-muted-foreground/20 uppercase tracking-[0.1em]">UUID: g7h8i9j0k1l2</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-12 relative z-10 px-2 sm:px-0">
+            <div class="flex flex-col items-end">
+              <span class="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground/20 mb-2">Network Samples</span>
+              <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black tabular-nums text-white tracking-tighter">8,234</span>
+                <span class="text-[10px] font-black text-muted-foreground/40 uppercase">Units</span>
+              </div>
+            </div>
+
+            <div class="h-10 w-px bg-white/[0.05]"></div>
+
+            <div class="px-4 py-1.5 rounded-xl border bg-amber-500/5 border-amber-500/20 text-amber-400/80 text-[9px] font-black uppercase tracking-[0.2em] flex items-center gap-2.5 transition-all duration-500 shadow-sm">
+              <div class="w-1.5 h-1.5 rounded-full bg-amber-500"></div>
+              paused
+            </div>
+
+            <button class="p-3 text-muted-foreground/20 hover:text-white transition-all hover:bg-white/5 rounded-2xl border border-transparent hover:border-white/5 group-hover:text-muted-foreground/60 active:scale-90">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"/>
+              </svg>
+            </button>
+          </div>
+
+          <div class="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#d2bbff]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technical Footer -->
+    <footer class="pt-20 pb-12 border-t border-white/[0.05] relative overflow-hidden">
+      <div class="flex flex-col md:flex-row justify-between items-center gap-10 relative z-10">
+        <div class="flex flex-col items-center md:items-start gap-4">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-xl bg-[#d2bbff] flex items-center justify-center shadow-[0_0_20px_rgba(124,58,237,0.3)]">
+              <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <span class="text-[14px] font-black tracking-widest text-white uppercase">Neural Platform</span>
+          </div>
+          <p class="text-[10px] font-black text-muted-foreground/20 uppercase tracking-[0.25em]">© 2024 Engineering Edition. Scaled for production.</p>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-10">
+          <div class="flex flex-col gap-1 group cursor-pointer">
+            <span class="text-[10px] font-black text-muted-foreground/30 group-hover:text-[#d2bbff] transition-colors tracking-[0.1em]">Security Compliance</span>
+            <span class="text-[11px] font-bold text-foreground/40 font-mono">ISO Synthesis</span>
+          </div>
+          <div class="flex flex-col gap-1 group cursor-pointer">
+            <span class="text-[10px] font-black text-muted-foreground/30 group-hover:text-[#d2bbff] transition-colors tracking-[0.1em]">API Gateway</span>
+            <span class="text-[11px] font-bold text-foreground/40 font-mono">v4.2.1 Stable</span>
+          </div>
+          <div class="flex flex-col gap-1 group cursor-pointer">
+            <span class="text-[10px] font-black text-muted-foreground/30 group-hover:text-[#d2bbff] transition-colors tracking-[0.1em]">Neural Core</span>
+            <span class="text-[11px] font-bold text-foreground/40 font-mono">Active Node</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute -bottom-10 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-[#d2bbff]/40 to-transparent opacity-50"></div>
+    </footer>
+  </div>
+</body>
+</html>

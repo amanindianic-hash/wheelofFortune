@@ -5,13 +5,9 @@ import { toast } from 'sonner';
 import { api } from '@/lib/api-client';
 import { useAuth } from '@/components/providers/auth-provider';
 import type { Client } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import type { ClientPlan } from '@/lib/types';
 import { useTheme } from '@/components/providers/theme-provider';
@@ -67,8 +63,6 @@ export default function AccountPage() {
     { id: 'enterprise', label: 'Enterprise', price: 'Custom',  spins: 'Unlimited spins',  features: ['SLA', 'Dedicated CSM', 'SSO / SAML'] },
   ];
 
-  // Free / starter → direct switch (no payment needed)
-  // growth / pro / enterprise → Stripe checkout
   const PAID_PLANS: ClientPlan[] = ['growth', 'pro', 'enterprise'];
 
   async function handleUpgrade(plan: ClientPlan) {
@@ -76,7 +70,6 @@ export default function AccountPage() {
     setUpgrading(true);
     try {
       if (PAID_PLANS.includes(plan)) {
-        // Redirect to Stripe checkout
         const res = await api.post('/api/billing/checkout', { plan });
         const data = await res.json();
         if (res.ok && data.url) {
@@ -85,7 +78,6 @@ export default function AccountPage() {
           toast.error(data.error?.message ?? 'Could not start checkout');
         }
       } else {
-        // Free / starter — direct plan switch
         const res = await api.put('/api/account', { plan });
         if (res.ok) {
           toast.success(`Plan changed to ${plan}`);
@@ -102,167 +94,208 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-3xl">
-      <div>
-        <h1 className="text-[26px] font-bold tracking-[-0.03em]">Account Settings</h1>
-        <p className="text-muted-foreground">Manage your company settings and team</p>
-      </div>
+    <div className="min-h-full bg-[#13131b]">
+      <div className="max-w-3xl mx-auto px-6 md:px-8 py-8 space-y-6">
 
-      {/* Plan info */}
-      {client && (
-        <Card className="border-violet-400/40 bg-violet-50 dark:bg-violet-950/30 dark:border-violet-500/30">
-          <CardContent className="flex items-center justify-between py-5">
-            <div>
-              <p className="text-sm text-muted-foreground">Current Plan</p>
-              <div className="flex items-center gap-2 mt-0.5">
-                <Badge className="capitalize bg-violet-600">{client.plan}</Badge>
-                <span className="text-sm">{PLAN_LIMITS[client.plan]}</span>
+        {/* Header */}
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-violet-400 mb-1">Account</p>
+          <h1 className="text-[26px] font-bold tracking-[-0.03em] text-white">Account Settings</h1>
+          <p className="text-sm text-white/50 mt-0.5">Manage your company settings and team</p>
+        </div>
+
+        {/* Plan info */}
+        {client && (
+          <div className="relative overflow-hidden rounded-2xl border border-violet-500/30 bg-violet-600/10 backdrop-blur-xl p-5">
+            <div className="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-violet-600 to-violet-400" />
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-white/50 mb-2">Current Plan</p>
+                <div className="flex items-center gap-2.5">
+                  <span className="inline-flex items-center rounded-full bg-violet-600 px-2.5 py-0.5 text-xs font-semibold text-white capitalize ring-1 ring-violet-500/40">
+                    {client.plan}
+                  </span>
+                  <span className="text-sm text-white/70">{PLAN_LIMITS[client.plan]}</span>
+                </div>
+                <p className="text-xs text-white/40 mt-1.5">
+                  {client.spins_used_this_month.toLocaleString()} of {client.plan_spin_limit.toLocaleString()} spins used this month
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {client.spins_used_this_month.toLocaleString()} of {client.plan_spin_limit.toLocaleString()} spins used this month
-              </p>
+              {client.plan !== 'enterprise' && (
+                <button
+                  onClick={() => setShowUpgrade(true)}
+                  className="shrink-0 h-9 px-4 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold shadow-[0_0_0_1px_rgba(124,58,237,0.4),0_4px_12px_-2px_rgba(124,58,237,0.35)] transition-all duration-200"
+                >
+                  Upgrade Plan
+                </button>
+              )}
             </div>
-            {client.plan !== 'enterprise' && (
-              <Button size="sm" className="bg-violet-600 hover:bg-violet-700 text-white" onClick={() => setShowUpgrade(true)}>
-                Upgrade Plan
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {/* Company settings */}
-      <Card>
-        <CardHeader><CardTitle className="text-base">Company Settings</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label>Company Name</Label>
-            <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+        {/* Company settings */}
+        <div className="rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl overflow-hidden">
+          <div className="px-6 pt-5 pb-4 border-b border-white/5">
+            <h2 className="text-sm font-semibold text-white">Company Settings</h2>
           </div>
-          <div className="space-y-2">
-            <Label>Timezone</Label>
-            <Input value={form.timezone} onChange={(e) => setForm({ ...form, timezone: e.target.value })}
-              placeholder="e.g. Asia/Kolkata, America/New_York" />
+          <div className="p-6 space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-white/70">Company Name</label>
+              <input
+                type="text"
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-white placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-white/70">Timezone</label>
+              <input
+                type="text"
+                value={form.timezone}
+                onChange={(e) => setForm({ ...form, timezone: e.target.value })}
+                placeholder="e.g. Asia/Kolkata, America/New_York"
+                className="h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-white placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-white/70">Custom Domain <span className="text-white/30 font-normal">(optional)</span></label>
+              <input
+                type="text"
+                value={form.custom_domain}
+                onChange={(e) => setForm({ ...form, custom_domain: e.target.value })}
+                placeholder="spin.yourcompany.com"
+                className="h-10 w-full rounded-lg border border-white/10 bg-white/5 px-3 text-white placeholder:text-white/30 focus:border-violet-500 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+              />
+              <p className="text-xs text-white/30">Configure DNS to point to this platform and we&apos;ll handle SSL.</p>
+            </div>
+            <div className="flex justify-end pt-1">
+              <button
+                onClick={saveAccount}
+                disabled={saving}
+                className="h-9 px-5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-sm font-semibold shadow-[0_0_0_1px_rgba(124,58,237,0.4),0_4px_12px_-2px_rgba(124,58,237,0.35)] transition-all duration-200 disabled:opacity-50"
+              >
+                {saving ? 'Saving…' : 'Save Changes'}
+              </button>
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label>Custom Domain (optional)</Label>
-            <Input value={form.custom_domain} onChange={(e) => setForm({ ...form, custom_domain: e.target.value })}
-              placeholder="spin.yourcompany.com" />
-            <p className="text-xs text-muted-foreground">Configure DNS to point to this platform and we&apos;ll handle SSL.</p>
-          </div>
-          <div className="flex justify-end">
-            <Button className="bg-violet-600 hover:bg-violet-700" onClick={saveAccount} disabled={saving}>
-              {saving ? 'Saving…' : 'Save Changes'}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Team */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Team Members</CardTitle>
-            <Badge variant="secondary">{team.length} member{team.length !== 1 ? 's' : ''}</Badge>
+        {/* Team */}
+        <div className="rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl overflow-hidden">
+          <div className="px-6 pt-5 pb-4 border-b border-white/5 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-white">Team Members</h2>
+            <span className="inline-flex items-center rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[11px] font-semibold text-white/50">
+              {team.length} member{team.length !== 1 ? 's' : ''}
+            </span>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
+          <div className="p-6 space-y-0">
             {team.map((member, i) => (
               <div key={member.id}>
-                {i > 0 && <Separator className="mb-3" />}
+                {i > 0 && <div className="border-t border-white/5 my-3" />}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <Avatar className="h-9 w-9">
-                      <AvatarFallback className="bg-violet-100 text-violet-700 text-sm">
-                        {member.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-500/20 text-sm font-semibold text-violet-300 shrink-0">
+                      {member.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    </div>
                     <div>
-                      <p className="text-sm font-medium flex items-center gap-2">
+                      <p className="text-sm font-medium text-white flex items-center gap-2">
                         {member.full_name}
-                        {member.id === user?.id && <span className="text-xs text-muted-foreground">(you)</span>}
+                        {member.id === user?.id && <span className="text-xs text-white/30">(you)</span>}
                       </p>
-                      <p className="text-xs text-muted-foreground">{member.email}</p>
+                      <p className="text-xs text-white/40">{member.email}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize text-xs">{member.role}</Badge>
+                    <span className="inline-flex items-center rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-[11px] font-medium text-white/60 capitalize">
+                      {member.role}
+                    </span>
                     {!member.email_verified && (
-                      <Badge variant="secondary" className="text-xs">Unverified</Badge>
+                      <span className="inline-flex items-center rounded-md bg-amber-500/10 ring-1 ring-amber-500/20 px-2 py-0.5 text-[11px] font-medium text-amber-400">
+                        Unverified
+                      </span>
                     )}
                   </div>
                 </div>
               </div>
             ))}
+            <div className="mt-4 pt-4 border-t border-white/5">
+              <p className="text-xs text-white/30">
+                Team invitations are available on Growth and Pro plans. Contact support to invite additional team members.
+              </p>
+            </div>
           </div>
-          <div className="mt-4 pt-4 border-t">
-            <p className="text-xs text-muted-foreground">
-              Team invitations are available on Growth and Pro plans. Contact support to invite additional team members.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Account slug */}
-      {client && (
-        <Card>
-          <CardHeader><CardTitle className="text-base">Account Info</CardTitle></CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Account Slug</span>
-              <code className="font-mono bg-muted px-2 py-0.5 rounded text-xs">{client.slug}</code>
+        {/* Account Info */}
+        {client && (
+          <div className="rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl overflow-hidden">
+            <div className="px-6 pt-5 pb-4 border-b border-white/5">
+              <h2 className="text-sm font-semibold text-white">Account Info</h2>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Member Since</span>
-              <span>{new Date(client.created_at).toLocaleDateString()}</span>
+            <div className="p-6 space-y-3 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-white/50">Account Slug</span>
+                <code className="font-mono bg-white/5 border border-white/10 px-2 py-0.5 rounded-md text-xs text-violet-300">{client.slug}</code>
+              </div>
+              <div className="border-t border-white/5" />
+              <div className="flex justify-between items-center">
+                <span className="text-white/50">Member Since</span>
+                <span className="text-white/80 text-xs">{new Date(client.created_at).toLocaleDateString()}</span>
+              </div>
+              <div className="border-t border-white/5" />
+              <div className="flex justify-between items-center">
+                <span className="text-white/50">Billing Cycle Day</span>
+                <span className="text-white/80 text-xs">Day {client.billing_cycle_day} of each month</span>
+              </div>
             </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Billing Cycle Day</span>
-              <span>Day {client.billing_cycle_day} of each month</span>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-      {/* Appearance */}
-      {themeMounted && <Card>
-        <CardHeader><CardTitle className="text-base">Appearance</CardTitle></CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground mb-4">Choose how the dashboard looks to you.</p>
-          <div className="grid grid-cols-3 gap-3">
-            {([
-              { value: 'light', label: 'Light', icon: '☀️', desc: 'Clean white' },
-              { value: 'dark',  label: 'Dark',  icon: '🌙', desc: 'Easy on eyes' },
-              { value: 'system',label: 'System',icon: '💻', desc: 'Follows OS' },
-            ] as const).map((opt) => (
-              <button
-                key={opt.value}
-                onClick={() => setTheme(opt.value)}
-                className={`flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all cursor-pointer ${
-                  theme === opt.value
-                    ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/30'
-                    : 'border-border hover:border-violet-300 bg-card'
-                }`}
-              >
-                <span className="text-2xl">{opt.icon}</span>
-                <span className={`text-sm font-semibold ${theme === opt.value ? 'text-violet-600 dark:text-violet-400' : ''}`}>
-                  {opt.label}
-                </span>
-                <span className="text-xs text-muted-foreground">{opt.desc}</span>
-                {theme === opt.value && (
-                  <span className="w-2 h-2 rounded-full bg-violet-500" />
-                )}
-              </button>
-            ))}
           </div>
-        </CardContent>
-      </Card>}
+        )}
+
+        {/* Appearance */}
+        {themeMounted && (
+          <div className="rounded-2xl border border-white/5 bg-[rgba(31,31,40,0.7)] backdrop-blur-xl overflow-hidden">
+            <div className="px-6 pt-5 pb-4 border-b border-white/5">
+              <h2 className="text-sm font-semibold text-white">Appearance</h2>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-white/50 mb-4">Choose how the dashboard looks to you.</p>
+              <div className="grid grid-cols-3 gap-3">
+                {([
+                  { value: 'light', label: 'Light', icon: '☀️', desc: 'Clean white' },
+                  { value: 'dark',  label: 'Dark',  icon: '🌙', desc: 'Easy on eyes' },
+                  { value: 'system',label: 'System',icon: '💻', desc: 'Follows OS' },
+                ] as const).map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setTheme(opt.value)}
+                    className={`flex flex-col items-center gap-2 rounded-xl border p-4 transition-all cursor-pointer ${
+                      theme === opt.value
+                        ? 'border-violet-500 bg-violet-600/15'
+                        : 'border-white/10 bg-white/5 hover:border-violet-500/50 hover:bg-white/8'
+                    }`}
+                  >
+                    <span className="text-2xl">{opt.icon}</span>
+                    <span className={`text-sm font-semibold ${theme === opt.value ? 'text-violet-400' : 'text-white/70'}`}>
+                      {opt.label}
+                    </span>
+                    <span className="text-xs text-white/30">{opt.desc}</span>
+                    {theme === opt.value && (
+                      <span className="w-2 h-2 rounded-full bg-violet-500" />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Upgrade Plan Modal */}
       <Dialog open={showUpgrade} onOpenChange={setShowUpgrade}>
-        <DialogContent className="w-[min(560px,calc(100vw-2rem))] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[min(560px,calc(100vw-2rem))] max-h-[90vh] overflow-y-auto bg-[#1f1f28] border border-white/10 text-white">
           <DialogHeader>
-            <DialogTitle>Choose a Plan</DialogTitle>
+            <DialogTitle className="text-white">Choose a Plan</DialogTitle>
           </DialogHeader>
           <div className="space-y-2 mt-2">
             {PLANS.map((plan) => {
@@ -275,35 +308,38 @@ export default function AccountPage() {
                 <div
                   key={plan.id}
                   className={`rounded-xl border p-3 transition-colors ${
-                    isCurrent ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/30' : 'border-border hover:border-violet-300'
+                    isCurrent ? 'border-violet-500 bg-violet-600/15' : 'border-white/10 bg-white/5 hover:border-violet-500/50'
                   }`}
                 >
-                  {/* Top row: name + price + button */}
                   <div className="flex items-center gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-bold text-sm">{plan.label}</span>
-                        {isCurrent && <Badge className="text-[10px] bg-violet-600 px-1.5 py-0">Current</Badge>}
-                        <span className="text-xs text-muted-foreground">{plan.spins}</span>
+                        <span className="font-bold text-sm text-white">{plan.label}</span>
+                        {isCurrent && (
+                          <span className="inline-flex items-center rounded-full bg-violet-600 px-1.5 py-0 text-[10px] font-semibold text-white">Current</span>
+                        )}
+                        <span className="text-xs text-white/40">{plan.spins}</span>
                       </div>
-                      <p className="text-lg font-bold leading-tight">{plan.price}</p>
+                      <p className="text-lg font-bold leading-tight text-white">{plan.price}</p>
                     </div>
-                    <Button
-                      size="sm"
-                      className="shrink-0 min-w-[90px]"
-                      variant={isCurrent ? 'outline' : isDowngrade ? 'ghost' : 'default'}
-                      style={!isCurrent && !isDowngrade ? { backgroundColor: '#7C3AED' } : {}}
+                    <button
+                      className={`shrink-0 min-w-[90px] h-8 px-3 rounded-lg text-xs font-semibold transition-all ${
+                        isCurrent
+                          ? 'border border-white/10 bg-white/5 text-white/50 cursor-default'
+                          : isDowngrade
+                          ? 'border border-white/10 bg-transparent text-white/60 hover:bg-white/5'
+                          : 'bg-violet-600 hover:bg-violet-500 text-white shadow-[0_0_0_1px_rgba(124,58,237,0.4)]'
+                      }`}
                       disabled={isCurrent || upgrading}
                       onClick={() => handleUpgrade(plan.id)}
                     >
                       {upgrading ? '…' : isCurrent ? 'Current' : isDowngrade ? 'Downgrade' : isPaid ? 'Checkout →' : 'Switch'}
-                    </Button>
+                    </button>
                   </div>
-                  {/* Features row */}
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-2">
                     {plan.features.map((f) => (
-                      <span key={f} className="text-xs text-muted-foreground flex items-center gap-1">
-                        <span className="text-green-500">✓</span>{f}
+                      <span key={f} className="text-xs text-white/40 flex items-center gap-1">
+                        <span className="text-emerald-400">✓</span>{f}
                       </span>
                     ))}
                   </div>
@@ -311,7 +347,7 @@ export default function AccountPage() {
               );
             })}
           </div>
-          <p className="text-xs text-muted-foreground text-center mt-3">
+          <p className="text-xs text-white/30 text-center mt-3">
             Growth / Pro / Enterprise redirect to Stripe checkout. Free &amp; Starter switch instantly.
           </p>
         </DialogContent>

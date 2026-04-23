@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpinPlatform - Leads</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #13131b; font-family: 'Inter', sans-serif; color: #e4e1ed; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+  </style>
+</head>
+<body class="min-h-full bg-[#13131b]">
+  <div class="max-w-7xl mx-auto px-6 md:px-8 py-8 space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+        <h1 class="text-[26px] font-bold tracking-[-0.03em] text-white">Leads</h1>
+        <p class="text-sm text-muted-foreground mt-0.5">Contact details collected before each spin</p>
+      </div>
+      <button class="h-8 gap-1.5 text-xs flex items-center px-4 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white/70 self-start sm:self-auto">
+        <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Export CSV
+      </button>
+    </div>
+
+    <!-- Summary Tiles -->
+    <div class="grid grid-cols-3 gap-3">
+      <div class="relative overflow-hidden rounded-lg bg-[#1f1f28] border border-white/5 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-violet-600 to-violet-400"></div>
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10 mb-4">
+          <svg class="h-4 w-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+          </svg>
+        </div>
+        <p class="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">Total Leads</p>
+        <p class="text-[36px] font-bold tabular-nums tracking-[-0.04em] leading-none text-white">1,248</p>
+        <p class="text-[11px] text-muted-foreground mt-2">all time</p>
+      </div>
+
+      <div class="relative overflow-hidden rounded-lg bg-[#1f1f28] border border-white/5 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-blue-600 to-blue-400"></div>
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10 mb-4">
+          <svg class="h-4 w-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <p class="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">With Email</p>
+        <p class="text-[36px] font-bold tabular-nums tracking-[-0.04em] leading-none text-white">892</p>
+        <p class="text-[11px] text-muted-foreground mt-2">this page</p>
+      </div>
+
+      <div class="relative overflow-hidden rounded-lg bg-[#1f1f28] border border-white/5 p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+        <div class="absolute inset-x-0 top-0 h-[2px] bg-gradient-to-r from-emerald-600 to-emerald-400"></div>
+        <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 mb-4">
+          <svg class="h-4 w-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+        </div>
+        <p class="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted-foreground mb-1.5">With Phone</p>
+        <p class="text-[36px] font-bold tabular-nums tracking-[-0.04em] leading-none text-white">347</p>
+        <p class="text-[11px] text-muted-foreground mt-2">this page</p>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <select class="h-8 w-44 text-xs rounded-md border border-white/10 bg-white/5 px-3 text-white/70 hover:bg-white/10 transition-colors">
+        <option>All Wheels</option>
+        <option>Summer Sale Wheel</option>
+        <option>Q4 Promo Spin</option>
+      </select>
+      <div class="relative flex-1 min-w-48 max-w-sm">
+        <svg class="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input type="text" placeholder="Search name, email or phone…" class="h-8 pl-8 pr-3 text-xs w-full rounded-md border border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-violet-500 focus:outline-none transition-colors">
+      </div>
+      <button class="h-8 text-xs px-4 rounded-md bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-white/70">Search</button>
+    </div>
+
+    <!-- Table -->
+    <div class="rounded-lg bg-[#1f1f28] border border-white/5 overflow-hidden">
+      <table class="w-full">
+        <thead>
+          <tr class="hover:bg-transparent border-b border-white/10">
+            <th class="text-xs font-medium pl-5 py-3 text-left text-white/70">Name</th>
+            <th class="text-xs font-medium py-3 text-left text-white/70">Email</th>
+            <th class="text-xs font-medium py-3 text-left text-white/70 hidden md:table-cell">Phone</th>
+            <th class="text-xs font-medium py-3 text-left text-white/70 hidden lg:table-cell">Wheel</th>
+            <th class="text-xs font-medium py-3 text-left text-white/70">Prize</th>
+            <th class="text-xs font-medium py-3 text-left text-white/70 hidden sm:table-cell">Coupon</th>
+            <th class="text-xs font-medium py-3 text-left text-white/70 hidden md:table-cell">GDPR</th>
+            <th class="text-xs font-medium py-3 text-left text-white/70 pr-5">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+            <td class="font-medium pl-5 py-3 text-sm text-white">Sarah Mitchell</td>
+            <td class="py-3 text-xs text-white/70">sarah.m@techcorp.io</td>
+            <td class="py-3 text-xs text-white/70 hidden md:table-cell">+1 (555) 123-4567</td>
+            <td class="py-3 text-xs text-white/50 hidden lg:table-cell">Summer Sale Wheel</td>
+            <td class="py-3"><span class="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-300 ring-1 ring-violet-500/20">20% OFF</span></td>
+            <td class="py-3 hidden sm:table-cell"><code class="text-[11px] bg-white/5 px-1.5 py-0.5 rounded font-mono text-white/60">SUMMER20XYZ</code></td>
+            <td class="py-3 hidden md:table-cell"><span class="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-emerald-500/20">Yes</span></td>
+            <td class="py-3 pr-5 text-xs text-white/50 tabular-nums">14 Apr 2024</td>
+          </tr>
+          <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+            <td class="font-medium pl-5 py-3 text-sm text-white">James Rodriguez</td>
+            <td class="py-3 text-xs text-white/70">j.rodriguez@company.com</td>
+            <td class="py-3 text-xs text-white/70 hidden md:table-cell">+1 (555) 987-6543</td>
+            <td class="py-3 text-xs text-white/50 hidden lg:table-cell">Q4 Promo Spin</td>
+            <td class="py-3"><span class="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-300 ring-1 ring-violet-500/20">$5 Gift Card</span></td>
+            <td class="py-3 hidden sm:table-cell"><code class="text-[11px] bg-white/5 px-1.5 py-0.5 rounded font-mono text-white/60">GC5ABC123</code></td>
+            <td class="py-3 hidden md:table-cell"><span class="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-emerald-500/20">Yes</span></td>
+            <td class="py-3 pr-5 text-xs text-white/50 tabular-nums">12 Apr 2024</td>
+          </tr>
+          <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+            <td class="font-medium pl-5 py-3 text-sm text-white">Emily Chen</td>
+            <td class="py-3 text-xs text-white/70">emily.chen@startup.co</td>
+            <td class="py-3 text-xs text-white/70 hidden md:table-cell">—</td>
+            <td class="py-3 text-xs text-white/50 hidden lg:table-cell">Summer Sale Wheel</td>
+            <td class="py-3"><span class="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-emerald-500/20">100 Points</span></td>
+            <td class="py-3 hidden sm:table-cell text-white/30">—</td>
+            <td class="py-3 hidden md:table-cell"><span class="inline-flex items-center rounded-md bg-white/5 px-2 py-0.5 text-[11px] font-medium text-white/40">No</span></td>
+            <td class="py-3 pr-5 text-xs text-white/50 tabular-nums">10 Apr 2024</td>
+          </tr>
+          <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+            <td class="font-medium pl-5 py-3 text-sm text-white">Michael Thompson</td>
+            <td class="py-3 text-xs text-white/70">mthompson@enterprise.net</td>
+            <td class="py-3 text-xs text-white/70 hidden md:table-cell">+1 (555) 456-7890</td>
+            <td class="py-3 text-xs text-white/50 hidden lg:table-cell">Newsletter Signup</td>
+            <td class="py-3"><span class="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-300 ring-1 ring-violet-500/20">Free Ship</span></td>
+            <td class="py-3 hidden sm:table-cell"><code class="text-[11px] bg-white/5 px-1.5 py-0.5 rounded font-mono text-white/60">FREESHIP22</code></td>
+            <td class="py-3 hidden md:table-cell"><span class="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-emerald-500/20">Yes</span></td>
+            <td class="py-3 pr-5 text-xs text-white/50 tabular-nums">8 Apr 2024</td>
+          </tr>
+          <tr class="hover:bg-white/5 transition-colors">
+            <td class="font-medium pl-5 py-3 text-sm text-white">Lisa Park</td>
+            <td class="py-3 text-xs text-white/70">lisa.park@agency.io</td>
+            <td class="py-3 text-xs text-white/70 hidden md:table-cell">+1 (555) 222-3333</td>
+            <td class="py-3 text-xs text-white/50 hidden lg:table-cell">Q4 Promo Spin</td>
+            <td class="py-3"><span class="inline-flex items-center rounded-md bg-violet-500/10 px-2 py-0.5 text-[11px] font-medium text-violet-300 ring-1 ring-violet-500/20">15% OFF</span></td>
+            <td class="py-3 hidden sm:table-cell"><code class="text-[11px] bg-white/5 px-1.5 py-0.5 rounded font-mono text-white/60">FALL15XYZ</code></td>
+            <td class="py-3 hidden md:table-cell"><span class="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-400 ring-1 ring-emerald-500/20">Yes</span></td>
+            <td class="py-3 pr-5 text-xs text-white/50 tabular-nums">5 Apr 2024</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between text-xs text-muted-foreground">
+      <span>Showing 1–50 of 1,248 leads</span>
+      <div class="flex gap-2">
+        <button class="h-7 text-xs px-3 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white/50" disabled>Previous</button>
+        <button class="h-7 text-xs px-3 rounded-md border border-white/10 bg-white/5 hover:bg-white/10 transition-colors text-white/70">Next</button>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>
